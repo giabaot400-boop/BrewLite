@@ -11,3 +11,4 @@ backend/src/generated/
 *.log
 .DS_Store
 Thumbs.db
+frontend/next-env.d.ts

@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProduct, ProductApiError } from "@/features/products/api";
-import { formatPrice } from "@/features/products/format-price";
 import { ProductImage } from "@/features/products/components/product-image";
+import { ProductOptions } from "@/features/products/components/product-options";
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -20,8 +20,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         <div className="py-3">
           <h1 className="text-3xl font-bold">{product.name}</h1>
           <p className="mt-5 leading-7 text-stone-600">{product.description}</p>
-          <p className="mt-8 text-sm text-stone-600">Giá size S</p>
-          <p className="mt-2 text-3xl font-bold text-coffee">{formatPrice(product.price)}</p>
+          <ProductOptions key={product.id} basePrice={product.price} sizes={product.sizes} toppings={product.toppings}/>
         </div>
       </div>
     </main>
