@@ -11,7 +11,6 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     throw error;
   });
 
-  // Khung chi tiết đầu tiên; A tiếp tục thêm chọn size/topping và tính giá.
   return (
     <main className="mx-auto max-w-6xl px-5 py-10 sm:px-8">
       <Link href="/" className="inline-flex min-h-11 items-center gap-2 font-semibold text-coffee">‹ Quay lại menu</Link>
