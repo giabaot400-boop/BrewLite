@@ -1,5 +1,6 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PageContainer } from "@/components/layout/page-container";
+import { ButtonLink } from "@/components/ui/button";
 import { getProduct, ProductApiError } from "@/features/products/api";
 import { ProductImage } from "@/features/products/components/product-image";
 import { ProductOptions } from "@/features/products/components/product-options";
@@ -12,8 +13,8 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   });
 
   return (
-    <main className="mx-auto max-w-6xl px-5 py-10 sm:px-8">
-      <Link href="/" className="inline-flex min-h-11 items-center gap-2 font-semibold text-coffee">‹ Quay lại menu</Link>
+    <PageContainer spacing="compact">
+      <ButtonLink href="/" variant="text">‹ Quay lại menu</ButtonLink>
       <div className="mt-6 grid grid-cols-1 items-start gap-8 md:grid-cols-2 md:gap-14">
         <ProductImage key={product.id} src={product.imageUrl} name={product.name} />
         <div className="py-3">
@@ -22,6 +23,6 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           <ProductOptions key={product.id} basePrice={product.price} sizes={product.sizes} toppings={product.toppings}/>
         </div>
       </div>
-    </main>
+    </PageContainer>
   );
 }

@@ -19,3 +19,19 @@ input:focus-visible {
   outline: 3px solid #925e32;
   outline-offset: 4px;
 }
+
+/* Tránh header che mục khi nhảy tới #main-content. */
+html {
+  scroll-padding-top: 5rem;
+}
+
+/* Người dùng tắt chuyển động trong hệ điều hành. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
