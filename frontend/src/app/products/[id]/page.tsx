@@ -14,7 +14,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   return (
     <main className="mx-auto max-w-6xl px-5 py-10 sm:px-8">
       <Link href="/" className="inline-flex min-h-11 items-center gap-2 font-semibold text-coffee">‹ Quay lại menu</Link>
-      <div className="mt-6 grid items-start gap-8 md:grid-cols-2 md:gap-14">
+      <div className="mt-6 grid grid-cols-1 items-start gap-8 md:grid-cols-2 md:gap-14">
         <ProductImage key={product.id} src={product.imageUrl} name={product.name} />
         <div className="py-3">
           <h1 className="text-3xl font-bold">{product.name}</h1>
