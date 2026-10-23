@@ -37,6 +37,33 @@ Các kết quả trên dùng dữ liệu mẫu trên máy A.
 Chưa xác nhận tích hợp Product API, PostgreSQL thật
 hoặc nghiệm thu đầy đủ Sprint 1.
 
+## Kiểm tra bổ sung ngày 23/10/2026 — dữ liệu fixture
+
+A thực hiện kiểm tra thủ công trên Chrome ở môi trường local:
+
+- Americano không có topping: hiển thị thông báo phù hợp,
+  vẫn chọn được size S/M/L. Đổi S → M → L → S cho giá lần lượt
+  40.000 → 45.000 → 50.000 → 40.000 đồng.
+- Menu và chi tiết sản phẩm: kiểm tra ở chiều rộng 390 px,
+  visualViewport.scale bằng 1; không ghi nhận tràn ngang
+  hoặc nội dung bị cắt trong các trang đã kiểm tra.
+- Bàn phím: Tab di chuyển có viền focus nhận biết;
+  phím mũi tên đổi size; Space chọn/bỏ topping.
+- Cà phê sữa size M: giá 40.000 đồng; chọn Kem và Trân châu
+  thành 52.000 đồng; bỏ cả hai trở về 40.000 đồng.
+
+Bổ sung grid-cols-1 cho khung chi tiết sản phẩm để khai báo
+rõ bố cục một cột trên màn hình nhỏ.
+
+Trong quá trình kiểm tra, phát hiện mức pinch-zoom khoảng 1,287.
+Sau khi mở tab mới, mức zoom trở về 1 và không còn hiện tượng
+kéo ngang. Chưa tách riêng ảnh hưởng của thay đổi CSS và zoom.
+
+Kết quả này chưa đại diện cho thiết bị di động thật,
+kiểm tra accessibility đầy đủ hoặc tích hợp Product API thật.
+
+- Sau thay đổi, frontend typecheck, lint và production build đều thành công trên máy A.
+
 ## Còn phải kiểm tra và hoàn thiện
 
 - Migration, seed và kết nối PostgreSQL thực tế trên môi trường của C/E.
