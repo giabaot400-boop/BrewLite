@@ -18,12 +18,31 @@ Các response API trong kiểm thử giao diện được chặn và trả dữ 
 chưa phải hai endpoint sản phẩm từ database thật. Kiểm tra giao diện thực hiện
 trên Chromium, chưa đại diện cho tất cả trình duyệt hay thiết bị.
 
+## Cập nhật ngày 20/10/2026 — giao diện dùng fixture
+
+Code tại commit `78b28f4`, đã tích hợp vào main qua PR #1.
+
+A đã triển khai:
+- Chọn một size, mặc định S.
+- Chọn hoặc bỏ nhiều topping.
+- Cập nhật giá xem trước theo giá cơ bản, phụ thu size và topping.
+- Kiểm tra dữ liệu giá và hiển thị thông báo khi không thể tính giá hợp lệ.
+
+Kết quả A đã chạy và cung cấp:
+- Frontend typecheck, lint và build thành công.
+- Đổi size, chọn/bỏ topping và đối chiếu tổng giá.
+- Thử giá cơ bản âm và NaN; giao diện hiển thị thông báo phù hợp.
+
+Các kết quả trên dùng dữ liệu mẫu trên máy A.
+Chưa xác nhận tích hợp Product API, PostgreSQL thật
+hoặc nghiệm thu đầy đủ Sprint 1.
+
 ## Còn phải kiểm tra và hoàn thiện
 
 - Migration, seed và kết nối PostgreSQL thực tế trên môi trường của C/E.
 - `GET /products` và `GET /products/:id` thật, kể cả dữ liệu rỗng và lỗi.
-- Chọn size, nhiều topping và tính giá: chưa được triển khai trong bản này.
-- Review của thành viên khác, chạy trên máy nhóm và nghiệm thu theo AC v1.0.
+- Kiểm tra lại chọn size, nhiều topping và tính giá khi tích hợp Product API thật.
+- Review của thành viên khác, chạy trên máy nhóm và nghiệm thu theo 24 AC trong hồ sơ v1.1.
 
 Không dùng `/health` làm bằng chứng database đã hoạt động. Các commit khởi tạo
 là bộ khung hỗ trợ nhóm bắt đầu; nhóm cần đọc, hiểu và kiểm tra trước khi bàn giao.
