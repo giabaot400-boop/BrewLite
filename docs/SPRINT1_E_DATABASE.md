@@ -49,3 +49,8 @@ Không commit hoặc chia sẻ file .env chứa mật khẩu.
 - D kiểm thử API và luồng tích hợp.
 - Cần một thành viên khác kiểm tra cài đặt theo hướng dẫn này.
 - /health hiện không xác nhận kết nối database.
+## Kiểm tra khởi động
+- Lint frontend thành công.
+- Frontend mở được tại http://localhost:3000, hiển thị menu bằng fixture.
+- Backend GET /health trả {"status":"ok","service":"brewlite-api"}.
+- Chưa xác nhận Product API và tích hợp frontend với database.
