@@ -64,6 +64,28 @@ kiểm tra accessibility đầy đủ hoặc tích hợp Product API thật.
 
 - Sau thay đổi, frontend typecheck, lint và production build đều thành công trên máy A.
 
+## Kiểm tra bổ sung ngày 24/10/2026 — giả lập trên frontend
+
+Mốc code: ec8e2f9, đã tích hợp phần UI dùng chung của B.
+A kiểm tra thủ công trên Chrome, chạy frontend ở chế độ dev.
+
+| Ca | Cách thử | Kết quả |
+|---|---|---|
+| TC-13 — thiếu giá | Tạm truyền undefined vào basePrice của ProductOptions | Hiện thông báo không thể tính giá; không hiện NaN; vẫn đổi size/topping được |
+| TC-13 — giá dạng chuỗi | Tạm truyền chuỗi "35000" vào basePrice | Chặn preview giá sai, hiện thông báo phù hợp; trang vẫn hoạt động |
+| TC-12 — ảnh lỗi | Trang chi tiết dùng đường dẫn ảnh không tồn tại | Hiện placeholder.svg, bố cục và tùy chọn vẫn hoạt động |
+| Loading Menu | getProducts chờ giả lập 3 giây rồi trả fixture | Hiện thông báo loading và skeleton, sau đó hiện 4 sản phẩm |
+| TC-03 — danh sách rỗng | getProducts trả mảng rỗng sau độ trễ | Dừng loading, hiện "Hiện chưa có sản phẩm." |
+| TC-04 — lỗi và thử lại | getProducts ném lỗi giả lập | Hiện lỗi và nút Thử lại; bấm lại có loading rồi hiện lỗi khi nguyên nhân vẫn còn |
+| TC-04 — phục hồi | Bật điều kiện thành công bằng hash thử nghiệm, không tải lại trang, rồi bấm Thử lại | Sau loading, hiện 4 sản phẩm và thông báo lỗi biến mất |
+
+Các phép thử trên kiểm tra hành vi frontend bằng đầu vào giả lập,
+chưa chứng minh Product API hoặc PostgreSQL thật hoạt động.
+
+Đã gỡ toàn bộ thay đổi giả lập. Git diff không còn thay đổi code.
+TC-13 giá âm và NaN đã được ghi nhận ở đợt kiểm tra trước,
+không phải các trường hợp chạy lại trong ngày này.
+
 ## Còn phải kiểm tra và hoàn thiện
 
 - Migration, seed và kết nối PostgreSQL thực tế trên môi trường của C/E.
