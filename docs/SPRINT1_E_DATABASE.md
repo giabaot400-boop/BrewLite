@@ -49,8 +49,29 @@ Không commit hoặc chia sẻ file .env chứa mật khẩu.
 - D kiểm thử API và luồng tích hợp.
 - Cần một thành viên khác kiểm tra cài đặt theo hướng dẫn này.
 - /health hiện không xác nhận kết nối database.
+
 ## Kiểm tra khởi động
 - Lint frontend thành công.
 - Frontend mở được tại http://localhost:3000, hiển thị menu bằng fixture.
 - Backend GET /health trả {"status":"ok","service":"brewlite-api"}.
 - Chưa xác nhận Product API và tích hợp frontend với database.
+
+## Kiểm thử tích hợp Product API — 25/10/2026
+
+Bản kiểm thử: code C tại commit d82837b kết hợp migration E.
+Nhánh kiểm thử local: test/e-product-api.
+Cấu hình backend: DEMO_MODE=false, kết nối PostgreSQL local.
+
+Kết quả:
+- Migration status: database đã đồng bộ.
+- Seed chạy thành công.
+- Typecheck và build frontend/backend thành công.
+- GET /health: 200, status ok.
+- GET /products: 200, đủ 4 sản phẩm.
+- GET /products/coffee-milk: 200, giá 35000.
+- Size S/M/L có phụ thu 0/5000/10000.
+- Topping cream giá 7000, pearl giá 5000.
+- ID không tồn tại: 404, message "Product not found".
+
+Bằng chứng: ảnh Terminal của các lệnh kiểm tra.
+Chưa xác nhận frontend đã chuyển từ fixture sang API thật.
