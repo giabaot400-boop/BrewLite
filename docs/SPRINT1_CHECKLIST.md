@@ -88,6 +88,14 @@ không phải cam kết mọi lần gọi đều có cùng thời gian phản h�
       và tải được chi tiết sản phẩm mà không cần F5.
 - [x] Frontend typecheck, lint và build thành công
       với phần sửa tại commit 2ed30b3.
+- [x] Backend typecheck và build thành công tại commit 4cbfb28
+      trên nhánh docs/sprint1-closeout, dùng Prisma 7.10.1.
+- [x] Git chỉ theo dõi backend/.env.example
+      và frontend/.env.local.example trong nhóm file .env*.
+- [x] git check-ignore xác nhận backend/.env
+      và frontend/.env.local được .gitignore bỏ qua.
+- [x] Kiểm tra lịch sử đường dẫn .env* trên các Git refs
+      hiện có chỉ thấy hai file mẫu, không thấy file env thật.
 
 Phần sửa lỗi được gửi trong PR #10, chưa tích hợp vào main.
 Bằng chứng ảnh/video và log cần được liên kết trước nghiệm thu.
@@ -101,8 +109,6 @@ Bằng chứng ảnh/video và log cần được liên kết trước nghiệm 
 - [ ] D cập nhật báo cáo kiểm thử trong PR #8:
       giữ kết quả lần đầu, ghi rõ lỗi và kết quả kiểm thử lại,
       commit được kiểm thử, nguồn dữ liệu và bằng chứng.
-- [ ] Gắn kết quả lint, typecheck và build đã thực hiện với đúng
-      phiên bản/phạm vi kiểm tra; bổ sung kiểm tra nếu còn thiếu.
 - [ ] A đối chiếu đủ 24 AC trong hồ sơ Sprint 1 v1.1:
       ghi rõ kết quả, bằng chứng và mục còn thiếu xác nhận.
 - [ ] Cập nhật board/backlog theo tiến độ thực tế;
