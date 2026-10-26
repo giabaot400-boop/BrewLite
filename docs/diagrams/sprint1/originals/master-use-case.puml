@@ -1,0 +1,43 @@
+@startuml
+
+left to right direction
+
+actor "Khách hàng" as Customer
+actor "Cổng thanh toán giả lập" as Gateway
+
+rectangle "Hệ thống BrewLite" {
+  usecase "UC-01: Xem menu" as UC01
+  usecase "UC-02: Xem chi tiết sản phẩm" as UC02
+  usecase "UC-03: Chọn size và topping" as UC03
+  usecase "UC-04: Tính và hiển thị giá" as UC04
+  usecase "UC-05: Quản lý giỏ hàng" as UC05
+  usecase "UC-06: Đăng ký tài khoản" as UC06
+  usecase "UC-07: Đăng nhập" as UC07
+  usecase "UC-08: Đặt hàng" as UC08
+  usecase "UC-09: Thanh toán không tiền mặt" as UC09
+  usecase "UC-10: Xem xác nhận đơn" as UC10
+  usecase "UC-11: Xem lịch sử và trạng thái đơn" as UC11
+  usecase "UC-12: Áp mã giảm giá" as UC12
+  usecase "UC-13: Tích lũy điểm thưởng" as UC13
+}
+
+Customer -- UC01
+Customer -- UC02
+Customer -- UC03
+Customer -- UC05
+Customer -- UC06
+Customer -- UC07
+Customer -- UC08
+Customer -- UC09
+Customer -- UC11
+Customer -- UC12
+
+UC03 ..> UC04 : <<include>>
+UC08 ..> UC09 : <<include>>
+UC10 ..> UC09 : <<extend>>
+UC12 ..> UC08 : <<extend>>
+UC13 ..> UC09 : <<extend>>
+
+Gateway -- UC09
+
+@enduml

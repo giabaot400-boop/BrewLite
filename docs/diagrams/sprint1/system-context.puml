@@ -1,0 +1,44 @@
+@startuml
+!pragma layout smetana
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #5B4636
+skinparam roundcorner 12
+skinparam packageStyle rectangle
+skinparam noteBackgroundColor #FFF6DA
+skinparam noteBorderColor #B89551
+skinparam actorBorderColor #5B4636
+skinparam actorFontColor #382A23
+skinparam rectangleBorderColor #80644F
+skinparam usecaseBorderColor #80644F
+skinparam entityBorderColor #80644F
+skinparam activityBorderColor #80644F
+skinparam activityBackgroundColor #F9F2E9
+skinparam activityDiamondBackgroundColor #FFF6DA
+skinparam activityDiamondBorderColor #80644F
+skinparam swimlaneBorderColor #C9B9A9
+left to right direction
+title BrewLite — Bối cảnh hệ thống\nBản làm rõ phạm vi từ hồ sơ Sprint 1 v1.1
+
+actor "Khách hàng" as Customer
+rectangle "Hệ thống BrewLite" as BrewLite #F9F2E9
+rectangle "Cổng thanh toán giả lập\nSprint 3 — dự kiến" as Payment #E8EEF9
+actor "Nhân viên quầy / Barista\nNgoài MVP" as Barista
+
+Customer --> BrewLite : Xem menu, tùy chỉnh sản phẩm;\ngiỏ hàng, tài khoản, đặt hàng, thanh toán
+BrewLite --> Customer : Sản phẩm và giá xem trước;\nkết quả đặt hàng, thanh toán và trạng thái đơn
+BrewLite --> Payment : Yêu cầu thanh toán [Sprint 3]
+Payment --> BrewLite : Kết quả thành công / thất bại [Sprint 3]
+Barista ..> BrewLite : Nhận / cập nhật trạng thái đơn\n[Phần mở rộng ngoài MVP]
+BrewLite ..> Barista : Thông tin đơn\n[Phần mở rộng ngoài MVP]
+
+note bottom of BrewLite
+  Sprint 1: Menu, chi tiết, size / topping, giá xem trước.
+  Sprint 2: Giỏ hàng, tài khoản, tạo đơn PENDING.
+  Sprint 3: Thanh toán, xác nhận / lịch sử, Task 10.
+  Các tương tác toàn hệ thống không có nghĩa đã triển khai hết.
+end note
+
+@enduml

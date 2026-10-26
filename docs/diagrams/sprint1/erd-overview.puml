@@ -1,0 +1,109 @@
+@startuml
+!pragma layout smetana
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #5B4636
+skinparam roundcorner 12
+skinparam packageStyle rectangle
+skinparam noteBackgroundColor #FFF6DA
+skinparam noteBorderColor #B89551
+skinparam actorBorderColor #5B4636
+skinparam actorFontColor #382A23
+skinparam rectangleBorderColor #80644F
+skinparam usecaseBorderColor #80644F
+skinparam entityBorderColor #80644F
+skinparam activityBorderColor #80644F
+skinparam activityBackgroundColor #F9F2E9
+skinparam activityDiamondBackgroundColor #FFF6DA
+skinparam activityDiamondBorderColor #80644F
+skinparam swimlaneBorderColor #C9B9A9
+title BrewLite — ERD tổng thể từ mô hình v0.9\nLàm rõ phạm vi Sprint 1 và phần thiết kế cho Sprint 2 / 3
+hide circle
+skinparam nodesep 45
+skinparam ranksep 65
+
+entity "Product\n(products)" as Product <<Sprint 1>> #EAF4EB {
+  * id : string <<PK>>
+  --
+  name : string
+  description : text
+  price : integer
+  image_url : string
+  stock : integer <<S3, dự kiến>>
+}
+entity "Topping\n(toppings)" as Topping <<Sprint 1>> #EAF4EB {
+  * id : string <<PK>>
+  --
+  name : string
+  price : integer
+  stock : integer <<S3, dự kiến>>
+}
+entity "ProductTopping\n(product_toppings)" as ProductTopping <<Sprint 1>> #EAF4EB {
+  * product_id : string <<PK, FK>>
+  * topping_id : string <<PK, FK>>
+}
+entity "User" as UserEntity <<Sprint 2, dự kiến>> #FFF3D6 {
+  * id : string <<PK>>
+  --
+  email : string <<UK>>
+  password_hash : string
+  loyalty_points : integer <<S3, dự kiến>>
+}
+entity "Order" as OrderEntity <<Sprint 2, dự kiến>> #FFF3D6 {
+  * id : string <<PK>>
+  --
+  user_id : string <<FK>>
+  status : string
+  total : integer
+  created_at : datetime
+}
+entity "OrderItem" as OrderItem <<Sprint 2, dự kiến>> #FFF3D6 {
+  * id : string <<PK>>
+  --
+  order_id : string <<FK>>
+  product_id : string <<FK>>
+  size : string
+  quantity : integer
+  unit_price : integer
+  line_total : integer
+}
+entity "OrderItemTopping" as OrderItemTopping <<Sprint 2, dự kiến>> #FFF3D6 {
+  * order_item_id : string <<PK, FK>>
+  * topping_id : string <<PK, FK>>
+  --
+  price_at_order : integer
+}
+entity "Payment" as Payment <<Sprint 3, dự kiến>> #E8EEF9 {
+  * id : string <<PK>>
+  --
+  order_id : string <<FK>>
+  idempotency_key : string <<UK>>
+  amount : integer
+  method : string
+  status : string
+  created_at : datetime
+}
+
+UserEntity ||--o{ OrderEntity : đặt
+OrderEntity ||--|{ OrderItem : chứa
+Product ||--o{ OrderItem : được đặt
+Product ||--o{ ProductTopping : hỗ trợ
+Topping ||--o{ ProductTopping : gắn cho
+OrderItem ||--o{ OrderItemTopping : có
+Topping ||--o{ OrderItemTopping : được chọn
+OrderEntity ||--o{ Payment : có
+
+legend bottom
+  Xanh lá: ba model đã có ở Sprint 1; các trường gắn S3 chưa có trong schema.
+  Vàng: thiết kế nền cho Sprint 2. Xanh dương: Payment dự kiến ở Sprint 3.
+  S1 không có stock, User, Order, OrderItem, OrderItemTopping, Payment hay loyalty_points.
+  Không có bảng Size; S / M / L và phụ thu nằm trong cấu hình backend.
+  ProductTopping và OrderItemTopping dùng khóa chính ghép hai trường được đánh dấu PK.
+  Giá là số nguyên VND; giá dòng đơn / topping là snapshot tại thời điểm đặt.
+  Một Order có thể chưa có Payment: tạo đơn PENDING không bắt buộc thanh toán.
+  Đây là ERD tổng thể, không phải migration hoặc schema Sprint 2 đã chốt.
+endlegend
+
+@enduml

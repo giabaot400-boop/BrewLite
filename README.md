@@ -166,6 +166,12 @@ chỉ áp dụng khi khởi tạo repository mới.
 | package.json | Workspace và các lệnh chạy chung |
 | package-lock.json | Khóa phiên bản dependency dùng chung |
 
+## Sơ đồ thiết kế
+
+Xem [bộ sơ đồ và mã PlantUML](docs/diagrams/README.md): bối cảnh hệ thống,
+master use case, activity Sprint 1 và ERD tổng thể. Tài liệu phân biệt phần
+đã triển khai trong Sprint 1 với phần thiết kế cho các sprint sau.
+
 ## Phân công
 
 | Vị trí | Kỹ thuật | Scrum |
