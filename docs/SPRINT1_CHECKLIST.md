@@ -1,7 +1,12 @@
 # Tiến độ Sprint 1
 
-Mốc code bàn giao để đối chiếu: 7df9f61.
-Product API và migration PostgreSQL đã tích hợp vào main qua PR #6 và #7.
+Mốc main đã tích hợp để chốt hồ sơ: b599076 (26/10/2026).
+Product API và migration PostgreSQL đã tích hợp qua PR #6 và #7.
+PR #10 sửa phục hồi trang chi tiết, PR #9 cập nhật tài liệu và
+PR #8 bổ sung báo cáo kiểm thử của D đều đã merge vào main.
+Mốc kiểm thử tích hợp ban đầu là 7df9f61; phần sửa retry được
+kiểm thử riêng tại 2ed30b3. Không coi b599076 là commit đã chạy
+trong các ảnh kiểm thử cũ.
 
 Bản tích hợp kiểm thử trên máy A: 5d6e058,
 ghép main da5c861 với commit sửa API d82837b.
@@ -49,7 +54,7 @@ Sprint 1 chưa được xác nhận nghiệm thu hoàn tất.
 - [x] Chạy tích hợp với DEMO_MODE=false.
 - [x] Đo mỗi API danh sách và chi tiết 3 lần bằng curl:
       cả 6 lần trả HTTP 200 và dưới 500 ms.
-      Danh sách: 4,008–54,361 ms; chi tiết: 5,723–11,998 ms.
+      Danh sách: khoảng 4,0–54,4 ms; chi tiết: khoảng 5,7–12,0 ms.
 - [x] Frontend dùng NEXT_PUBLIC_PRODUCTS_SOURCE=api,
       menu hiển thị sản phẩm và điều hướng đến trang chi tiết.
 - [x] Xác nhận request menu tới http://localhost:3001/products;
@@ -97,20 +102,93 @@ không phải cam kết mọi lần gọi đều có cùng thời gian phản h�
 - [x] Kiểm tra lịch sử đường dẫn .env* trên các Git refs
       hiện có chỉ thấy hai file mẫu, không thấy file env thật.
 
-Phần sửa lỗi được gửi trong PR #10, chưa tích hợp vào main.
-Bằng chứng ảnh/video và log cần được liên kết trước nghiệm thu.
+## Hồ sơ đã tích hợp sau review
+
+- [x] PR #10 đã merge; main có phần sửa retry() ở trang chi tiết.
+- [x] PR #9 đã merge; README, API contract và tài liệu liên quan đã cập nhật.
+- [x] PR #8 đã merge cùng commit hiệu đính 2ad9a0d của A.
+      [Báo cáo D](Testing/MEMBER_D_TEST_RESULTS.md) giữ kết quả lần đầu,
+      retest, đối chiếu AC và các giới hạn bằng chứng.
+- [x] Đã liên kết [18 ảnh do D nộp](Testing/evidence/).
+      Kết quả API đo trên máy D khoảng 57,6 ms và 67,0 ms,
+      đạt ngưỡng dưới 500 ms trong hai lần đo đã ghi nhận.
+
+Báo cáo D chưa xác định commit chạy trong từng ảnh, DEMO_MODE của
+backend và nguồn dữ liệu UI ở một số ca; bước phục hồi retry menu
+là xác nhận của D, chưa được A xác minh độc lập trong đợt rà báo cáo.
+Không dùng các ảnh đó để suy diễn đủ toàn bộ AC hoặc thay thế kết quả A.
+Kết quả A trước đây và kết quả D được giữ riêng theo người thực hiện.
+
+Bằng chứng hiện có khác: [kiểm tra bản khởi động và các đợt bổ sung](KIEM_TRA_BAN_KHOI_DONG.md),
+[bàn giao database](SPRINT1_E_DATABASE.md), cùng các log và kết quả
+được ghi trong checklist này. Nếu liên kết thêm ảnh/log của A,
+sử dụng bằng chứng đã lưu; không yêu cầu chụp lại toàn bộ.
+
+## Đối chiếu 24 AC theo hồ sơ Sprint 1 v1.1
+
+Nguồn tiêu chí: hồ sơ phân tích và thiết kế Sprint 1 v1.1, Mục 4.2–4.5.
+Đối chiếu code tại b599076 với các kết quả A đã cung cấp và hồ sơ D đã nộp.
+Đây là tổng hợp kết quả có sẵn, không phải đợt chạy kiểm thử mới trên b599076.
+Chữ “Đạt” dưới đây chỉ áp dụng trong phạm vi dữ liệu mẫu, môi trường và ca
+đã ghi nhận; quyết định chấp nhận Increment thuộc PO.
+
+Nguồn đối chiếu đã có:
+- [README](../README.md), [workflow Git](GIT_WORKFLOW.md), package.json
+  của hai ứng dụng và các file env mẫu, gitignore trong repository.
+- Các kết quả API/PostgreSQL và UI trên máy A trong checklist này;
+  mốc tích hợp 5d6e058/7df9f61, phần sửa retry tại 2ed30b3.
+- [Các đợt kiểm thử giao diện trước đó](KIEM_TRA_BAN_KHOI_DONG.md):
+  fixture, tính giá, giá không hợp lệ, responsive và thao tác bàn phím.
+- [Báo cáo D](Testing/MEMBER_D_TEST_RESULTS.md) và
+  [ảnh D](Testing/evidence/), với giới hạn commit/nguồn dữ liệu đã nêu.
+- Code [đọc và kiểm tra Product API](../frontend/src/features/products/api.ts),
+  [menu](../frontend/src/features/products/components/menu.tsx),
+  [tùy chọn và giá](../frontend/src/features/products/components/product-options.tsx),
+  [trang chi tiết](../frontend/src/app/products/[id]/page.tsx) và
+  [Product service](../backend/src/products/products-prisma.service.ts).
+
+| Mã AC | Nội dung đối chiếu | Kết quả và căn cứ hiện có |
+|---|---|---|
+| TS01-AC-01 | Next.js, Tailwind, TypeScript và NestJS | Đạt. Cấu trúc ứng dụng, dependency và code phù hợp; hai ứng dụng đã chạy trên máy A. |
+| TS01-AC-02 | Chạy độc lập và build hai ứng dụng | Đạt trong các đợt đã ghi nhận. A chạy riêng frontend/backend; frontend lint, typecheck, build với phần sửa 2ed30b3; backend typecheck/build tại 4cbfb28. Không ghi là đã chạy lại build ở b599076. |
+| TS01-AC-03 | README có cài đặt, chạy, build và cấu trúc thư mục | Đạt về nội dung tài liệu sau PR #9. Việc xác nhận thành viên khác thiết lập theo toàn bộ README vẫn là mục DoD riêng còn mở. |
+| TS01-AC-04 | Gitignore, env example và không đưa env thật/secret lên Git | Phù hợp trong phạm vi đã kiểm tra. Có gitignore và hai env mẫu; A kiểm tra tracked files, check-ignore và lịch sử đường dẫn .env trên các refs đã có. Không phát hiện env thật trong phạm vi đó; không coi đây là quét mọi secret trong mọi nội dung. |
+| TS01-AC-05 | Thống nhất quy ước branch, commit và review | Có quy ước trong baseline và GIT_WORKFLOW.md; thực hiện chưa đầy đủ trong lịch sử. Đã ghi nhận C đưa code thẳng lên main trước khi tách nhánh. Các PR sau có rà soát, nhưng không kết luận mọi thay đổi trước đó đều đạt DoD review. |
+| TS02-AC-01 | GET /products trả 200 và raw array đủ trường | Đạt với dữ liệu mẫu. A kiểm tra API thật trả 4 sản phẩm; ảnh D TC-D02 bổ sung kết quả HTTP 200/raw array. |
+| TS02-AC-02 | Chi tiết có mô tả, sizes, toppings và phụ thu | Đạt với coffee-milk. Response API thật trên máy A có mô tả, S/M/L và hai topping; D TC-D07/09/10 bổ sung response và UI trong phạm vi báo cáo D. |
+| TS02-AC-03 | ID không tồn tại trả 404 nhất quán | Đạt. A và D ghi nhận HTTP 404, message Product not found. |
+| TS02-AC-04 | Giá nguyên không âm, giá cơ bản là size S | Đạt với dữ liệu mẫu đã đối chiếu. A kiểm tra giá/quan hệ SQL và response; S cộng 0, M cộng 5000, L cộng 10000; tiền truyền bằng số nguyên. |
+| TS02-AC-05 | API dưới 500 ms với dữ liệu mẫu trong demo | Đạt trong các lần đo local đã ghi nhận. A: sáu request đều 200 và khoảng 4,0–54,4 ms; D: hai lần khoảng 57,6 ms và 67,0 ms. Không cam kết cho tải hoặc môi trường khác. |
+| US01-AC-01 | Menu gọi API và có loading | Đạt. A xác nhận nguồn api, request /products và loading khi làm chậm mạng; code Menu khởi tạo loading rồi gọi getProducts. |
+| US01-AC-02 | Card có ảnh, tên và giá size S dạng VND | Đạt. UI menu đã kiểm tra; ProductCard dùng dữ liệu sản phẩm và formatPrice, giá API là giá cơ bản S. |
+| US01-AC-03 | Danh sách rỗng hiển thị empty | Đạt về hành vi UI. A ghi đè response GET /products thành [] bằng Local Overrides; D có ca fixture rỗng. Không ghi đây là kiểm thử database rỗng. |
+| US01-AC-04 | API lỗi có trạng thái lỗi và cách thử lại | Đạt theo kết quả A. Dừng backend gây lỗi menu; khởi động lại rồi bấm Thử lại phục hồi 4 sản phẩm không reload. Ảnh D chỉ bổ sung trạng thái lỗi; không chuyển kết quả A thành kết quả D. |
+| US01-AC-05 | Chọn card mở đúng chi tiết theo id | Đạt trong các lượt điều hướng đã ghi nhận. A mở chi tiết từ menu; ProductCard tạo link theo product.id được encode. |
+| US01-AC-06 | Không hardcode danh sách và giá trong component | Đạt qua đọc code. Menu nhận dữ liệu từ getProducts, ProductCard nhận props; fixture nằm ở nguồn dữ liệu riêng và đã phân biệt với chế độ api. |
+| US02-AC-01 | Chi tiết lấy id từ route, gọi API và có loading | Đạt. Route nhận id và gọi getProduct; có loading.tsx; A đã thấy loading rồi tải được chi tiết khi mô phỏng mạng chậm. |
+| US02-AC-02 | Hiển thị và dùng dữ liệu tùy chọn, giá từ backend | Đạt theo kiểm thử tích hợp A và đọc code. ProductPage truyền dữ liệu API vào ProductOptions; giá và phụ thu không hardcode trong component. Phụ thu cố định ở backend phù hợp thiết kế v1.1. |
+| US02-AC-03 | Mặc định S, không topping, luôn một size | Đạt qua code và ca UI đã ghi nhận. State ban đầu S và mảng topping rỗng; size dùng radio với một selectedSize. |
+| US02-AC-04 | Công thức giá và đổi size không cộng dồn | Đạt. A đối chiếu cà phê sữa 35000/40000/45000; ca Americano S→M→L→S cho 40000/45000/50000/40000; code tính lại từ lựa chọn hiện tại. |
+| US02-AC-05 | Nhiều topping, bỏ chọn trừ đúng, không cộng trùng | Đạt trong các ca đã ghi nhận và qua code. A kiểm tra L + hai topping = 57000, bỏ Kem còn 50000; toggle dùng tập id không trùng. |
+| US02-AC-06 | Giá cập nhật ngay, VND và lựa chọn rõ | Đạt. A thao tác đổi lựa chọn và đối chiếu giá; code render giá từ state, dùng formatPrice và radio/checkbox thể hiện trạng thái chọn. |
+| US02-AC-07 | 404, lỗi khác và đường quay về Menu | Đạt trong các ca A đã ghi nhận. ID sai hiện not-found; backend dừng gây lỗi chi tiết; retry phục hồi sau sửa 2ed30b3; trang chi tiết/not-found có đường về Menu. |
+| US02-AC-08 | Chặn giá thiếu, không phải số hoặc âm | Đạt ở phạm vi component đã thử. A đưa giá âm, NaN, undefined và chuỗi vào ProductOptions; không hiện preview sai và có thông báo. API client cũng kiểm tra dữ liệu; các ca này không chứng minh database đã có ràng buộc chặn mọi giá sai. |
+
+Kết luận đối chiếu: đã có kết quả phù hợp cho 19 AC về API/menu/chi tiết
+trong phạm vi thử nêu trên, và căn cứ cho các AC nền tảng. TS01-AC-05 có
+quy ước đã thống nhất nhưng có ngoại lệ thực thi cần ghi nhận trung thực
+trong đánh giá DoD/Retro. Đây không phải kết luận 24/24 AC đã được PO
+nghiệm thu hoặc toàn bộ DoD đã hoàn thành. Không sửa lịch sử để coi lần
+đẩy thẳng main là đã qua nhánh/PR; nhóm cần ghi nhận và thống nhất cải tiến.
 
 ## Còn phải hoàn thành hoặc xác nhận trước nghiệm thu
 
-- [ ] Hoàn thiện README đúng với code và kiểm tra lại hướng dẫn chạy
-      bằng kết quả thiết lập trên máy thành viên khác đã có.
-- [ ] Gom và liên kết bằng chứng migration, seed, API,
-      thời gian phản hồi và các ca giao diện đã kiểm tra.
-- [ ] D cập nhật báo cáo kiểm thử trong PR #8:
-      giữ kết quả lần đầu, ghi rõ lỗi và kết quả kiểm thử lại,
-      commit được kiểm thử, nguồn dữ liệu và bằng chứng.
-- [ ] A đối chiếu đủ 24 AC trong hồ sơ Sprint 1 v1.1:
-      ghi rõ kết quả, bằng chứng và mục còn thiếu xác nhận.
+- [ ] Đối chiếu hướng dẫn README với kết quả thiết lập trên máy
+      thành viên khác đã có; việc cập nhật nội dung README đã xong qua PR #9.
+- [x] Đã gom liên kết các nguồn bằng chứng hiện có của A/D/E,
+      phân biệt phạm vi, người thực hiện và thông tin chưa xác định.
+- [x] Đã lập đối chiếu đủ 24 mã AC trong hồ sơ Sprint 1 v1.1,
+      ghi căn cứ và ngoại lệ quy trình; chưa thay cho quyết định nghiệm thu của PO.
 - [ ] Cập nhật board/backlog theo tiến độ thực tế;
       công việc chưa đạt được ghi nhận để nhóm quyết định xử lý.
 - [ ] Nhóm thực hiện Sprint Review, ghi kết quả nghiệm thu của PO.
