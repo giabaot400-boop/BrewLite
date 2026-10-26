@@ -2,6 +2,11 @@
 
 Nhánh được kiểm tra: `feature/menu`. Đây là bản khởi động, chưa nghiệm thu Sprint 1.
 
+> Tài liệu giữ lịch sử kiểm thử bản khởi động và các đợt kiểm tra bổ sung.
+> Các nhận xét “chưa tích hợp API/database” thuộc thời điểm ghi nhận.
+> Kết quả tích hợp sau PR #6 và #7 cùng trạng thái cần xác nhận hiện tại
+> được tổng hợp trong SPRINT1_CHECKLIST.md.
+
 ## Đã kiểm tra thành công
 
 - `npm run db:validate` và `npm run db:generate`.
