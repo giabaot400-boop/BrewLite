@@ -154,6 +154,18 @@ Xem docs/GIT_WORKFLOW.md để cập nhật nhánh và xử lý tích hợp.
 Các hướng dẫn tạo repository/remote lần đầu trong tài liệu đó
 chỉ áp dụng khi khởi tạo repository mới.
 
+## Cấu trúc thư mục
+
+| Đường dẫn | Nội dung |
+|---|---|
+| frontend/ | Ứng dụng Next.js, giao diện và phần gọi API |
+| backend/ | Ứng dụng NestJS, Product API và kết nối Prisma |
+| backend/prisma/ | Schema, migration và seed PostgreSQL |
+| docs/ | API contract, workflow, checklist và kết quả kiểm tra |
+| scripts/ | Script hỗ trợ thiết lập môi trường |
+| package.json | Workspace và các lệnh chạy chung |
+| package-lock.json | Khóa phiên bản dependency dùng chung |
+
 ## Phân công
 
 | Vị trí | Kỹ thuật | Scrum |
