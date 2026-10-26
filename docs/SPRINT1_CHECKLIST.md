@@ -69,6 +69,29 @@ Sprint 1 chưa được xác nhận nghiệm thu hoàn tất.
 Các kết quả thời gian chỉ mô tả những lần đo local đã thực hiện,
 không phải cam kết mọi lần gọi đều có cùng thời gian phản hồi.
 
+## Kiểm tra bổ sung ngày 26/10/2026 trên máy A
+
+- [x] Menu dùng API: hiển thị loading khi mô phỏng mạng chậm,
+      sau đó hiển thị đủ 4 sản phẩm.
+- [x] Menu hiển thị “Hiện chưa có sản phẩm.” khi phản hồi GET
+      /products được ghi đè thành [] bằng Chrome Local Overrides.
+      Đây là phản hồi API giả lập, không phải kiểm thử database rỗng.
+      Sau khi tắt Overrides, menu hiển thị lại 4 sản phẩm.
+- [x] Trang chi tiết hiển thị “Đang tải chi tiết sản phẩm…”
+      khi mô phỏng mạng chậm, sau đó hiển thị sản phẩm.
+- [x] Dừng backend và reload trang chi tiết:
+      hiển thị “Không tải được sản phẩm”; lỗi kết nối ECONNREFUSED.
+- [x] Phát hiện lỗi phục hồi: backend đã trả HTTP 200 nhưng
+      nút Thử lại không phục hồi trang; F5 phục hồi được.
+- [x] Sửa reset() thành retry() tại commit 2ed30b3.
+      Kiểm thử lại: khởi động lại backend, bấm Thử lại
+      và tải được chi tiết sản phẩm mà không cần F5.
+- [x] Frontend typecheck, lint và build thành công
+      với phần sửa tại commit 2ed30b3.
+
+Phần sửa lỗi được gửi trong PR #10, chưa tích hợp vào main.
+Bằng chứng ảnh/video và log cần được liên kết trước nghiệm thu.
+
 ## Còn phải hoàn thành hoặc xác nhận trước nghiệm thu
 
 - [ ] Hoàn thiện README đúng với code và kiểm tra lại hướng dẫn chạy
@@ -78,8 +101,6 @@ không phải cam kết mọi lần gọi đều có cùng thời gian phản h�
 - [ ] D cập nhật báo cáo kiểm thử trong PR #8:
       giữ kết quả lần đầu, ghi rõ lỗi và kết quả kiểm thử lại,
       commit được kiểm thử, nguồn dữ liệu và bằng chứng.
-- [ ] Xác nhận loading và empty của menu khi dùng API thật;
-      các kết quả fixture trước đó được giữ riêng.
 - [ ] Gắn kết quả lint, typecheck và build đã thực hiện với đúng
       phiên bản/phạm vi kiểm tra; bổ sung kiểm tra nếu còn thiếu.
 - [ ] A đối chiếu đủ 24 AC trong hồ sơ Sprint 1 v1.1:
