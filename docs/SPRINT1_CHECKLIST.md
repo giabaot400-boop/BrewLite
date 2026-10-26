@@ -1,9 +1,17 @@
 # Tiến độ Sprint 1
 
-Mốc code đã tích hợp: ec8e2f9, gồm phần UI dùng chung qua PR #4 ngày 23/10/2026.
-Kết quả kiểm tra frontend được bổ sung đến ngày 24/10/2026.
-Giao diện hiện dùng dữ liệu mẫu (fixture).
-Sprint 1 chưa được nghiệm thu hoàn tất.
+Mốc code bàn giao để đối chiếu: 7df9f61.
+Product API và migration PostgreSQL đã tích hợp vào main qua PR #6 và #7.
+
+Bản tích hợp kiểm thử trên máy A: 5d6e058,
+ghép main da5c861 với commit sửa API d82837b.
+Nội dung code của bản merge 7df9f61 khớp bản ghép đã kiểm tra.
+
+Các kết quả dưới đây phân biệt kiểm thử bằng fixture và bằng API thật.
+Mục được đánh dấu hoàn thành phản ánh kết quả đã ghi nhận;
+bằng chứng và đối chiếu đủ 24 AC/DoD được hoàn thiện trước nghiệm thu.
+
+Sprint 1 chưa được xác nhận nghiệm thu hoàn tất.
 
 ## Đã hoàn thành với dữ liệu mẫu
 
@@ -26,20 +34,67 @@ Sprint 1 chưa được nghiệm thu hoàn tất.
 - [x] Kiểm tra responsive ở 390/768/1280 px, bàn phím,
       focus, skip-link và giao diện 404 trên Chrome.
 
-## Còn phải hoàn thành hoặc xác nhận
+## Kết quả tích hợp API và PostgreSQL đã ghi nhận trên máy A
 
-- [ ] E xác nhận repo chung và cấu hình môi trường cho từng máy.
-- [ ] C/E chạy migration và seed thành công trên PostgreSQL thật.
-- [ ] C hoàn thành GET /products và GET /products/:id từ database.
-- [ ] A tích hợp giao diện với Product API thật.
-- [ ] A kiểm tra lại loading/empty/error, điều hướng và 404
-      khi dùng API thật.
-- [ ] A kiểm tra lại size, topping và giá với dữ liệu từ API thật.
-- [ ] D kiểm thử API, dữ liệu rỗng, lỗi, 404 và các phép tính giá.
-- [ ] Review các PR backend và phần tích hợp còn lại.
-- [ ] Nhóm kiểm tra cài đặt và build trên máy thành viên khác.
-- [ ] A nghiệm thu theo 24 AC trong hồ sơ v1.1;
-      B hỗ trợ Sprint Review, Retrospective và lưu bằng chứng.
+- [x] Áp dụng migration của E thành công trên PostgreSQL 17.
+- [x] Seed tạo đúng 4 sản phẩm, 2 topping và 2 liên kết.
+- [x] Đối chiếu giá sản phẩm, giá topping và liên kết đúng dữ liệu mẫu.
+- [x] Chạy lại seed không tạo thêm dòng trùng; số lượng vẫn là 4 / 2 / 2.
+- [x] Backend khởi động thành công với ProductsModule và PrismaModule.
+- [x] GET /products trả HTTP 200, raw JSON array và đúng 4 sản phẩm.
+- [x] GET /products/coffee-milk trả HTTP 200,
+      đúng mô tả, giá cơ bản, sizes và toppings.
+- [x] GET /products/khong-ton-tai trả HTTP 404,
+      thông báo Product not found.
+- [x] Chạy tích hợp với DEMO_MODE=false.
+- [x] Đo mỗi API danh sách và chi tiết 3 lần bằng curl:
+      cả 6 lần trả HTTP 200 và dưới 500 ms.
+      Danh sách: 4,008–54,361 ms; chi tiết: 5,723–11,998 ms.
+- [x] Frontend dùng NEXT_PUBLIC_PRODUCTS_SOURCE=api,
+      menu hiển thị sản phẩm và điều hướng đến trang chi tiết.
+- [x] Xác nhận request menu tới http://localhost:3001/products;
+      thời gian Total trên trình duyệt được A ghi nhận là 18,05 ms.
+- [x] Đối chiếu giá cà phê sữa:
+      S = 35.000đ; M = 40.000đ; L = 45.000đ;
+      M + Kem = 47.000đ;
+      L + Kem + Trân châu = 57.000đ;
+      L + Trân châu, bỏ Kem = 50.000đ.
+- [x] Dừng backend và tải lại menu: frontend hiển thị trạng thái lỗi.
+- [x] Khởi động lại backend, bấm Thử lại mà không reload:
+      danh sách 4 sản phẩm được khôi phục.
+- [x] Truy cập /products/khong-ton-tai trên frontend:
+      hiển thị không tìm thấy và quay về menu được.
+- [x] PR #6 và PR #7 đã được review, kiểm tra và merge vào main.
+
+Các kết quả thời gian chỉ mô tả những lần đo local đã thực hiện,
+không phải cam kết mọi lần gọi đều có cùng thời gian phản hồi.
+
+## Còn phải hoàn thành hoặc xác nhận trước nghiệm thu
+
+- [ ] Hoàn thiện README đúng với code và kiểm tra lại hướng dẫn chạy
+      bằng kết quả thiết lập trên máy thành viên khác đã có.
+- [ ] Gom và liên kết bằng chứng migration, seed, API,
+      thời gian phản hồi và các ca giao diện đã kiểm tra.
+- [ ] D cập nhật báo cáo kiểm thử trong PR #8:
+      giữ kết quả lần đầu, ghi rõ lỗi và kết quả kiểm thử lại,
+      commit được kiểm thử, nguồn dữ liệu và bằng chứng.
+- [ ] Xác nhận loading và empty của menu khi dùng API thật;
+      các kết quả fixture trước đó được giữ riêng.
+- [ ] Gắn kết quả lint, typecheck và build đã thực hiện với đúng
+      phiên bản/phạm vi kiểm tra; bổ sung kiểm tra nếu còn thiếu.
+- [ ] A đối chiếu đủ 24 AC trong hồ sơ Sprint 1 v1.1:
+      ghi rõ kết quả, bằng chứng và mục còn thiếu xác nhận.
+- [ ] Cập nhật board/backlog theo tiến độ thực tế;
+      công việc chưa đạt được ghi nhận để nhóm quyết định xử lý.
+- [ ] Nhóm thực hiện Sprint Review, ghi kết quả nghiệm thu của PO.
+- [ ] B hỗ trợ Retrospective, ghi vấn đề và hành động cải thiện.
+- [ ] Đồng bộ báo cáo Assignment 1 với kết quả cuối Sprint.
+
+Kết quả kiểm thử trên máy A không tự thay thế cho kết quả D trực tiếp
+thực hiện. Báo cáo phải phân biệt người kiểm thử và người tổng hợp.
+
+Chỉ xác nhận Sprint 1 hoàn thành khi nhóm đã đối chiếu AC/DoD
+và ghi nhận kết quả Sprint Review.
 
 Thời gian toàn đồ án:
 - Sprint 1: Tuần 1.
