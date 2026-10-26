@@ -1,5 +1,10 @@
 # Bàn giao database Sprint 1 — Thành viên E
 
+> Tài liệu giữ nội dung bàn giao database của E tại thời điểm mở PR #6.
+> PR #6 hiện đã merge; migration và seed đã được kiểm tra thêm trên máy A.
+> Phần Product API cũng đã tích hợp qua PR #7.
+> Xem SPRINT1_CHECKLIST.md để theo dõi kết quả và việc còn lại.
+
 ## Công nghệ và phạm vi
 - PostgreSQL 17, Prisma.
 - Ba bảng: products, toppings, product_toppings.
