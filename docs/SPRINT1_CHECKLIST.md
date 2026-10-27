@@ -185,15 +185,31 @@ nghiệm thu hoặc toàn bộ DoD đã hoàn thành. Không sửa lịch sử �
 
 - [ ] Đối chiếu hướng dẫn README với kết quả thiết lập trên máy
       thành viên khác đã có; việc cập nhật nội dung README đã xong qua PR #9.
+      Ngày 27/10/2026 có một lần chạy README trên môi trường Linux sạch
+      (không phải máy thành viên, Node.js 22 thay vì 24, clone nhánh
+      docs/sprint1-final-records tại 8b4c3a6): `npm ci`, `npm run setup`,
+      lint, typecheck và build frontend thành công. Các bước Prisma
+      (`db:generate`, `db:validate`, `migrate deploy`, `db:seed`) và typecheck
+      backend không chạy được vì môi trường đó không tải được công cụ Prisma,
+      nên chưa có kết quả. Mục này chỉ tick khi thành viên khác chạy đủ README,
+      gồm cả database.
 - [x] Đã gom liên kết các nguồn bằng chứng hiện có của A/D/E,
       phân biệt phạm vi, người thực hiện và thông tin chưa xác định.
 - [x] Đã lập đối chiếu đủ 24 mã AC trong hồ sơ Sprint 1 v1.1,
       ghi căn cứ và ngoại lệ quy trình; chưa thay cho quyết định nghiệm thu của PO.
 - [ ] Cập nhật board/backlog theo tiến độ thực tế;
       công việc chưa đạt được ghi nhận để nhóm quyết định xử lý.
+      Trạng thái đề xuất cho S1-01 đến S1-07 nằm ở
+      [SPRINT1_REVIEW_RETRO.md](SPRINT1_REVIEW_RETRO.md), mục 1.3; chưa cập nhật board thật.
 - [ ] Nhóm thực hiện Sprint Review, ghi kết quả nghiệm thu của PO.
+      Bản ghi nháp: [SPRINT1_REVIEW_RETRO.md](SPRINT1_REVIEW_RETRO.md), mục 1;
+      các ô kết quả buổi họp còn trống.
 - [ ] B hỗ trợ Retrospective, ghi vấn đề và hành động cải thiện.
+      Dữ kiện đầu vào và đề xuất hành động: [SPRINT1_REVIEW_RETRO.md](SPRINT1_REVIEW_RETRO.md),
+      mục 2; chưa có hành động nào được nhóm đồng ý.
 - [ ] Đồng bộ báo cáo Assignment 1 với kết quả cuối Sprint.
+      Nội dung chuẩn bị chép vào báo cáo:
+      [SPRINT1_BAO_CAO_DONG_BO.md](SPRINT1_BAO_CAO_DONG_BO.md); chưa sửa file báo cáo.
 
 Kết quả kiểm thử trên máy A không tự thay thế cho kết quả D trực tiếp
 thực hiện. Báo cáo phải phân biệt người kiểm thử và người tổng hợp.
