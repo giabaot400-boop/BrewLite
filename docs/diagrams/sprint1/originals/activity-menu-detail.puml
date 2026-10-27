@@ -1,0 +1,91 @@
+@startuml
+
+title BrewLite - Activity Diagram Sprint 1
+
+|Khách hàng|
+start
+:Mở ứng dụng BrewLite;
+
+|Frontend|
+:Hiển thị trạng thái loading;
+:Gọi GET /products;
+
+|Backend|
+:Nhận yêu cầu lấy danh sách sản phẩm;
+
+if (Lấy danh sách thành công?) then (Có)
+  :Trả về 200 và danh sách sản phẩm;
+
+  |Frontend|
+  if (Danh sách sản phẩm rỗng?) then (Có)
+    :Hiển thị "Hiện chưa có sản phẩm";
+    stop
+  else (Không)
+    :Hiển thị lưới sản phẩm;
+    :Hiển thị hình ảnh, tên và giá size S;
+  endif
+
+else (Không)
+  |Frontend|
+  :Dừng trạng thái loading;
+  :Hiển thị lỗi tải menu;
+  stop
+endif
+
+|Khách hàng|
+:Chọn một sản phẩm;
+
+|Frontend|
+:Mở trang chi tiết theo id;
+:Hiển thị trạng thái loading;
+:Gọi GET /products/:id;
+
+|Backend|
+:Nhận yêu cầu lấy chi tiết sản phẩm;
+
+if (Backend xử lý được yêu cầu?) then (Có)
+  :Tìm sản phẩm theo id;
+
+  if (Tìm thấy sản phẩm?) then (Có)
+    :Trả về 200 và thông tin chi tiết;
+
+    |Frontend|
+    :Hiển thị thông tin sản phẩm;
+    :Hiển thị các size và topping;
+    :Chọn mặc định size S;
+    :Không chọn topping;
+    :Tính và hiển thị giá cơ bản;
+
+  else (Không)
+    :Trả về 404 Not Found;
+
+    |Frontend|
+    :Dừng trạng thái loading;
+    :Hiển thị "Không tìm thấy sản phẩm";
+    stop
+  endif
+
+else (Không)
+  |Frontend|
+  :Dừng trạng thái loading;
+  :Hiển thị lỗi tải chi tiết;
+  stop
+endif
+
+|Khách hàng|
+while (Muốn thay đổi lựa chọn?) is (Có)
+  :Chọn size hoặc bật/tắt topping;
+
+  |Frontend|
+  :Cập nhật lựa chọn hiện tại;
+  :Tính giá cơ bản cộng phụ thu size;
+  :Cộng giá các topping đã chọn;
+  :Hiển thị lựa chọn và giá mới;
+
+  |Khách hàng|
+endwhile (Không)
+
+:Xem lựa chọn và giá cuối;
+stop
+
+@enduml

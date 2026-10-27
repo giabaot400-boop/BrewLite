@@ -1,0 +1,53 @@
+@startuml
+!pragma layout smetana
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #5B4636
+skinparam roundcorner 12
+skinparam packageStyle rectangle
+skinparam noteBackgroundColor #FFF6DA
+skinparam noteBorderColor #B89551
+skinparam actorBorderColor #5B4636
+skinparam actorFontColor #382A23
+skinparam rectangleBorderColor #80644F
+skinparam componentBorderColor #80644F
+skinparam databaseBorderColor #80644F
+skinparam frameBorderColor #80644F
+top to bottom direction
+
+title BrewLite — Logical Architecture\nChỉnh lý r2 — đối chiếu Sprint 1
+
+actor "Khách hàng\nWeb Browser" as Customer
+
+frame "Hệ thống BrewLite" {
+  component "Next.js Frontend\nReact + TypeScript + Tailwind CSS\nClient / Server Components" as Frontend #F9F2E9
+  component "NestJS Backend\nProduct REST API + Business Logic\nPrisma ORM" as Backend #F9F2E9
+  database "PostgreSQL\nproducts / toppings / product_toppings" as Database #F9F2E9
+
+  Frontend --> Backend : HTTP REST / JSON\nGET /products\nGET /products/:id
+  Backend --> Database : Đọc dữ liệu sản phẩm\nqua Prisma
+}
+
+rectangle "Mock Payment Gateway\nVí điện tử / Thẻ\nSprint 3 — dự kiến, chưa triển khai" as PaymentGateway #E8EEF9
+
+Customer --> Frontend : Giao diện web\nHTTP / HTTPS
+Backend ..> PaymentGateway : Yêu cầu\nthanh toán
+PaymentGateway ..> Backend : Kết quả\nthanh toán
+
+note left of Frontend
+  Sprint 1: Menu, chi tiết sản phẩm,
+  chọn size / topping và giá xem trước.
+  Menu gọi API từ Client Component;
+  trang chi tiết lấy dữ liệu từ Server Component.
+end note
+
+note bottom of Database
+  Prisma thuộc backend; PostgreSQL lưu dữ liệu.
+  Migration / seed thiết lập dữ liệu ngoài luồng người dùng.
+  Các API sản phẩm Sprint 1 chỉ đọc dữ liệu.
+end note
+
+@enduml

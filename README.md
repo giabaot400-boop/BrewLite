@@ -166,6 +166,12 @@ chỉ áp dụng khi khởi tạo repository mới.
 | package.json | Workspace và các lệnh chạy chung |
 | package-lock.json | Khóa phiên bản dependency dùng chung |
 
+## Sơ đồ thiết kế
+
+Xem [bộ sơ đồ và mã PlantUML](docs/diagrams/README.md): bối cảnh hệ thống,
+master use case, activity Sprint 1, ERD tổng thể và logical architecture. Tài liệu phân biệt phần
+đã triển khai trong Sprint 1 với phần thiết kế cho các sprint sau.
+
 ## Phân công
 
 | Vị trí | Kỹ thuật | Scrum |
@@ -185,7 +191,10 @@ npm run build
 ```
 
 Các lệnh trên không thay cho kiểm thử kết nối PostgreSQL và migration/seed thực tế.
-Checklist từng task nằm ở `docs/SPRINT1_CHECKLIST.md`.
+Xem [checklist và đối chiếu 24 AC](docs/SPRINT1_CHECKLIST.md),
+[tổng hợp Review/Retrospective và backlog](docs/SPRINT1_REVIEW_RETRO.md)
+và [nội dung đồng bộ báo cáo](docs/SPRINT1_BAO_CAO_DONG_BO.md).
+Hồ sơ phân biệt kết quả chức năng đã kiểm tra với quyết định chấp nhận của PO.
 
 ## Tài liệu tham khảo
 

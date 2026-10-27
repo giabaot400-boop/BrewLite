@@ -1,0 +1,118 @@
+@startuml
+!pragma layout smetana
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #5B4636
+skinparam roundcorner 12
+skinparam packageStyle rectangle
+skinparam noteBackgroundColor #FFF6DA
+skinparam noteBorderColor #B89551
+skinparam actorBorderColor #5B4636
+skinparam actorFontColor #382A23
+skinparam rectangleBorderColor #80644F
+skinparam usecaseBorderColor #80644F
+skinparam entityBorderColor #80644F
+skinparam activityBorderColor #80644F
+skinparam activityBackgroundColor #F9F2E9
+skinparam activityDiamondBackgroundColor #FFF6DA
+skinparam activityDiamondBorderColor #80644F
+skinparam swimlaneBorderColor #C9B9A9
+title BrewLite — Activity Sprint 1\nMenu → Chi tiết → Tùy chọn → Giá xem trước
+
+|Khách hàng|
+start
+:Mở ứng dụng BrewLite;
+
+|Frontend Next.js|
+repeat
+  :Hiển thị loading;\nGọi GET /products;
+  |Backend NestJS|
+  :Xử lý yêu cầu danh sách;\nĐọc dữ liệu qua Prisma / PostgreSQL;
+  |Frontend Next.js|
+  :Nhận kết quả hoặc lỗi kết nối;\nDừng loading;
+  if (Nhận HTTP 200 và mảng sản phẩm?) then (Có)
+    if (Danh sách rỗng?) then (Có)
+      :Hiển thị "Hiện chưa có sản phẩm.";
+      stop
+    else (Không)
+      :Hiển thị lưới sản phẩm;\nẢnh, tên, giá size S định dạng VND;
+    endif
+  else (Không)
+    :Hiển thị lỗi tải menu\nvà nút Thử lại;
+  endif
+  |Khách hàng|
+repeat while (Menu đang lỗi và chọn Thử lại?) is (Có) not (Không)
+
+|Frontend Next.js|
+if (Menu đã tải thành công?) then (Có)
+else (Không)
+  :Giữ trạng thái lỗi và nút Thử lại;
+  stop
+endif
+
+|Khách hàng|
+:Chọn một sản phẩm;
+|Frontend Next.js|
+:Mở /products/[id];
+repeat
+  :Hiển thị loading;\nGọi GET /products/:id;
+  |Backend NestJS|
+  :Xử lý yêu cầu chi tiết;\nTìm sản phẩm qua Prisma / PostgreSQL;
+  |Frontend Next.js|
+  :Nhận kết quả hoặc lỗi kết nối;\nDừng loading;
+  if (HTTP 404?) then (Có)
+    :Hiển thị "Không tìm thấy sản phẩm"\nvà liên kết về Menu;
+    stop
+  else (Không)
+    if (Nhận chi tiết thành công?) then (Có)
+      :Hiển thị ảnh, tên, mô tả;\nHiển thị sizes / toppings từ API;
+      :Mặc định size S;\nKhông chọn topping;
+    else (Không)
+      :Hiển thị lỗi tải chi tiết;\nCó Thử lại và đường về Menu;
+    endif
+  endif
+  |Khách hàng|
+repeat while (Chi tiết đang lỗi và chọn Thử lại?) is (Có) not (Không)
+
+|Frontend Next.js|
+if (Chi tiết đã tải thành công?) then (Có)
+else (Không)
+  :Giữ trạng thái lỗi và cách phục hồi;
+  stop
+endif
+
+if (Giá dùng để tính hợp lệ?) then (Có)
+  :Hiển thị giá preview mặc định\nbằng giá cơ bản size S, định dạng VND;
+else (Không)
+  :Báo không thể tính giá;\nKhông hiển thị preview sai;
+endif
+
+|Khách hàng|
+while (Muốn thay đổi lựa chọn?) is (Có)
+  :Chọn một size hoặc bật / tắt topping;
+  |Frontend Next.js|
+  :Thay size hiện tại;\nGiữ tập topping không trùng;
+  if (Giá dùng để tính hợp lệ?) then (Có)
+    :Tính lại từ lựa chọn hiện tại:\nbasePrice + size.extraPrice\n+ tổng giá topping đang chọn;
+    :Hiển thị lựa chọn và giá mới\nngay lập tức, định dạng VND;
+  else (Không)
+    :Báo không thể tính giá;\nKhông hiển thị NaN hoặc giá âm;
+  endif
+  |Khách hàng|
+endwhile (Không)
+:Xem lựa chọn và giá preview\nhoặc thông báo không thể tính giá;
+stop
+
+legend bottom
+  Giá hợp lệ: dữ liệu giá cần dùng tồn tại, là số nguyên không âm.
+  Mỗi lần tính dùng phụ thu của đúng một size và tập topping hiện tại.
+  Dữ liệu tùy chọn / phụ thu lấy từ API; không cộng dồn giá hiển thị cũ.
+  Lỗi tải gồm lỗi HTTP khác 404, lỗi mạng hoặc không kết nối được backend.
+  Các nút stop kết thúc nhánh đang xét; không có nghĩa khóa UI hay xóa nút Retry.
+  Đây là luồng nghiệp vụ, không mô tả chi tiết cơ chế render / fetch của Next.js.
+  Sprint 1 chỉ xem trước giá; chưa thêm giỏ hàng, tạo đơn hay thanh toán.
+endlegend
+
+@enduml

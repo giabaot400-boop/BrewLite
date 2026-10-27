@@ -59,3 +59,26 @@ Không commit hoặc chia sẻ file .env chứa mật khẩu.
 - Frontend mở được tại http://localhost:3000, hiển thị menu bằng fixture.
 - Backend GET /health trả {"status":"ok","service":"brewlite-api"}.
 - Chưa xác nhận Product API và tích hợp frontend với database.
+
+
+## Bổ sung kết quả máy E — đối chiếu ngày 27/10/2026
+
+Nguồn: E ghi tại commit
+[332a1ed](https://github.com/giabaot400-boop/BrewLite/commit/332a1ed811b440d87e45b2642f58dc836e685f53)
+trên nhánh `chore/database`, mục kiểm thử tích hợp ngày 25/10/2026.
+Phần này được tổng hợp thêm vào hồ sơ, không ghi commit trên đã merge vào main.
+
+- Bản kiểm thử E: code C `d82837b` kết hợp migration E, nhánh local
+  `test/e-product-api`, backend `DEMO_MODE=false`, PostgreSQL local.
+- E ghi migration status đồng bộ, seed thành công; frontend/backend
+  typecheck và build thành công.
+- E ghi `/health` 200; `/products` 200 đủ 4 sản phẩm;
+  `/products/coffee-milk` 200, giá 35000, phụ thu S/M/L là 0/5000/10000,
+  Kem 7000 và Trân châu 5000; ID sai trả 404 `Product not found`.
+- Nguồn của E nhắc ảnh Terminal; chưa có đường dẫn ảnh trong mục nguồn đó,
+  nên đây là kết quả E ghi nhận, không giả định đã kiểm tra ảnh.
+- E chưa xác nhận frontend đã chuyển fixture sang API thật. Chưa khẳng định
+  một lần clone sạch đã chạy trọn README cuối; giữ việc đó ở backlog F02.
+
+Các dòng “chờ review”, “chưa có Product API” ở phần bàn giao phía trên là lịch
+sử trước tích hợp; PR #6/#7 đã merge như phần giới thiệu tài liệu nêu.
