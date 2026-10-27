@@ -151,7 +151,7 @@ Nguồn đối chiếu đã có:
 |---|---|---|
 | TS01-AC-01 | Next.js, Tailwind, TypeScript và NestJS | Đạt. Cấu trúc ứng dụng, dependency và code phù hợp; hai ứng dụng đã chạy trên máy A. |
 | TS01-AC-02 | Chạy độc lập và build hai ứng dụng | Đạt trong các đợt đã ghi nhận. A chạy riêng frontend/backend; frontend lint, typecheck, build với phần sửa 2ed30b3; backend typecheck/build tại 4cbfb28. Không ghi là đã chạy lại build ở b599076. |
-| TS01-AC-03 | README có cài đặt, chạy, build và cấu trúc thư mục | Đạt về nội dung tài liệu sau PR #9. Việc xác nhận thành viên khác thiết lập theo toàn bộ README vẫn là mục DoD riêng còn mở. |
+| TS01-AC-03 | README có cài đặt, chạy, build và cấu trúc thư mục | Đạt về nội dung tài liệu sau PR #9. A/E có kết quả chạy/build và thiết lập database riêng. Chưa xác nhận một lần clone sạch chạy trọn README cuối; theo dõi bổ sung, không ghi là đã chạy. |
 | TS01-AC-04 | Gitignore, env example và không đưa env thật/secret lên Git | Phù hợp trong phạm vi đã kiểm tra. Có gitignore và hai env mẫu; A kiểm tra tracked files, check-ignore và lịch sử đường dẫn .env trên các refs đã có. Không phát hiện env thật trong phạm vi đó; không coi đây là quét mọi secret trong mọi nội dung. |
 | TS01-AC-05 | Thống nhất quy ước branch, commit và review | Có quy ước trong baseline và GIT_WORKFLOW.md; thực hiện chưa đầy đủ trong lịch sử. Đã ghi nhận C đưa code thẳng lên main trước khi tách nhánh. Các PR sau có rà soát, nhưng không kết luận mọi thay đổi trước đó đều đạt DoD review. |
 | TS02-AC-01 | GET /products trả 200 và raw array đủ trường | Đạt với dữ liệu mẫu. A kiểm tra API thật trả 4 sản phẩm; ảnh D TC-D02 bổ sung kết quả HTTP 200/raw array. |
@@ -181,41 +181,45 @@ trong đánh giá DoD/Retro. Đây không phải kết luận 24/24 AC đã đư
 nghiệm thu hoặc toàn bộ DoD đã hoàn thành. Không sửa lịch sử để coi lần
 đẩy thẳng main là đã qua nhánh/PR; nhóm cần ghi nhận và thống nhất cải tiến.
 
-## Còn phải hoàn thành hoặc xác nhận trước nghiệm thu
+## Tổng hợp chốt hồ sơ ngày 27/10/2026
 
-- [ ] Đối chiếu hướng dẫn README với kết quả thiết lập trên máy
-      thành viên khác đã có; việc cập nhật nội dung README đã xong qua PR #9.
-      Ngày 27/10/2026 có một lần chạy README trên môi trường Linux sạch
-      (không phải máy thành viên, Node.js 22 thay vì 24, clone nhánh
-      docs/sprint1-final-records tại 8b4c3a6): `npm ci`, `npm run setup`,
-      lint, typecheck và build frontend thành công. Các bước Prisma
-      (`db:generate`, `db:validate`, `migrate deploy`, `db:seed`) và typecheck
-      backend không chạy được vì môi trường đó không tải được công cụ Prisma,
-      nên chưa có kết quả. Mục này chỉ tick khi thành viên khác chạy đủ README,
-      gồm cả database.
-- [x] Đã gom liên kết các nguồn bằng chứng hiện có của A/D/E,
-      phân biệt phạm vi, người thực hiện và thông tin chưa xác định.
-- [x] Đã lập đối chiếu đủ 24 mã AC trong hồ sơ Sprint 1 v1.1,
-      ghi căn cứ và ngoại lệ quy trình; chưa thay cho quyết định nghiệm thu của PO.
-- [ ] Cập nhật board/backlog theo tiến độ thực tế;
-      công việc chưa đạt được ghi nhận để nhóm quyết định xử lý.
-      Trạng thái đề xuất cho S1-01 đến S1-07 nằm ở
-      [SPRINT1_REVIEW_RETRO.md](SPRINT1_REVIEW_RETRO.md), mục 1.3; chưa cập nhật board thật.
-- [ ] Nhóm thực hiện Sprint Review, ghi kết quả nghiệm thu của PO.
-      Bản ghi nháp: [SPRINT1_REVIEW_RETRO.md](SPRINT1_REVIEW_RETRO.md), mục 1;
-      các ô kết quả buổi họp còn trống.
-- [ ] B hỗ trợ Retrospective, ghi vấn đề và hành động cải thiện.
-      Dữ kiện đầu vào và đề xuất hành động: [SPRINT1_REVIEW_RETRO.md](SPRINT1_REVIEW_RETRO.md),
-      mục 2; chưa có hành động nào được nhóm đồng ý.
-- [ ] Đồng bộ báo cáo Assignment 1 với kết quả cuối Sprint.
-      Nội dung chuẩn bị chép vào báo cáo:
-      [SPRINT1_BAO_CAO_DONG_BO.md](SPRINT1_BAO_CAO_DONG_BO.md); chưa sửa file báo cáo.
+- [x] Đối chiếu nội dung README và bằng chứng thiết lập đã có của A/E/D.
+      E đã ghi generate/validate, migration/seed và build frontend/backend;
+      bổ sung Product API với DEMO_MODE=false tại commit
+      [332a1ed](https://github.com/giabaot400-boop/BrewLite/commit/332a1ed811b440d87e45b2642f58dc836e685f53).
+      Xem [bàn giao E](SPRINT1_E_DATABASE.md). Chưa xác nhận frontend E dùng API thật.
+- [x] Đã gom nguồn bằng chứng và đối chiếu đủ 24 AC; giữ giới hạn phạm vi,
+      người thực hiện, mốc code và ngoại lệ quy trình Git.
+- [x] Đã lập bản tổng hợp Review/Retrospective qua PR/chat và cập nhật Sprint
+      Backlog S1-01–S1-07, F01–F04 trong
+      [SPRINT1_REVIEW_RETRO.md](SPRINT1_REVIEW_RETRO.md).
+      Không ghi đã có buổi họp hoặc đã cập nhật một board ngoài repository.
+- [x] Ghi trạng thái ý kiến A–E: C/D/E chưa có ý kiến bổ sung trong đợt chốt;
+      không suy ra đồng ý, không bỏ qua đóng góp đã có.
+- [x] Hoàn thiện nội dung đồng bộ báo cáo tại
+      [SPRINT1_BAO_CAO_DONG_BO.md](SPRINT1_BAO_CAO_DONG_BO.md).
+- [ ] A ghi quyết định chấp nhận Increment hoặc AC/chức năng còn cần sửa
+      ở mục 1.5 của bản tổng hợp Review. Đây là xác nhận thực tế của PO,
+      không thể điền thay bằng ý kiến im lặng của thành viên.
+- [ ] Review và merge PR #11 để đưa hồ sơ cuối vào main.
 
-Kết quả kiểm thử trên máy A không tự thay thế cho kết quả D trực tiếp
-thực hiện. Báo cáo phải phân biệt người kiểm thử và người tổng hợp.
+### Các giới hạn được giữ lại, không yêu cầu chạy lại toàn bộ
 
-Chỉ xác nhận Sprint 1 hoàn thành khi nhóm đã đối chiếu AC/DoD
-và ghi nhận kết quả Sprint Review.
+Chưa có xác nhận một lần clone sạch chạy trọn README cuối trên máy khác.
+Lần thử Linux ngày 27/10/2026 ở 8b4c3a6 dùng Node 22 (khác hướng dẫn Node 24):
+cài đặt/setup và frontend đã kiểm tra, nhưng Prisma bị chặn tải công cụ;
+không dùng lần đó làm bằng chứng backend/database đạt hoặc lỗi sản phẩm.
+Kết quả Windows của A/E được giữ riêng. Theo dõi xác nhận trọn README ở lần
+thiết lập tiếp theo (F02), không ghi là đã thực hiện.
+
+Test tự động và Docker không được thêm thành điều kiện mới của đợt chốt này.
+Chỉ bổ sung ca kiểm thử khi có thiếu sót chức năng cụ thể; không chụp lại mọi ảnh.
+Kết quả A không thay cho kết quả D/E; metadata chưa xác định giữ nguyên giới hạn.
+Lịch sử C đẩy trực tiếp main vẫn là ngoại lệ, không được tick thành tuân thủ đầy đủ.
+
+Chức năng đã có kết quả kiểm tra theo bảng 24 AC; quyết định chấp nhận Increment
+còn chờ PO. Hoàn thiện hồ sơ Sprint 1 không đồng nghĩa đã hoàn tất Assignment 1
+hoặc các chức năng Sprint 2/3.
 
 Thời gian toàn đồ án:
 - Sprint 1: Tuần 1.

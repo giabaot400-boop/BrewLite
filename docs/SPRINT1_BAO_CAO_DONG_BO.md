@@ -1,7 +1,7 @@
-# Sprint 1 — Nội dung đồng bộ cho báo cáo Assignment 1 (bản nháp)
+# Sprint 1 — Nội dung đồng bộ cho báo cáo Assignment 1 (đợt chốt hồ sơ 27/10/2026)
 
-Chuẩn bị ngày 27/10/2026 từ main b599076 để người cập nhật báo cáo (bản làm việc 0.2
-trở đi) chép vào Chương 6 và 7. Mọi kết quả dưới đây **lấy từ ghi nhận trong
+Cập nhật ngày 27/10/2026 từ main b599076 và hồ sơ PR #11; đồng bộ với
+báo cáo làm việc 0.5, Chương 6–8. Báo cáo Word được lưu riêng, không đưa lên Git. Mọi kết quả dưới đây **lấy từ ghi nhận trong
 `SPRINT1_CHECKLIST.md`, `KIEM_TRA_BAN_KHOI_DONG.md` và `Testing/`**, không phải đợt
 chạy mới trên b599076. Báo cáo phải giữ cách ghi này: chỉ ghi “Đạt” cho phạm vi, môi
 trường và người chạy đã nêu.
@@ -13,7 +13,7 @@ trường và người chạy đã nêu.
 | Repository | https://github.com/giabaot400-boop/BrewLite |
 | Frontend | Next.js; chạy cổng 3000; có thể dùng fixture hoặc Product API qua `NEXT_PUBLIC_PRODUCTS_SOURCE`. |
 | Backend | NestJS; cổng 3001; `/health`, `GET /products`, `GET /products/:id` đã tích hợp qua PR #6 và #7. |
-| Database | PostgreSQL với Prisma; migration `20261024160346_init_products`; seed 4 sản phẩm, 2 topping, 2 liên kết. A chạy trên PostgreSQL 17; D ghi PostgreSQL 18. |
+| Database | PostgreSQL với Prisma; migration `20261024160346_init_products`; seed 4 sản phẩm, 2 topping, 2 liên kết. A/E ghi PostgreSQL 17; D ghi PostgreSQL 18. Kết quả máy E được bổ sung từ commit 332a1ed. |
 | Layout và UI dùng chung | Tích hợp qua PR #4 (thành viên B). |
 
 ## 2. Bảng thay cho Mục 6.3 (tiến độ chức năng)
@@ -21,13 +21,13 @@ trường và người chạy đã nêu.
 | Hạng mục | Tiến độ có căn cứ | Còn thiếu |
 |---|---|---|
 | Phân tích và thiết kế | Hồ sơ v1.1, đối chiếu 24 AC, bộ sơ đồ trong `docs/diagrams/` | Họ tên, ngày cụ thể |
-| Bộ khung và Git | Frontend/backend chạy; main và các nhánh tính năng; PR #1 đến #10 | Xác nhận thiết lập từ máy thành viên khác; ngoại lệ C đưa code thẳng lên main |
-| Menu | Chạy với fixture và với API thật (A) | Kiểm tra lại ở b599076 nếu cần bằng chứng mới |
+| Bộ khung và Git | Frontend/backend chạy; main và các nhánh tính năng; PR #1 đến #10 | Giữ ngoại lệ C đưa code thẳng main; clean install trọn README cuối chưa xác nhận |
+| Menu | Chạy với fixture và với API thật (A) | Không yêu cầu chạy lại nếu không có thay đổi code hoặc lỗi mới |
 | Trang chi tiết | Size, topping, giá xem trước, chặn giá sai; retry sửa ở PR #10 | – |
-| Product API | Hai endpoint đã tích hợp; 200/404; đo local dưới 500 ms (A, D) | Test tự động |
-| Database | Migration và seed chạy trên máy A | Chạy lại trên máy thành viên khác |
+| Product API | Hai endpoint đã tích hợp; 200/404; đo local dưới 500 ms (A, D), E có ghi nhận tích hợp | Test tự động là đề xuất cho kế hoạch tiếp theo |
+| Database | A/E có kết quả migration và seed; A kiểm tra reseed 4/2/2 | Chưa có một lần clone sạch chạy trọn README cuối |
 | Kiểm thử | Báo cáo D đã merge (PR #8) với 12 nhóm ca và 18 ảnh | Commit chạy từng ảnh, nguồn dữ liệu UI ở một số ca |
-| Nghiệm thu Sprint 1 | Đã đối chiếu 24 AC | Sprint Review, Retro, quyết định của PO |
+| Nghiệm thu Sprint 1 | Đã đối chiếu 24 AC; có tổng hợp Review/Retro và backlog qua PR/chat | Quyết định PO và review/merge hồ sơ PR #11 |
 | Sprint 2 và 3 | Có phạm vi và kế hoạch | Chưa triển khai |
 
 ## 3. Cập nhật trạng thái bộ ca kiểm thử (Mục 7.4)
@@ -37,7 +37,7 @@ quả trong báo cáo của D.
 
 | Mã | Trạng thái đề xuất | Căn cứ và giới hạn |
 |---|---|---|
-| TC-01 | Chờ ghi kết quả | Cần máy khác chạy toàn bộ README. Đã có lần chạy trên môi trường Linux sạch: cài đặt, `setup`, lint, typecheck và build frontend thành công; bước Prisma không chạy được trong môi trường đó nên chưa tính |
+| TC-01 | Đạt phần chạy/build/env đã kiểm; clean install cuối chưa xác nhận | A/E có kết quả hai ứng dụng và database. Linux sạch dùng Node 22 khác hướng dẫn Node 24, Prisma bị chặn tải công cụ; không dùng để kết luận backend đạt/lỗi |
 | TC-02 | Đạt (A, D) | API thật trả 4 sản phẩm; Menu có loading và đúng ảnh, tên, giá S |
 | TC-03 | Đạt với phản hồi giả lập (A, D) | Local Overrides trả `[]` (A) và fixture rỗng (D); không phải database rỗng |
 | TC-04 | Đạt (A); D ghi PASS, bước phục hồi chưa được A xác minh độc lập | Dừng và bật lại backend, bấm Thử lại phục hồi 4 sản phẩm |
@@ -53,17 +53,20 @@ quả trong báo cáo của D.
 
 ## 4. Đoạn thay cho Mục 7.3 (đánh giá hiện tại)
 
-Sprint 1 đã có luồng Menu, chi tiết, tùy chọn và giá chạy với dữ liệu từ Product API và
-PostgreSQL trên máy A, cùng báo cáo kiểm thử của D. Các kết quả thể hiện phạm vi đã
-kiểm tra, không thay thế Sprint Review. Còn mở: xác nhận thiết lập từ máy thành viên
-khác, test tự động, ghi rõ commit cho từng đợt kiểm thử, ngoại lệ quy trình review ở
-giai đoạn đầu, Sprint Review và Retrospective, và quyết định chấp nhận Increment của
-PO.
+Sprint 1 đã có kết quả chức năng trong phạm vi kiểm tra ghi nhận của A/D/E.
+Đủ 24 mã AC đã được đối chiếu; ngoại lệ Git và giới hạn bằng chứng giữ nguyên.
+Đã có bản tổng hợp Review/Retrospective qua PR/chat, trạng thái ý kiến A–E và
+backlog tại [SPRINT1_REVIEW_RETRO.md](SPRINT1_REVIEW_RETRO.md). C/D/E chưa có
+ý kiến bổ sung trong đợt chốt; không tính là đồng ý. Chưa có buổi họp riêng.
+Chờ quyết định PO và review/merge PR #11; không tự ghi “24/24 đạt mọi DoD”.
+Test tự động, Docker và chụp lại toàn bộ bằng chứng không phải điều kiện mới
+của đợt chốt này. Clean install trọn README cuối chưa xác nhận được theo dõi
+ở F02. Bản Word 0.5 giữ các giới hạn này và kết quả gốc, không nhân bản 18 ảnh.
 
 ## 5. Mục [BỔ SUNG] vẫn cần người thật làm
 
 | Mã trong báo cáo | Việc |
 |---|---|
-| KQ-01 | Chèn ảnh Menu và chi tiết chụp từ bản chạy, ghi ngày, nhánh, commit (có thể dùng ảnh trong `docs/Testing/evidence/` và chú thích giới hạn) |
-| KT-01 | Chèn log lint, typecheck, build và kiểm tra setup từ một máy khác |
+| KQ-01 | Đã liên kết ảnh bản chạy trong `docs/Testing/evidence/`; chỉ chèn ảnh tiêu biểu khi cần theo mẫu nộp, không phải chụp lại toàn bộ |
+| KT-01 | Đã ghi kết quả lint/typecheck/build A và kết quả máy E; giữ commit/nguồn. Clean install cuối theo dõi F02, không ghi đã làm |
 | Họ tên, ngày | Họ tên và mã số sinh viên A đến E; ngày cụ thể từng Sprint |

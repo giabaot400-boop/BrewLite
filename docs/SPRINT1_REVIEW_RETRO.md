@@ -1,118 +1,116 @@
-# Sprint 1 — Bản ghi Sprint Review và Retrospective (bản nháp)
+# Sprint 1 — Tổng hợp Review, Retrospective và backlog
 
-Chuẩn bị ngày 27/10/2026 từ lịch sử repository và các tài liệu đã merge vào main
-(mốc b599076). Đây là **bản nháp để nhóm dùng trong buổi họp**. Các mục
-“Kết quả buổi họp” còn trống vì chưa có buổi họp nào được ghi nhận; không điền
-thay nhóm hoặc PO.
+Cập nhật ngày 27/10/2026 bằng PR và trao đổi bất đồng bộ. Nhóm chưa có buổi
+họp riêng; tài liệu này không ghi đã tổ chức một buổi họp hoặc demo mới.
+Nguồn: main `b599076`, checklist 24 AC, báo cáo A/D/E và bản tổng hợp B
+ở commit [c96a7eb](https://github.com/giabaot400-boop/BrewLite/commit/c96a7eb3beff44cd4979585ad7a9c8fffdcbc504).
+A yêu cầu hoàn thiện hồ sơ và ghi trung lập người chưa có ý kiến.
 
-## 1. Sprint Review
+## 1. Sprint Review qua PR và trao đổi bất đồng bộ
 
-### 1.1 Thông tin buổi họp
+### 1.1 Mục tiêu và kết quả được xem xét
 
-| Mục | Nội dung |
+Khách hàng xem menu từ backend, mở chi tiết sản phẩm, chọn size/topping và
+xem giá được cập nhật. Increment đã tích hợp tại main `b599076`.
+Các lần chạy giữ đúng mốc code ban đầu: tích hợp `5d6e058`/`7df9f61`,
+sửa retry `2ed30b3`, backend build `4cbfb28`. Đây là tổng hợp kết quả có sẵn,
+không phải đợt chạy mới trên main. Code frontend/backend, package lock và
+scripts ở đầu PR #11 (`c96a7eb`) khớp main `b599076`; PR này chỉ sửa tài liệu.
+
+| Luồng đã kiểm tra | Căn cứ và phạm vi |
 |---|---|
-| Ngày giờ | [BỔ SUNG] |
-| Người tham dự | [BỔ SUNG: A, B, C, D, E] |
-| Người điều phối | [BỔ SUNG] |
-| Người ghi biên bản | [BỔ SUNG] |
+| Menu | A: API thật, loading, ảnh/tên/giá S, điều hướng; empty bằng response `[]` giả lập, không phải database rỗng |
+| Chi tiết và giá | A: mặc định S, size/topping, giá 35/40/45 nghìn; M + Kem 47 nghìn, L + hai topping 57 nghìn; bỏ Kem còn 50 nghìn |
+| Lỗi và thử lại | A: Menu phục hồi sau khi backend hoạt động lại; chi tiết phục hồi bằng nút Thử lại sau sửa tại `2ed30b3`, không cần F5 |
+| API và database | A/E: migration/seed; A reseed giữ 4/2/2. API 200/raw array, chi tiết và 404 đúng; các lần đo A/D đều dưới 500 ms trong môi trường local |
+| Kiểm thử bổ sung | D: 12 nhóm ca, 18 ảnh; giữ giới hạn commit/cấu hình chưa xác định theo báo cáo D |
 
-### 1.2 Sprint Goal
+Nguồn chi tiết: [checklist và 24 AC](SPRINT1_CHECKLIST.md),
+[báo cáo D](Testing/MEMBER_D_TEST_RESULTS.md),
+[bàn giao và kết quả máy E](SPRINT1_E_DATABASE.md).
 
-Xây dựng nền tảng ban đầu cho BrewLite cho phép khách hàng xem danh sách đồ uống
-từ backend, mở trang chi tiết, chọn size và topping rồi xem giá được cập nhật
-chính xác (hồ sơ v1.1, mục 2.1).
+### 1.2 Sprint Backlog đối chiếu để chốt hồ sơ
 
-### 1.3 Backlog item và trạng thái theo bằng chứng trong repository
+Đây là bảng backlog trong repository. Chưa có bằng chứng một board ngoài
+repository đã được cập nhật; không ghi thay là đã cập nhật board đó.
 
-Trạng thái dưới đây là **đề xuất từ bằng chứng đã có**; PO quyết định chấp nhận.
-
-| ID | Kết quả phải có | Lead | Trạng thái đề xuất | Căn cứ và phần còn thiếu |
+| ID | Phần việc | Lead | Kết quả ghi nhận | Trạng thái chốt |
 |---|---|---|---|---|
-| S1-01 | Repo, docs, env, README | E | Gần xong | Hai ứng dụng build được; có `.env.example`; không thấy env thật trong Git (A kiểm tra). Còn thiếu: xác nhận thiết lập từ máy mới theo README |
-| S1-02 | Product, Topping, dữ liệu mẫu | E | Xong trên máy A | Migration và seed chạy thành công trên PostgreSQL 17 (A); seed chạy lại không nhân đôi dữ liệu |
-| S1-03 | GET /products, GET /products/:id | C | Xong trên máy A | 200, 404 đúng contract; lần đo local dưới 500 ms (A và D). Ghi nhận C từng đưa code thẳng lên main |
-| S1-04 | Trang Menu | A | Xong | Loading, lưới, empty, lỗi, thử lại, điều hướng (A); responsive 390/768/1280 px |
-| S1-05 | Chi tiết, tùy chọn, tính giá | A | Xong | Mặc định S, nhiều topping, không cộng trùng, chặn giá sai (A); lỗi phục hồi retry đã sửa ở PR #10 |
-| S1-06 | Kiểm thử và tích hợp | D | Một phần | Báo cáo D đã merge (12 nhóm ca, 18 ảnh). Chưa ghi commit chạy từng ảnh; repo chưa có test tự động |
-| S1-07 | Hồ sơ Sprint và hướng dẫn chạy | A, E | Chưa xong | Đối chiếu 24 AC đã lập. Còn: Review này, Retrospective, đồng bộ báo cáo |
+| S1-01 | Repo, môi trường, README | E | Có cấu trúc, env mẫu, hướng dẫn cài/chạy/build; A/E có kết quả hai ứng dụng build | Đã có kết quả kỹ thuật; PO xem xét ngoại lệ quy trình Git |
+| S1-02 | Product, Topping, seed | E | A/E áp dụng migration và seed; A kiểm tra reseed giữ 4/2/2 | Đã kiểm tra trong phạm vi mẫu |
+| S1-03 | Product API | C | Hai endpoint hoạt động sau sửa đăng ký ProductsModule; 200/404 và giá đúng theo mẫu | Đã kiểm tra; giữ lịch sử lỗi ban đầu và retest |
+| S1-04 | Menu | A | API thật, loading, empty giả lập, lỗi/retry, điều hướng, responsive | Đã kiểm tra trong các ca ghi nhận |
+| S1-05 | Chi tiết, tùy chọn, giá | A | API thật, lựa chọn/giá, 404, retry đã sửa PR #10 | Đã kiểm tra; dữ liệu giá sai thử ở component |
+| S1-06 | Kiểm thử và tích hợp | D | Báo cáo đã merge; A bổ sung kiểm tra tích hợp, E có kết quả riêng | Đã tổng hợp; giữ giới hạn bằng chứng D |
+| S1-07 | Hồ sơ, sơ đồ, Review/Retro | A, B, E | Đã có 24 AC, sơ đồ, tổng hợp Review/Retro và nội dung đồng bộ báo cáo | Hồ sơ chuẩn bị xong; chờ quyết định PO và review/merge PR #11 |
 
-### 1.4 Definition of Done (hồ sơ v1.1, mục 2.4)
+### 1.3 Đối chiếu DoD và ngoại lệ
 
-| Tiêu chí | Tình trạng theo bằng chứng hiện có | Ghi chú |
+| Tiêu chí | Kết luận từ bằng chứng |
+|---|---|
+| Hai ứng dụng chạy/build; có hướng dẫn thiết lập | Có kết quả A/E và README. Chưa xác nhận một lần chạy trọn README cuối từ clone sạch; không ghi là đã thực hiện |
+| AC và trạng thái UI | Đã đối chiếu đủ 24 mã; kết quả theo phạm vi ở checklist. Không phát hiện lỗi chức năng đang chặn các luồng đã thử |
+| Review và quy ước Git | Có ngoại lệ C từng đẩy trực tiếp main. Các phần tích hợp sau đã qua PR và kiểm tra; không đổi ngoại lệ lịch sử thành “đạt hoàn toàn” |
+| Env/secret | Có env mẫu; kiểm tra tracked paths, ignore và lịch sử đường dẫn env không thấy env thật. Không coi đây là kiểm toán mọi secret |
+| Quyết định PO | Chờ A xác nhận rõ tại mục 1.5; không suy ra từ sự im lặng của thành viên |
+
+Không thêm yêu cầu mới phải có test tự động, Docker hoặc chụp lại mọi ảnh để
+nghiệm thu Sprint 1. Việc có hướng dẫn thiết lập và việc đã chứng minh một lần
+clean install trọn vẹn là hai kết quả khác nhau. Hạng mục kiểm tra bổ sung
+được theo dõi ở mục 3, không được ghi thành kết quả đã chạy.
+
+### 1.4 Ý kiến tại đợt chốt hồ sơ
+
+| Thành viên | Ý kiến đã ghi nhận | Căn cứ / lưu ý |
 |---|---|---|
-| Frontend và backend build; có hướng dẫn chạy từ máy mới | Chưa xác nhận đầy đủ | Build frontend và hướng dẫn README đã có; chưa có ai khác ngoài A ghi nhận chạy toàn bộ README (bao gồm database) |
-| AC đã kiểm tra, không lỗi chặn demo | Đã đối chiếu 24 AC | Kết quả tổng hợp từ A và D, không phải đợt chạy mới trên b599076 |
-| API validate tham số; UI có loading, empty, error | Đạt theo ghi nhận | Kiểm tra ở Menu và chi tiết (A) |
-| Commit rõ nghĩa; ít nhất một người khác review | Có ngoại lệ | Các PR từ #4 trở đi có review; C đưa code thẳng lên main trước đó (checklist ghi nhận) |
-| Không secret trong Git; có env example | Đạt trong phạm vi đã kiểm tra | Hai file env mẫu; kiểm tra lịch sử đường dẫn `.env*` |
-| PO chấp nhận Increment; việc chưa xong trả về Product Backlog | **Chưa có** | Quyết định ở mục 1.6 |
+| A | Đề nghị hoàn thiện hồ sơ Sprint 1; người chưa phản hồi ghi “chưa có ý kiến” | Trao đổi với A ngày 27/10/2026; quyết định PO vẫn cần ghi riêng |
+| B | Đã soạn dự thảo Review/Retro và đồng bộ báo cáo | Commit `c96a7eb`; chưa ghi B đã đồng ý với mọi nội dung hiệu đính sau đó |
+| C | Chưa có ý kiến bổ sung trong đợt chốt này | Không đồng nghĩa không làm việc hoặc đã đồng ý |
+| D | Chưa có ý kiến bổ sung trong đợt chốt này | Báo cáo kiểm thử đã nộp vẫn được ghi nhận |
+| E | Chưa có ý kiến bổ sung trong đợt chốt này | Migration, bàn giao và kết quả máy E vẫn được ghi nhận |
 
-### 1.5 Demo (nhóm điền)
+Không cần tự viết ý kiến cho C/D/E. Có phản hồi mới thì bổ sung đúng nội dung
+và ngày thực tế; không hồi tố thành ý kiến đã có ở thời điểm tổng hợp.
 
-| Nội dung demo | Người trình bày | Dữ liệu (fixture hay API thật) | Kết quả |
+### 1.5 Quyết định của PO
+
+**Trạng thái: chờ A xác nhận; chưa ghi Increment đã được PO chấp nhận.**
+
+Nội dung đề xuất để A quyết định:
+
+> Chấp nhận kết quả chức năng Sprint 1 gồm menu, chi tiết, lựa chọn size/topping,
+> giá xem trước, Product API và database trong phạm vi bằng chứng đã ghi nhận.
+> Giữ ngoại lệ quy trình Git và giới hạn kiểm thử trong hồ sơ; các việc bổ sung
+> tại mục 3 tiếp tục được theo dõi, không ghi là đã hoàn thành.
+
+Nếu A đồng ý, bổ sung nguyên văn quyết định và ngày xác nhận. Nếu A chưa chấp
+nhận, ghi rõ chức năng/AC cần sửa. Không ghi “24/24 đạt mọi DoD” vì ngoại lệ
+quy trình và giới hạn bằng chứng vẫn tồn tại.
+
+## 2. Retrospective: dữ kiện và bài học được tổng hợp
+
+Đây là bản tổng hợp từ ghi nhận A và dự thảo B; không phải kết luận đồng thuận
+của cả năm thành viên. Việc C/D/E chưa gửi ý kiến không ngăn lưu bản tổng hợp này.
+
+| Mặt xem xét | Ghi nhận |
+|---|---|
+| Điều làm được | Luồng UI–API–PostgreSQL đã tích hợp; lỗi retry chi tiết được phát hiện/sửa; có phân biệt fixture/API, người chạy và mốc code |
+| Khó khăn | Code từng lên thẳng main; ProductsModule chưa đăng ký gây 404; database chưa sẵn sàng gây lỗi; một số ảnh thiếu commit/nguồn dữ liệu; PostgreSQL khác phiên bản |
+| Bài học | Kiểm tra một luồng tích hợp sớm; ghi commit/cấu hình ngay khi chạy; kiểm tra trạng thái phục hồi sau lỗi; giữ lỗi ban đầu và kết quả retest |
+
+Các ghi nhận trên mô tả công việc và sự kiện, không suy đoán thái độ hoặc
+mức độ nghiêm túc. Không tự gán mức trừ điểm cho thành viên.
+
+## 3. Backlog bổ sung và đề xuất cải thiện
+
+| ID | Việc tiếp theo | Người dự kiến phối hợp | Trạng thái / thời điểm |
 |---|---|---|---|
-| Menu từ API | [BỔ SUNG] | [BỔ SUNG] | [BỔ SUNG] |
-| Chi tiết, size, topping, giá | [BỔ SUNG] | [BỔ SUNG] | [BỔ SUNG] |
-| Trạng thái lỗi và thử lại | [BỔ SUNG] | [BỔ SUNG] | [BỔ SUNG] |
-| 404 sản phẩm không tồn tại | [BỔ SUNG] | [BỔ SUNG] | [BỔ SUNG] |
+| F01 | Ghi quyết định nghiệm thu của A; review/merge hồ sơ PR #11 | A / người review | Chờ xác nhận và review; không tự merge main |
+| F02 | Xác nhận trọn README cuối khi thành viên tiếp theo thiết lập máy; ghi phiên bản và kết quả | E + người thiết lập | Theo dõi ở lần thiết lập tiếp theo; chưa có ngày cam kết |
+| F03 | Ghi commit đã kiểm thử, nguồn fixture/API, DEMO_MODE và kết quả retest trong PR/báo cáo từ Sprint 2 | D cùng người nộp PR | Đề xuất áp dụng từ lần bàn giao tiếp theo; chưa ghi cả nhóm đã đồng ý |
+| F04 | Rà quy tắc bảo vệ main và review trước merge | Chủ repo, B | Đề xuất; chưa kiểm tra cấu hình bảo vệ hiện tại, chưa bật thay |
 
-### 1.6 Kết quả buổi họp (PO điền)
-
-| Mục | Nội dung |
-|---|---|
-| Quyết định của PO về Increment | [BỔ SUNG: chấp nhận / chấp nhận có điều kiện / không chấp nhận] |
-| Việc chưa đạt, trả về Product Backlog | [BỔ SUNG] |
-| Phản hồi từ người tham dự | [BỔ SUNG] |
-
-## 2. Retrospective
-
-### 2.1 Thông tin buổi họp
-
-| Mục | Nội dung |
-|---|---|
-| Ngày giờ | [BỔ SUNG] |
-| Người điều phối | B (Scrum Master) |
-| Người tham dự | [BỔ SUNG] |
-
-### 2.2 Dữ kiện từ repository để làm đầu vào thảo luận
-
-Các mục dưới đây là **sự kiện ghi trong repository hoặc PR**, không phải kết luận
-của nhóm. Nhóm bổ sung, sửa hoặc bỏ mục nào chưa đúng.
-
-**Điều đã tiến hành tốt (đề xuất ghi nhận)**
-- Các thay đổi chính được đưa vào main qua pull request (PR #1 đến #10), nhiều PR có yêu cầu hoặc ghi nhận review.
-- A phát hiện lỗi nút Thử lại không phục hồi khi kiểm thử với API thật, sửa ở PR #10
-  bằng tài liệu Next.js của chính dự án.
-- Tài liệu phân biệt kết quả fixture với kết quả API thật; báo cáo D giữ lịch sử
-  FAIL ban đầu (TC-D02 trả 404) thay vì xóa.
-- Có đối chiếu 24 AC kèm căn cứ và ngoại lệ.
-
-**Vấn đề đã gặp (sự kiện có ghi nhận)**
-- C đưa code thẳng lên main trước khi tách nhánh (TS01-AC-05 có ngoại lệ).
-- Giao diện dùng fixture cho đến khi migration và Product API được tích hợp qua PR #6 và #7.
-- Lần kiểm thử đầu của D gặp `GET /products` trả 404, sau đó 500 vì PostgreSQL chưa
-  sẵn sàng; phải retest.
-- Phiên bản PostgreSQL khác nhau giữa các máy (A và E ghi 17, D ghi 18).
-- Bằng chứng kiểm thử chưa ghi commit đã chạy, `DEMO_MODE` và nguồn dữ liệu của UI.
-- Một số lỗi trình bày nhỏ: tên file ảnh không khớp nội dung (`Pearl`), đuôi `.png.png`,
-  số thập phân dùng dấu phẩy dễ đọc nhầm thành hàng nghìn (“4,008–54,361 ms”).
-- Quy ước có yêu cầu review nhưng GitHub chưa bắt buộc (nút Merge vẫn bấm được
-  khi chưa có approve).
-
-### 2.3 Hành động cải thiện đề xuất (nhóm quyết định)
-
-| # | Hành động đề xuất | Người đề xuất phụ trách | Hạn | Nhóm đồng ý? |
-|---|---|---|---|---|
-| 1 | Bật branch protection cho `main`: bắt buộc PR và 1 approval | Chủ repo [BỔ SUNG] | [BỔ SUNG] | [BỔ SUNG] |
-| 2 | Mẫu PR có mục “commit đã kiểm thử” và “nguồn dữ liệu: fixture/API” | [BỔ SUNG] | [BỔ SUNG] | [BỔ SUNG] |
-| 3 | Thống nhất một phiên bản PostgreSQL; cân nhắc đưa Docker Compose cho DB vào sớm hơn Sprint 3 | E | [BỔ SUNG] | [BỔ SUNG] |
-| 4 | Quy ước đặt tên file bằng chứng (`TC-xx_mô-tả.png`, không đuôi kép) và quy ước viết số (dùng khoảng trắng hoặc dấu chấm cho hàng nghìn) | D | [BỔ SUNG] | [BỔ SUNG] |
-| 5 | Họp checkpoint giữa Sprint để phát hiện phần chậm (API, DB) sớm hơn | B | [BỔ SUNG] | [BỔ SUNG] |
-| 6 | Thêm test tự động tối thiểu (unit test tính giá, test API) trước Sprint 2 | [BỔ SUNG] | [BỔ SUNG] | [BỔ SUNG] |
-
-Mục “Nhóm đồng ý?” và “Hạn” chỉ điền sau khi họp. Hành động chưa được nhóm đồng ý
-thì không ghi là đã thống nhất.
-
-### 2.4 Kết luận buổi Retro
-
-[BỔ SUNG sau buổi họp]
+Test tự động, Docker Compose, đổi tên ảnh và checkpoint có thể được nhóm cân
+nhắc theo kế hoạch Sprint sau; không đặt thành điều kiện mới phải làm ngay
+để chốt chức năng Sprint 1. Nếu dùng board riêng, B có thể đồng bộ bảng mục 1.2
+và F01–F04; hiện chỉ xác nhận backlog trong tài liệu này đã được cập nhật.
