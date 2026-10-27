@@ -4,7 +4,6 @@ Cập nhật ngày 27/10/2026 bằng PR và trao đổi bất đồng bộ. Nhó
 họp riêng; tài liệu này không ghi đã tổ chức một buổi họp hoặc demo mới.
 Nguồn: main `b599076`, checklist 24 AC, báo cáo A/D/E và bản tổng hợp B
 ở commit [c96a7eb](https://github.com/giabaot400-boop/BrewLite/commit/c96a7eb3beff44cd4979585ad7a9c8fffdcbc504).
-A yêu cầu hoàn thiện hồ sơ và ghi trung lập người chưa có ý kiến.
 
 ## 1. Sprint Review qua PR và trao đổi bất đồng bộ
 
@@ -63,28 +62,25 @@ clean install trọn vẹn là hai kết quả khác nhau. Hạng mục kiểm t
 
 | Thành viên | Ý kiến đã ghi nhận | Căn cứ / lưu ý |
 |---|---|---|
-| A | Đề nghị hoàn thiện hồ sơ; PO chấp nhận kết quả chức năng theo phạm vi đã giải thích | A xác nhận qua trao đổi bất đồng bộ ngày 27/10/2026; quyết định tại mục 1.5 |
+| A | PO chấp nhận kết quả chức năng trong phạm vi đã kiểm tra | Quyết định nghiệm thu ngày 27/10/2026 tại mục 1.5 |
 | B | Đã soạn dự thảo Review/Retro và đồng bộ báo cáo | Commit `c96a7eb`; chưa ghi B đã đồng ý với mọi nội dung hiệu đính sau đó |
 | C | Chưa có ý kiến bổ sung trong đợt chốt này | Không đồng nghĩa không làm việc hoặc đã đồng ý |
 | D | Chưa có ý kiến bổ sung trong đợt chốt này | Báo cáo kiểm thử đã nộp vẫn được ghi nhận |
 | E | Chưa có ý kiến bổ sung trong đợt chốt này | Migration, bàn giao và kết quả máy E vẫn được ghi nhận |
 
-Không cần tự viết ý kiến cho C/D/E. Có phản hồi mới thì bổ sung đúng nội dung
-và ngày thực tế; không hồi tố thành ý kiến đã có ở thời điểm tổng hợp.
+Ý kiến mới, nếu có, được bổ sung kèm ngày ghi nhận. Trạng thái chưa có ý kiến
+không được xem là đồng ý với bản tổng hợp.
 
 ### 1.5 Quyết định của PO — đã xác nhận ngày 27/10/2026
 
 **A (Product Owner) chấp nhận kết quả chức năng Sprint 1 trong phạm vi đã kiểm tra.**
 
-Nguồn: sau khi được giải thích rõ phạm vi và giới hạn, A xác nhận qua trao đổi
-bất đồng bộ ngày 27/10/2026: “ok, vậy anh chấp nhận á”.
+Quyết định nghiệm thu do PO (A) xác nhận ngày 27/10/2026, với phạm vi:
 
-Nội dung quyết định được ghi theo phạm vi A đã đồng ý:
-
-> Chấp nhận kết quả chức năng Sprint 1 gồm menu, chi tiết, lựa chọn size/topping,
-> giá xem trước, Product API và database trong phạm vi bằng chứng đã ghi nhận.
-> Giữ ngoại lệ quy trình Git và giới hạn kiểm thử trong hồ sơ; các việc bổ sung
-> tại mục 3 tiếp tục được theo dõi, không ghi là đã hoàn thành.
+Chấp nhận kết quả chức năng Sprint 1 gồm menu, chi tiết, lựa chọn size/topping,
+giá xem trước, Product API và database trong phạm vi bằng chứng đã ghi nhận.
+Giữ ngoại lệ quy trình Git và giới hạn kiểm thử trong hồ sơ; các việc bổ sung
+tại mục 3 tiếp tục được theo dõi, chưa được ghi nhận hoàn thành.
 
 Mốc chức năng đã tích hợp: main `b599076`. Hồ sơ và logical architecture được
 bổ sung tại `fe1cee2` trên PR #11; đây không phải một đợt chạy kiểm thử mới.
@@ -103,8 +99,8 @@ của cả năm thành viên. Việc C/D/E chưa gửi ý kiến không ngăn l�
 | Khó khăn | Code từng lên thẳng main; ProductsModule chưa đăng ký gây 404; database chưa sẵn sàng gây lỗi; một số ảnh thiếu commit/nguồn dữ liệu; PostgreSQL khác phiên bản |
 | Bài học | Kiểm tra một luồng tích hợp sớm; ghi commit/cấu hình ngay khi chạy; kiểm tra trạng thái phục hồi sau lỗi; giữ lỗi ban đầu và kết quả retest |
 
-Các ghi nhận trên mô tả công việc và sự kiện, không suy đoán thái độ hoặc
-mức độ nghiêm túc. Không tự gán mức trừ điểm cho thành viên.
+Các ghi nhận Retrospective tập trung vào kết quả công việc, sự kiện đã xảy ra
+và hành động cải thiện cho Sprint tiếp theo.
 
 ## 3. Backlog bổ sung và đề xuất cải thiện
 
