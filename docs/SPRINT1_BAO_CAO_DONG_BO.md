@@ -1,7 +1,7 @@
 # Sprint 1 — Nội dung đồng bộ cho báo cáo Assignment 1 (đợt chốt hồ sơ 27/10/2026)
 
 Cập nhật ngày 27/10/2026 từ main b599076 và hồ sơ PR #11; đồng bộ với
-báo cáo làm việc 0.5, Chương 6–8. Báo cáo Word được lưu riêng, không đưa lên Git. Mọi kết quả dưới đây **lấy từ ghi nhận trong
+báo cáo làm việc 0.6, Chương 6–8. Báo cáo Word được lưu riêng, không đưa lên Git. Mọi kết quả dưới đây **lấy từ ghi nhận trong
 `SPRINT1_CHECKLIST.md`, `KIEM_TRA_BAN_KHOI_DONG.md` và `Testing/`**, không phải đợt
 chạy mới trên b599076. Báo cáo phải giữ cách ghi này: chỉ ghi “Đạt” cho phạm vi, môi
 trường và người chạy đã nêu.
@@ -27,7 +27,7 @@ trường và người chạy đã nêu.
 | Product API | Hai endpoint đã tích hợp; 200/404; đo local dưới 500 ms (A, D), E có ghi nhận tích hợp | Test tự động là đề xuất cho kế hoạch tiếp theo |
 | Database | A/E có kết quả migration và seed; A kiểm tra reseed 4/2/2 | Chưa có một lần clone sạch chạy trọn README cuối |
 | Kiểm thử | Báo cáo D đã merge (PR #8) với 12 nhóm ca và 18 ảnh | Commit chạy từng ảnh, nguồn dữ liệu UI ở một số ca |
-| Nghiệm thu Sprint 1 | Đã đối chiếu 24 AC; có tổng hợp Review/Retro và backlog qua PR/chat | Quyết định PO và review/merge hồ sơ PR #11 |
+| Nghiệm thu Sprint 1 | Đã đối chiếu 24 AC; có tổng hợp Review/Retro và backlog qua PR/chat | PO đã chấp nhận ngày 27/10/2026; hồ sơ PR #11 chờ review/merge |
 | Sprint 2 và 3 | Có phạm vi và kế hoạch | Chưa triển khai |
 
 ## 3. Cập nhật trạng thái bộ ca kiểm thử (Mục 7.4)
@@ -58,10 +58,12 @@ Sprint 1 đã có kết quả chức năng trong phạm vi kiểm tra ghi nhận
 Đã có bản tổng hợp Review/Retrospective qua PR/chat, trạng thái ý kiến A–E và
 backlog tại [SPRINT1_REVIEW_RETRO.md](SPRINT1_REVIEW_RETRO.md). C/D/E chưa có
 ý kiến bổ sung trong đợt chốt; không tính là đồng ý. Chưa có buổi họp riêng.
-Chờ quyết định PO và review/merge PR #11; không tự ghi “24/24 đạt mọi DoD”.
+PO đã chấp nhận kết quả chức năng ngày 27/10/2026, theo phạm vi và giới hạn
+ở mục 1.5 của bản tổng hợp Review. Còn chờ review/merge PR #11; không ghi
+thành “24/24 đạt mọi DoD”.
 Test tự động, Docker và chụp lại toàn bộ bằng chứng không phải điều kiện mới
 của đợt chốt này. Clean install trọn README cuối chưa xác nhận được theo dõi
-ở F02. Bản Word 0.5 giữ các giới hạn này và kết quả gốc, không nhân bản 18 ảnh.
+ở F02. Bản Word 0.6 giữ các giới hạn này và kết quả gốc, không nhân bản 18 ảnh.
 
 ## 5. Mục [BỔ SUNG] vẫn cần người thật làm
 

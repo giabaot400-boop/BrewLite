@@ -36,13 +36,13 @@ repository đã được cập nhật; không ghi thay là đã cập nhật boa
 
 | ID | Phần việc | Lead | Kết quả ghi nhận | Trạng thái chốt |
 |---|---|---|---|---|
-| S1-01 | Repo, môi trường, README | E | Có cấu trúc, env mẫu, hướng dẫn cài/chạy/build; A/E có kết quả hai ứng dụng build | Đã có kết quả kỹ thuật; PO xem xét ngoại lệ quy trình Git |
+| S1-01 | Repo, môi trường, README | E | Có cấu trúc, env mẫu, hướng dẫn cài/chạy/build; A/E có kết quả hai ứng dụng build | PO đã chấp nhận kết quả chức năng; ngoại lệ quy trình Git được giữ trong hồ sơ |
 | S1-02 | Product, Topping, seed | E | A/E áp dụng migration và seed; A kiểm tra reseed giữ 4/2/2 | Đã kiểm tra trong phạm vi mẫu |
 | S1-03 | Product API | C | Hai endpoint hoạt động sau sửa đăng ký ProductsModule; 200/404 và giá đúng theo mẫu | Đã kiểm tra; giữ lịch sử lỗi ban đầu và retest |
 | S1-04 | Menu | A | API thật, loading, empty giả lập, lỗi/retry, điều hướng, responsive | Đã kiểm tra trong các ca ghi nhận |
 | S1-05 | Chi tiết, tùy chọn, giá | A | API thật, lựa chọn/giá, 404, retry đã sửa PR #10 | Đã kiểm tra; dữ liệu giá sai thử ở component |
 | S1-06 | Kiểm thử và tích hợp | D | Báo cáo đã merge; A bổ sung kiểm tra tích hợp, E có kết quả riêng | Đã tổng hợp; giữ giới hạn bằng chứng D |
-| S1-07 | Hồ sơ, sơ đồ, Review/Retro | A, B, E | Đã có 24 AC, sơ đồ, tổng hợp Review/Retro và nội dung đồng bộ báo cáo | Hồ sơ chuẩn bị xong; chờ quyết định PO và review/merge PR #11 |
+| S1-07 | Hồ sơ, sơ đồ, Review/Retro | A, B, E | Đã có 24 AC, sơ đồ, tổng hợp Review/Retro và nội dung đồng bộ báo cáo | PO đã chấp nhận ngày 27/10/2026; chờ review/merge PR #11 |
 
 ### 1.3 Đối chiếu DoD và ngoại lệ
 
@@ -52,7 +52,7 @@ repository đã được cập nhật; không ghi thay là đã cập nhật boa
 | AC và trạng thái UI | Đã đối chiếu đủ 24 mã; kết quả theo phạm vi ở checklist. Không phát hiện lỗi chức năng đang chặn các luồng đã thử |
 | Review và quy ước Git | Có ngoại lệ C từng đẩy trực tiếp main. Các phần tích hợp sau đã qua PR và kiểm tra; không đổi ngoại lệ lịch sử thành “đạt hoàn toàn” |
 | Env/secret | Có env mẫu; kiểm tra tracked paths, ignore và lịch sử đường dẫn env không thấy env thật. Không coi đây là kiểm toán mọi secret |
-| Quyết định PO | Chờ A xác nhận rõ tại mục 1.5; không suy ra từ sự im lặng của thành viên |
+| Quyết định PO | A đã xác nhận chấp nhận kết quả chức năng ngày 27/10/2026, phạm vi và giới hạn tại mục 1.5 |
 
 Không thêm yêu cầu mới phải có test tự động, Docker hoặc chụp lại mọi ảnh để
 nghiệm thu Sprint 1. Việc có hướng dẫn thiết lập và việc đã chứng minh một lần
@@ -63,7 +63,7 @@ clean install trọn vẹn là hai kết quả khác nhau. Hạng mục kiểm t
 
 | Thành viên | Ý kiến đã ghi nhận | Căn cứ / lưu ý |
 |---|---|---|
-| A | Đề nghị hoàn thiện hồ sơ Sprint 1; người chưa phản hồi ghi “chưa có ý kiến” | Trao đổi với A ngày 27/10/2026; quyết định PO vẫn cần ghi riêng |
+| A | Đề nghị hoàn thiện hồ sơ; PO chấp nhận kết quả chức năng theo phạm vi đã giải thích | A xác nhận qua trao đổi bất đồng bộ ngày 27/10/2026; quyết định tại mục 1.5 |
 | B | Đã soạn dự thảo Review/Retro và đồng bộ báo cáo | Commit `c96a7eb`; chưa ghi B đã đồng ý với mọi nội dung hiệu đính sau đó |
 | C | Chưa có ý kiến bổ sung trong đợt chốt này | Không đồng nghĩa không làm việc hoặc đã đồng ý |
 | D | Chưa có ý kiến bổ sung trong đợt chốt này | Báo cáo kiểm thử đã nộp vẫn được ghi nhận |
@@ -72,20 +72,25 @@ clean install trọn vẹn là hai kết quả khác nhau. Hạng mục kiểm t
 Không cần tự viết ý kiến cho C/D/E. Có phản hồi mới thì bổ sung đúng nội dung
 và ngày thực tế; không hồi tố thành ý kiến đã có ở thời điểm tổng hợp.
 
-### 1.5 Quyết định của PO
+### 1.5 Quyết định của PO — đã xác nhận ngày 27/10/2026
 
-**Trạng thái: chờ A xác nhận; chưa ghi Increment đã được PO chấp nhận.**
+**A (Product Owner) chấp nhận kết quả chức năng Sprint 1 trong phạm vi đã kiểm tra.**
 
-Nội dung đề xuất để A quyết định:
+Nguồn: sau khi được giải thích rõ phạm vi và giới hạn, A xác nhận qua trao đổi
+bất đồng bộ ngày 27/10/2026: “ok, vậy anh chấp nhận á”.
+
+Nội dung quyết định được ghi theo phạm vi A đã đồng ý:
 
 > Chấp nhận kết quả chức năng Sprint 1 gồm menu, chi tiết, lựa chọn size/topping,
 > giá xem trước, Product API và database trong phạm vi bằng chứng đã ghi nhận.
 > Giữ ngoại lệ quy trình Git và giới hạn kiểm thử trong hồ sơ; các việc bổ sung
 > tại mục 3 tiếp tục được theo dõi, không ghi là đã hoàn thành.
 
-Nếu A đồng ý, bổ sung nguyên văn quyết định và ngày xác nhận. Nếu A chưa chấp
-nhận, ghi rõ chức năng/AC cần sửa. Không ghi “24/24 đạt mọi DoD” vì ngoại lệ
-quy trình và giới hạn bằng chứng vẫn tồn tại.
+Mốc chức năng đã tích hợp: main `b599076`. Hồ sơ và logical architecture được
+bổ sung tại `fe1cee2` trên PR #11; đây không phải một đợt chạy kiểm thử mới.
+Quyết định của A không thay thành ý kiến đồng thuận của C/D/E, không xóa
+ngoại lệ TS01-AC-05 và không xác nhận “24/24 AC cùng mọi DoD đạt hoàn toàn”.
+PR #11 vẫn chờ review/merge để đưa hồ sơ cuối vào main.
 
 ## 2. Retrospective: dữ kiện và bài học được tổng hợp
 
@@ -105,7 +110,7 @@ mức độ nghiêm túc. Không tự gán mức trừ điểm cho thành viên.
 
 | ID | Việc tiếp theo | Người dự kiến phối hợp | Trạng thái / thời điểm |
 |---|---|---|---|
-| F01 | Ghi quyết định nghiệm thu của A; review/merge hồ sơ PR #11 | A / người review | Chờ xác nhận và review; không tự merge main |
+| F01 | Quyết định PO đã ghi; review/merge hồ sơ PR #11 | A / người review | A đã chấp nhận ngày 27/10/2026; phần review/merge còn chờ |
 | F02 | Xác nhận trọn README cuối khi thành viên tiếp theo thiết lập máy; ghi phiên bản và kết quả | E + người thiết lập | Theo dõi ở lần thiết lập tiếp theo; chưa có ngày cam kết |
 | F03 | Ghi commit đã kiểm thử, nguồn fixture/API, DEMO_MODE và kết quả retest trong PR/báo cáo từ Sprint 2 | D cùng người nộp PR | Đề xuất áp dụng từ lần bàn giao tiếp theo; chưa ghi cả nhóm đã đồng ý |
 | F04 | Rà quy tắc bảo vệ main và review trước merge | Chủ repo, B | Đề xuất; chưa kiểm tra cấu hình bảo vệ hiện tại, chưa bật thay |

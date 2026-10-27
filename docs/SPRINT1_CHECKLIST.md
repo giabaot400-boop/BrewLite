@@ -16,7 +16,9 @@ Các kết quả dưới đây phân biệt kiểm thử bằng fixture và bằ
 Mục được đánh dấu hoàn thành phản ánh kết quả đã ghi nhận;
 bằng chứng và đối chiếu đủ 24 AC/DoD được hoàn thiện trước nghiệm thu.
 
-Sprint 1 chưa được xác nhận nghiệm thu hoàn tất.
+PO (A) đã chấp nhận kết quả chức năng Sprint 1 ngày 27/10/2026 trong phạm vi
+đã kiểm tra. Ngoại lệ Git và giới hạn bằng chứng được giữ nguyên; hồ sơ cuối
+trong PR #11 còn chờ review/merge vào main.
 
 ## Đã hoàn thành với dữ liệu mẫu
 
@@ -177,9 +179,10 @@ Nguồn đối chiếu đã có:
 Kết luận đối chiếu: đã có kết quả phù hợp cho 19 AC về API/menu/chi tiết
 trong phạm vi thử nêu trên, và căn cứ cho các AC nền tảng. TS01-AC-05 có
 quy ước đã thống nhất nhưng có ngoại lệ thực thi cần ghi nhận trung thực
-trong đánh giá DoD/Retro. Đây không phải kết luận 24/24 AC đã được PO
-nghiệm thu hoặc toàn bộ DoD đã hoàn thành. Không sửa lịch sử để coi lần
-đẩy thẳng main là đã qua nhánh/PR; nhóm cần ghi nhận và thống nhất cải tiến.
+trong đánh giá DoD/Retro. PO đã chấp nhận kết quả chức năng ngày 27/10/2026
+theo phạm vi và giới hạn tại mục 1.5 của bản tổng hợp Review. Quyết định này
+không xác nhận 24/24 AC cùng mọi DoD đạt hoàn toàn. Lần đẩy thẳng main vẫn
+được giữ là ngoại lệ lịch sử; hành động cải tiến tiếp tục theo dõi ở backlog.
 
 ## Tổng hợp chốt hồ sơ ngày 27/10/2026
 
@@ -198,9 +201,9 @@ nghiệm thu hoặc toàn bộ DoD đã hoàn thành. Không sửa lịch sử �
       không suy ra đồng ý, không bỏ qua đóng góp đã có.
 - [x] Hoàn thiện nội dung đồng bộ báo cáo tại
       [SPRINT1_BAO_CAO_DONG_BO.md](SPRINT1_BAO_CAO_DONG_BO.md).
-- [ ] A ghi quyết định chấp nhận Increment hoặc AC/chức năng còn cần sửa
-      ở mục 1.5 của bản tổng hợp Review. Đây là xác nhận thực tế của PO,
-      không thể điền thay bằng ý kiến im lặng của thành viên.
+- [x] A đã xác nhận chấp nhận kết quả chức năng Sprint 1 ngày 27/10/2026,
+      trong phạm vi đã kiểm tra, giữ ngoại lệ Git và giới hạn bằng chứng.
+      Quyết định và nguồn xác nhận nằm ở mục 1.5 của bản tổng hợp Review.
 - [ ] Review và merge PR #11 để đưa hồ sơ cuối vào main.
 
 ### Các giới hạn được giữ lại, không yêu cầu chạy lại toàn bộ
@@ -217,9 +220,10 @@ Chỉ bổ sung ca kiểm thử khi có thiếu sót chức năng cụ thể; kh
 Kết quả A không thay cho kết quả D/E; metadata chưa xác định giữ nguyên giới hạn.
 Lịch sử C đẩy trực tiếp main vẫn là ngoại lệ, không được tick thành tuân thủ đầy đủ.
 
-Chức năng đã có kết quả kiểm tra theo bảng 24 AC; quyết định chấp nhận Increment
-còn chờ PO. Hoàn thiện hồ sơ Sprint 1 không đồng nghĩa đã hoàn tất Assignment 1
-hoặc các chức năng Sprint 2/3.
+Phần nghiệm thu chức năng Sprint 1 đã được PO chấp nhận ngày 27/10/2026.
+Việc còn chờ để đưa hồ sơ cuối vào main là review/merge PR #11. F02–F04 vẫn
+được theo dõi riêng, không ghi là đã làm xong. Assignment 1 và các chức năng
+Sprint 2/3 tiếp tục theo kế hoạch.
 
 Thời gian toàn đồ án:
 - Sprint 1: Tuần 1.
