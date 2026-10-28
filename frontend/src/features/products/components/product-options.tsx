@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import type { SizeCode, SizeOption, ToppingOption } from "../types";
+import { Button } from "@/components/ui/button";
+import { useCart } from "@/features/cart/cart-provider";
+import { CartNotice } from "@/features/cart/components/cart-notice";
+import { buildProductCartDraft } from "@/features/cart/product-cart-draft";
+import type { ProductDetail, SizeCode } from "../types";
 import { formatPrice } from "../format-price";
 
 function isValidPrice(value: unknown): value is number {
@@ -9,16 +13,13 @@ function isValidPrice(value: unknown): value is number {
 }
 
 type ProductOptionsProps = {
-  basePrice: number;
-  sizes: SizeOption[];
-  toppings: ToppingOption[];
+  product: ProductDetail;
 };
 
-export function ProductOptions({
-  basePrice,
-  sizes,
-  toppings,
-}: ProductOptionsProps) {
+export function ProductOptions({ product }: ProductOptionsProps) {
+  const { sizes, toppings } = product;
+  const { state: cartState, canMutate, addItem } = useCart();
+  const [feedback, setFeedback] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<SizeCode>("S");
 
   const [selectedToppingIds, setSelectedToppingIds] = useState<string[]>([]);
@@ -31,23 +32,13 @@ export function ProductOptions({
     );
   }
 
-  const selectedSizeOption = sizes.find((size) => size.code === selectedSize);
+  const draft = buildProductCartDraft(product, selectedSize, selectedToppingIds);
+  const previewPrice = draft?.previewUnitPrice ?? null;
 
-  const selectedToppings = toppings.filter((topping) =>
-    selectedToppingIds.includes(topping.id),
-  );
-
-  const priceValues = [
-    basePrice,
-    selectedSizeOption?.extraPrice,
-    ...selectedToppings.map((topping) => topping.price),
-  ];
-
-  const calculatedPrice = priceValues.every(isValidPrice)
-    ? priceValues.reduce((total, price) => total + price, 0)
-    : null;
-
-  const previewPrice = isValidPrice(calculatedPrice) ? calculatedPrice : null;
+  async function addToCart() {
+    setFeedback(null);
+    if (draft && await addItem(draft)) setFeedback("Đã thêm 1 ly vào giỏ hàng.");
+  }
 
   return (
     <>
@@ -132,6 +123,13 @@ export function ProductOptions({
             : formatPrice(previewPrice)}
         </p>
       </section>
+      <CartNotice />
+      <div className="mt-5 [&>button:disabled]:cursor-not-allowed [&>button:disabled]:opacity-50">
+        <Button disabled={!canMutate || draft === null} onClick={() => { void addToCart(); }}>
+          {cartState.isSaving ? "Đang lưu giỏ…" : "Thêm vào giỏ"}
+        </Button>
+      </div>
+      <p role="status" aria-live="polite" className="mt-3 text-sm text-stone-600">{feedback}</p>
     </>
   );
 }
