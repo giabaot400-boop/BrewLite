@@ -1,4 +1,4 @@
-# Sprint 2 phần A bước 4–5 Chủ giỏ và vòng đời lần đặt
+# Sprint 2 phần A bước 4–6 Chủ giỏ và vòng đời lần đặt
 
 Nền đối chiếu: PR #13, commit `067c37155306c76afae0c3b2da5d82adea78d392`
 trên nhánh `feature/sprint2-cart`. Theo đặc tả Sprint 2 v0.6,
@@ -8,8 +8,9 @@ Bước 4 bổ sung helper thuần và thao tác storage để A nối auth/orde
 Chưa nối vào CartProvider hoặc UI; giao diện hiện tại vẫn là giỏ khách.
 Bước 5 mở rộng trên commit `b89aad5a79d758688ab2444e4daa5f68f31380fa`:
 kiểm tra phản hồi và xử lý storage khi đã xác nhận tạo đơn hoặc từ chối.
-Chưa triển khai auth hoặc gửi HTTP tạo đơn. Hồ sơ này giữ chung hai bước
-vì cùng mô tả vòng đời envelope, không thêm một file checkpoint riêng cho A5.
+Bước 6 mở rộng trên commit `150ea08b484e2be4cb406564e91cb5ed4631ca03`:
+helper HTTP frontend và kiểm thử bằng mock. Chưa nối auth hoặc gửi đơn trong
+giao diện. Hồ sơ giữ chung các bước vì cùng mô tả vòng đời lần đặt.
 
 ## Tệp và ranh giới
 
@@ -21,6 +22,8 @@ vì cùng mô tả vòng đời envelope, không thêm một file checkpoint ri�
 - `cart-lifecycle.test.mjs`: 22 ca mới cho nghiệp vụ, lỗi ghi và hàng đợi khóa.
 - A5 thêm `cart-order-response.ts`, `cart-order-settlement.ts` và
   `cart-order-settlement.test.mjs`; storage có thêm `settleOrder(command)`.
+- A6 thêm `cart-order-transport.ts` và `cart-order-transport.test.mjs`;
+  không sửa storage hoặc các module cũ ở bước này.
 
 Không sửa backend, migration, Product API, BFF auth, cookie/CSRF, UI của B,
 dependency, tsconfig hoặc .env. Chỉ sửa module TypeScript thuần; chưa thêm
@@ -80,8 +83,8 @@ của owner cho tới bước xử lý kết quả; không xóa pending để m�
 Kết quả HTTP chưa rõ theo bảng P01 sẽ gọi MARK_ORDER_UNKNOWN với owner/key
 của request, kể cả khi người dùng đã đổi tài khoản. Reload vẫn phục hồi
 SUBMITTING thành UNKNOWN trong bộ nhớ như A2, không tự POST hoặc sinh key.
-A4 chưa phân loại phản hồi HTTP; phần phân loại của A5 ở dưới. Cả hai bước
-chưa triển khai timer HTTP 15/10 giây vì chưa có lớp gửi request.
+A4 chưa phân loại phản hồi HTTP; phần phân loại của A5 ở dưới. Timer browser
+15 giây được bổ sung trong A6; timer BFF 10 giây vẫn chờ Route Handler.
 
 ## Lỗi và nối phiên
 
@@ -206,9 +209,93 @@ npm run lint --workspace frontend
 git diff --check
 ```
 
-Chưa có kết quả typecheck/lint trên máy A cho A5. Không cần chạy migration
-hoặc kiểm tra UI đặt đơn ở bước helper này; chưa đánh dấu các AC/test kế hoạch
-đã đạt từ unit test. Bước tiếp theo nối auth state C, UI B và Route Handler
-/api/orders A dùng helper cookie/CSRF C, contract orders D. D/E giữ giá chính
-thức, OrderRequest và transaction DB. Kiểm tra timer, fetch/body và phản hồi
-thật khi có lớp HTTP; không thêm payment/lịch sử đơn Sprint 3.
+A cung cấp tổng kết Windows sau A5: 91 test, pass 91, fail/cancelled/skipped
+đều 0; typecheck/lint và git diff --check không báo lỗi. Đã commit/push A5
+tại `150ea08`. Đây vẫn là kiểm thử helper, chưa là nghiệm thu toàn luồng.
+
+## A6 Helper HTTP frontend
+
+`createCartOrderTransport({ fetch, now?, schedule? }).send(preparedRequest, signal?)`
+nhận request SUBMITTING từ kết quả đã await của BEGIN_ORDER/RETRY_ORDER.
+fetch được truyền rõ từ caller; now/schedule chỉ là port thay đồng hồ cho
+kiểm thử. Timeout thật cố định ORDER_HTTP_TIMEOUT_MS=15000, không đổi thành
+một ngưỡng ngắn hơn trong cấu hình production.
+
+Helper chụp và validate request trước HTTP, gồm UUID/owner/snapshot/qty/giá
+và giới hạn body UTF-8. Không nhận thẳng pending UNKNOWN từ read(); caller
+phải đi qua RETRY_ORDER để kiểm tra lại dưới khóa. Validator chỉ chứng minh
+dữ liệu đúng cấu trúc, không chứng minh đã ghi bền hoặc phiên còn hợp lệ.
+
+Mỗi send gọi fetch một lần tới đường dẫn cố định /api/orders, POST JSON
+đúng payload đã lưu. Header gồm Content-Type application/json, Accept JSON,
+X-BrewLite-Request: 1 và Idempotency-Key cũ. Dùng credentials same-origin,
+cache no-store, redirect error. Không tự gắn Origin/Cookie/Authorization,
+không nhận URL NestJS từ caller và không đưa owner/JWT vào body. Browser
+quản lý cookie HttpOnly; C/A xử lý cookie và CSRF ở BFF khi tích hợp.
+
+Một AbortController và một timer bao phủ cả fetch và response.json(); không
+khởi động lại 15 giây khi đã nhận headers. Kết quả được chặn bằng Promise.race
+để adapter mock bỏ qua AbortSignal cũng không giữ caller vô hạn. finally
+dọn timer/listener. Hủy từ caller cũng dừng chờ; không suy ra server đã hủy
+transaction. Callback fetch/body đến muộn không tự lưu hoặc đảo kết quả.
+
+Kết quả gồm reply cho A5 và failure:
+
+| failure | Nội dung reply |
+|---|---|
+| null | HTTP status và JSON đã đọc; A5 mới quyết định CONFIRMED/REJECTED/PRICE_CHANGED/UNKNOWN |
+| NETWORK | status=null, body=null; chưa rõ kết quả |
+| INVALID_BODY | Giữ status đã nhận, body=null; 2xx vẫn chưa là xác nhận thành công |
+| TIMEOUT/CANCELLED | Giữ status nếu đã nhận, body=null; giữ owner/key cũ để phục hồi |
+
+reply luôn mang owner/key đã chụp và receivedAt local, không lấy tài khoản
+mới khi response đến. Không trả lỗi mạng thô hoặc JWT cho UI. Helper không
+ghi storage, sinh key, tự retry, gọi auth hoặc tự dọn cart. Không có effect
+gửi khi tạo transport, tải lại trang hay đăng nhập. UI tích hợp phải đặt
+trạng thái busy trước khi gọi và khôi phục nút trong finally.
+
+Trình tự caller cần giữ: xác nhận chủ động và owner đã xác thực -> await
+BEGIN_ORDER/RETRY_ORDER -> send(request) sau khi khóa đã nhả -> await
+settleOrder(reply). Lỗi chuẩn bị/lưu thì không gửi; lỗi ghi kết quả thì giữ
+khả năng phục hồi key cũ. Không bắt lỗi ghi kết quả rồi tự tạo key/POST mới.
+
+## Điểm phối hợp trước khi nối HTTP thật
+
+Owner ghi trong request local không ràng buộc danh tính của cookie đang gửi.
+Đặc biệt, tab khác có thể đổi phiên sau lúc UI đọc auth state. A/C/D cần
+review cách đối chiếu owner dự định với phiên thực tế trước khi cho request
+đến nghiệp vụ tạo đơn; không dùng một lần đọc me trước đó làm bằng chứng
+không thể đổi phiên. A6 chưa nối UI/BFF, không tự thêm header/field/mã lỗi
+hoặc thay hợp đồng v0.6 để xử lý điểm này. Đây là mục cần chốt trong tích
+hợp, chưa được chứng minh bằng các test mock của A6.
+
+B giữ form, xác nhận logout và thành phần UI chung; C giữ auth và helper
+cookie/CSRF. A giữ caller frontend và Route Handler /api/orders sau khi có
+helper C. D/E giữ API, giá chính thức, OrderRequest và transaction DB.
+
+## Kết quả A6 và điểm dừng
+
+Ngày 30/10/2026, Node.js v24.22.1 trên môi trường thực thi hỗ trợ:
+109/109 test đạt, gồm 91 ca trước và 18 ca HTTP mới; không fail hoặc skip.
+Đồng hồ giả kiểm tra đúng mốc cấu hình 15000 ms mà không đợi thực 15 giây.
+Có kiểm thử ghép helper storage A4/A5 với transport bằng port giả lập và
+đọc JSON qua Response native của Node. Chưa có HTTP server, cookie browser,
+phiên thật hoặc PostgreSQL trong bằng chứng này.
+
+Trên máy A sau khi áp dụng:
+
+```powershell
+node --test frontend/src/features/cart/cart-reducer.test.mjs frontend/src/features/cart/cart-storage.test.mjs frontend/src/features/cart/cart-view.test.mjs frontend/src/features/cart/cart-lifecycle.test.mjs frontend/src/features/cart/cart-order-settlement.test.mjs frontend/src/features/cart/cart-order-transport.test.mjs
+npm run typecheck --workspace frontend
+npm run lint --workspace frontend
+git diff --check
+```
+
+Chưa có kết quả typecheck/lint trên máy A cho A6. Không cần migration hoặc
+test UI đặt đơn ở bước này. Sau A6, điểm dừng phần độc lập là review PR #13
+và các interface tích hợp cùng B/C/D/E; không nhận thêm auth/backend/DB.
+Chưa đánh dấu 36 AC/37 ca kế hoạch đã đạt. Không thêm payment/lịch sử đơn.
+
+Nguồn kỹ thuật: https://fetch.spec.whatwg.org/#abort-fetch — abort fetch
+ảnh hưởng cả response body đang đọc. Timeout 15000 ms là lựa chọn v0.6
+của BrewLite, không phải giá trị do Fetch Standard quy định.
