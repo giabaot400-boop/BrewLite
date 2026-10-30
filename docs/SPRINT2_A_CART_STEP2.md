@@ -2,7 +2,8 @@
 
 Bổ sung nền lưu giỏ theo P01/P06/P09 của đặc tả Sprint 2 v0.6, tiếp sau
 checkpoint A1 `04c43eb` trên nhánh feature/sprint2-cart. Đây là triển khai
-phía frontend; chưa nối giao diện, xác thực hoặc tạo đơn.
+phía frontend. Tại checkpoint A2 chưa nối giao diện, xác thực hoặc tạo đơn;
+giao diện giỏ khách đã được bổ sung trong A3 (xem hồ sơ bước 3).
 
 ## Tệp và cấu hình
 
@@ -92,13 +93,23 @@ npm run lint --workspace frontend
 git diff --check
 ```
 
-Chưa chạy typecheck/lint bằng dependency repository cho bước A2 trên môi
-trường thực thi hỗ trợ. Cần đối chiếu kết quả trên máy A sau khi áp dụng.
+Kết quả bổ sung trên máy A sau khi áp dụng A2, trước commit `d6b6e5d`:
+
+- Node.js v24.16.0 trên Windows: 36/36 unit test đạt, không fail hoặc skip.
+- Frontend typecheck và lint: không báo lỗi hoặc warning.
+- `git diff --check`: không báo lỗi khoảng trắng.
+- Node phát cảnh báo MODULE_TYPELESS_PACKAGE_JSON khi chạy trực tiếp module
+  TypeScript; các bài test vẫn đạt. Không đổi package.json chỉ để tắt cảnh báo.
+
+Ở A3, A xác nhận sửa số lượng ở một tab làm tab còn lại cập nhật. Đây là
+quan sát trên trình duyệt thật, bổ sung cho kiểm thử hai client giả lập;
+chưa chứng minh các biến thể quota, dữ liệu hỏng, thiếu khóa hoặc mọi thứ tự
+thao tác đồng thời trên trình duyệt. Chi tiết và giới hạn bằng chứng ở hồ sơ A3.
 Không cần build toàn bộ backend hoặc chạy lại migration cho gói này.
 
 ## Chặng tiếp theo
 
-A3 nối CartProvider dạng Client Component, hydration, phản hồi lỗi lưu,
+A3 đã nối CartProvider dạng Client Component, hydration, phản hồi lỗi lưu,
 storage event và UI thêm món/trang giỏ/badge. Context dùng useReducer theo
 P09; không được dispatch giỏ rỗng ban đầu ra storage hoặc ghi lại từ state
 cũ của tab. Tab nhận storage event sẽ đọc lại bản mới nhất qua cùng lớp lưu.
