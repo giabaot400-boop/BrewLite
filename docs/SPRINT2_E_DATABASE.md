@@ -44,13 +44,16 @@ Schema/migration nền chưa đồng nghĩa hoàn thành Sprint 2.
 - Transaction A lấy được khóa.
 - Transaction B không lấy được cùng khóa khi A đang giữ.
 - Sau khi A commit, B lấy được khóa.
+- Request key khác vẫn lấy được khóa khi khóa cũ đang được giữ.
+- Tài khoản khác vẫn lấy được khóa với cùng request key.
+- Sau rollback, transaction khác lấy lại được khóa.
+- Bài check-order-lock.ts đạt PASS 1 đến PASS 6.
 - Typecheck và build thành công.
 
 Chạy kiểm tra:
 npm.cmd exec --workspace backend -- tsx prisma/check-order-lock.ts
 
 Còn lại:
-- Kiểm tra giải phóng khóa sau rollback.
-- Kiểm tra request khác không bị khóa nhầm.
+
 - Phối hợp D tích hợp helper vào transaction tạo đơn,
   kiểm tra replay, rollback và request đồng thời.

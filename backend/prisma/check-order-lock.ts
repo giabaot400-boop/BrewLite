@@ -41,7 +41,44 @@ async function main() {
       await tryLockOrderRequest(tx2, userId, requestKey),
       true,
     );
-    console.log('PASS 3: B acquired the lock after A committed.');
+        console.log('PASS 3: B acquired the lock after A committed.');
+  });
+
+  const rollbackMarker = new Error('EXPECTED_TEST_ROLLBACK');
+
+  try {
+    await first.$transaction(async (tx1) => {
+      assert.equal(
+        await tryLockOrderRequest(tx1, userId, requestKey),
+        true,
+      );
+
+      await second.$transaction(async (tx2) => {
+        assert.equal(
+          await tryLockOrderRequest(tx2, userId, `${requestKey}-other`),
+          true,
+        );
+        console.log('PASS 4: a different request key acquired its lock.');
+
+        assert.equal(
+          await tryLockOrderRequest(tx2, `${userId}-other`, requestKey),
+          true,
+        );
+        console.log('PASS 5: a different user acquired its lock.');
+      });
+
+      throw rollbackMarker;
+    });
+  } catch (error) {
+    if (error !== rollbackMarker) throw error;
+  }
+
+  await second.$transaction(async (tx2) => {
+    assert.equal(
+      await tryLockOrderRequest(tx2, userId, requestKey),
+      true,
+    );
+    console.log('PASS 6: the lock was released after rollback.');
   });
 }
 
