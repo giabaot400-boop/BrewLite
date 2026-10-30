@@ -1,8 +1,10 @@
 import { cartReducer } from "./cart-reducer.ts";
 import { CartStorageError, decodeCartEnvelope, encodeCartEnvelope, pendingForOwner } from "./cart-envelope.ts";
 import { applyCartLifecycle } from "./cart-lifecycle.ts";
+import { settleCartOrder } from "./cart-order-settlement.ts";
 import type { CartEnvelope } from "./cart-envelope";
 import type { CartLifecycleCommand, CartLifecycleResult } from "./cart-lifecycle";
+import type { OrderSettlementCommand, OrderSettlementResult } from "./cart-order-settlement";
 import type { CartAction, CartError } from "./types";
 
 export const CART_STORAGE_KEY = "brewlite.cart.v1";
@@ -81,6 +83,17 @@ export function createCartStorage(environment?: CartStorageEnvironment) {
         const saved = applyCartLifecycle(envelope, captured);
         if (saved.envelope !== envelope) writeStored(storage, saved.envelope);
         // No sendable request is returned if validation or persistence failed.
+        return saved;
+      });
+    },
+
+    settleOrder(command: OrderSettlementCommand): Promise<OrderSettlementResult> {
+      const captured = structuredClone(command);
+      return underLock((storage) => {
+        const envelope = readStored(storage);
+        const saved = settleCartOrder(envelope, captured);
+        if (saved.envelope !== envelope) writeStored(storage, saved.envelope);
+        // Save result, pending removal and cart update atomically in one envelope.
         return saved;
       });
     },
