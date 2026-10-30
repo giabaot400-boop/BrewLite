@@ -30,3 +30,27 @@ Căn cứ thiết kế: BrewLite Sprint 2 v0.6.
 - Chưa xác nhận migration trên máy thành viên khác.
 
 Schema/migration nền chưa đồng nghĩa hoàn thành Sprint 2.
+
+## Helper advisory lock
+
+- File: backend/src/database/order-request-lock.ts.
+- Hàm tryLockOrderRequest(tx, userId, requestKey).
+- Nhận transaction của bên gọi, không mở transaction riêng.
+- Khóa dùng SHA-256 của tuple namespace/userId/requestKey,
+  chuyển thành số nguyên 64 bit có dấu.
+- Dùng pg_try_advisory_xact_lock qua truy vấn tham số hóa.
+
+Đã kiểm tra trên PostgreSQL thật:
+- Transaction A lấy được khóa.
+- Transaction B không lấy được cùng khóa khi A đang giữ.
+- Sau khi A commit, B lấy được khóa.
+- Typecheck và build thành công.
+
+Chạy kiểm tra:
+npm.cmd exec --workspace backend -- tsx prisma/check-order-lock.ts
+
+Còn lại:
+- Kiểm tra giải phóng khóa sau rollback.
+- Kiểm tra request khác không bị khóa nhầm.
+- Phối hợp D tích hợp helper vào transaction tạo đơn,
+  kiểm tra replay, rollback và request đồng thời.
