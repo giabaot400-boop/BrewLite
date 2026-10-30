@@ -36,7 +36,8 @@ export type CartEnvelope = {
 
 export type CartStorageErrorCode = "INVALID_DATA" | "UNSUPPORTED_VERSION"
   | "STORAGE_UNAVAILABLE" | "LOCK_UNAVAILABLE" | "LOCK_TIMEOUT"
-  | "OWNER_MISMATCH" | "PENDING_REQUEST" | "REVISION_OVERFLOW";
+  | "OWNER_MISMATCH" | "PENDING_REQUEST" | "REVISION_OVERFLOW"
+  | "CART_CHANGED" | "EMPTY_CART" | "PENDING_NOT_FOUND" | "REQUEST_KEY_REUSED";
 
 export class CartStorageError extends Error {
   readonly code: CartStorageErrorCode;

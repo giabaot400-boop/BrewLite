@@ -1,6 +1,8 @@
 import { cartReducer } from "./cart-reducer.ts";
 import { CartStorageError, decodeCartEnvelope, encodeCartEnvelope, pendingForOwner } from "./cart-envelope.ts";
+import { applyCartLifecycle } from "./cart-lifecycle.ts";
 import type { CartEnvelope } from "./cart-envelope";
+import type { CartLifecycleCommand, CartLifecycleResult } from "./cart-lifecycle";
 import type { CartAction, CartError } from "./types";
 
 export const CART_STORAGE_KEY = "brewlite.cart.v1";
@@ -59,10 +61,28 @@ export function createCartStorage(environment?: CartStorageEnvironment) {
     return decodeCartEnvelope(raw);
   }
 
+  function writeStored(storage: CartStorageEnvironment["storage"], envelope: CartEnvelope): void {
+    const raw = encodeCartEnvelope(envelope);
+    try { storage.setItem(CART_STORAGE_KEY, raw); } catch {
+      throw new CartStorageError("STORAGE_UNAVAILABLE", "Không lưu được giỏ. Thao tác chưa được xác nhận đã lưu.");
+    }
+  }
+
   return {
     read(): Promise<CartEnvelope> {
       // Missing data gives an in-memory empty cart; hydration never writes it back.
       return underLock(readStored);
+    },
+
+    applyLifecycle(command: CartLifecycleCommand): Promise<CartLifecycleResult> {
+      const captured = structuredClone(command);
+      return underLock((storage) => {
+        const envelope = readStored(storage);
+        const saved = applyCartLifecycle(envelope, captured);
+        if (saved.envelope !== envelope) writeStored(storage, saved.envelope);
+        // No sendable request is returned if validation or persistence failed.
+        return saved;
+      });
     },
 
     mutateCart(action: CartAction, expectedOwnerId: string | null): Promise<SavedCartMutation> {
@@ -84,11 +104,7 @@ export function createCartStorage(environment?: CartStorageEnvironment) {
           return { envelope, error: result.error };
         }
         const next = { ...envelope, cart: result.cart };
-        const raw = encodeCartEnvelope(next);
-        try { storage.setItem(CART_STORAGE_KEY, raw); } catch {
-          // No successful state is published when persistence fails.
-          throw new CartStorageError("STORAGE_UNAVAILABLE", "Không lưu được giỏ. Thao tác chưa được xác nhận đã lưu.");
-        }
+        writeStored(storage, next);
         return { envelope: next, error: null };
       });
     },
