@@ -1,11 +1,13 @@
 import Link from "next/link";
 import type { ButtonHTMLAttributes, ComponentProps } from "react";
 
-type Variant = "primary" | "text";
+type Variant = "primary" | "secondary" | "text";
 
-const base = "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg font-semibold";
+const base =
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg font-semibold disabled:cursor-not-allowed disabled:opacity-60";
 const variants: Record<Variant, string> = {
   primary: "bg-coffee px-5 py-3 text-white",
+  secondary: "border border-stone-300 bg-white px-5 py-3 text-ink",
   text: "rounded-md text-coffee",
 };
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AuthNav } from "@/features/auth/components/auth-nav";
 import { CartBadge } from "@/features/cart/components/cart-badge";
 import { PAGE_WIDTH } from "./page-container";
 
@@ -7,7 +8,7 @@ export function Header() {
     <header className="border-b border-stone-200 bg-white">
       <nav
         aria-label="Điều hướng chính"
-        className={`${PAGE_WIDTH} flex items-center justify-between py-3`}
+        className={`${PAGE_WIDTH} flex flex-wrap items-center justify-between gap-x-2 py-3`}
       >
         <Link
           href="/"
@@ -23,6 +24,7 @@ export function Header() {
             Menu
           </Link>
           <CartBadge />
+          <AuthNav />
         </div>
       </nav>
     </header>
