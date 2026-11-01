@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CartBadge } from "@/features/cart/components/cart-badge";
 import { PAGE_WIDTH } from "./page-container";
 
 export function Header() {
@@ -14,12 +15,15 @@ export function Header() {
         >
           BrewLite
         </Link>
-        <Link
-          href="/"
-          className="flex min-h-11 items-center rounded-md px-3 text-sm font-semibold text-coffee"
-        >
-          Menu
-        </Link>
+        <div className="flex flex-wrap items-center justify-end gap-1">
+          <Link
+            href="/"
+            className="flex min-h-11 items-center rounded-md px-3 text-sm font-semibold text-coffee"
+          >
+            Menu
+          </Link>
+          <CartBadge />
+        </div>
       </nav>
     </header>
   );
