@@ -44,7 +44,7 @@ type OrderErrorResponse = {
   error: {
     code: string;
     message: string;
-    fieldErrors?: Record<string, string>;
+    fieldErrors?: Record<string, string[]>;
     details?: {
       items: {
         productId: string;
@@ -206,13 +206,13 @@ export class OrdersService {
       }
   > {
     const snapshots: ItemSnapshot[] = [];
-    const fieldErrors: Record<string, string> = {};
+    const fieldErrors: Record<string, string[]> = {};
 
     for (let index = 0; index < items.length; index++) {
       const result = await this.calculateItem(tx, items[index]);
 
       if (!result.ok) {
-        fieldErrors[`items[${index}]`] = result.message;
+        fieldErrors[`items[${index}]`] = [result.message];
       } else {
         snapshots.push(result.snapshot);
       }
@@ -293,13 +293,13 @@ export class OrdersService {
   ): OrderErrorResponse {
     if (!body.error.fieldErrors) return body;
 
-    const mapped: Record<string, string> = {};
+    const mapped: Record<string, string[]> = {};
 
-    for (const [key, message] of Object.entries(body.error.fieldErrors)) {
+    for (const [key, messages] of Object.entries(body.error.fieldErrors)) {
       const match = /^items\[(\d+)\](.*)$/.exec(key);
 
       if (!match) {
-        mapped[key] = message;
+        mapped[key] = [...messages];
         continue;
       }
 
@@ -307,7 +307,7 @@ export class OrdersService {
       const originalIndex =
         items[canonicalIndex]?.originalIndex ?? canonicalIndex;
 
-      mapped[`items[${originalIndex}]${match[2]}`] = message;
+      mapped[`items[${originalIndex}]${match[2]}`] = [...messages];
     }
 
     return {

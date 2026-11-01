@@ -9,25 +9,29 @@ import { AppModule } from "./app.module.js";
 import type { Request, Response, NextFunction } from "express";
 import type { ValidationError } from "class-validator";
 
-function collectFieldErrors(errors: ValidationError[]): Record<string, string> {
-  const fieldErrors: Record<string, string> = {};
+function collectFieldErrors(
+  errors: ValidationError[],
+): Record<string, string[]> {
+  const fieldErrors: Record<string, string[]> = {};
 
   function visit(error: ValidationError, parentPath = ""): void {
     const property = error.property;
 
-    // Chỉ số mảng được biểu diễn bằng [index].
+    // Bieu dien chi so mang bang [index]
     const path = /^\d+$/.test(property)
       ? `${parentPath}[${property}]`
       : parentPath
         ? `${parentPath}.${property}`
         : property;
 
-    // Lấy thông báo lỗi của thuộc tính hiện tại.
+    // Luu cac thong bao loi duoi dang mang chuoi
     if (error.constraints) {
-      fieldErrors[path] = Object.values(error.constraints).join(", ");
+      const messages = Object.values(error.constraints);
+
+      fieldErrors[path] = [...(fieldErrors[path] ?? []), ...messages];
     }
 
-    // Duyệt tiếp các thuộc tính con.
+    // Duyet cac thuoc tinh con
     for (const child of error.children ?? []) {
       visit(child, path);
     }

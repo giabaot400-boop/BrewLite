@@ -114,12 +114,21 @@ test("UT-D06: Duplicate configuration is rejected", () => {
       const response = error.getResponse() as {
         error: {
           code: string;
-          fieldErrors: Record<string, string>;
+          fieldErrors: Record<string, string[]>;
         };
       };
 
       assert.equal(response.error.code, "VALIDATION_ERROR");
-      assert.ok(response.error.fieldErrors["items[2]"]);
+
+      const messages = response.error.fieldErrors["items[2]"];
+
+      // Kiểm tra fieldErrors là mảng
+      assert.ok(Array.isArray(messages));
+
+      // Kiểm tra nội dung thông báo lỗi
+      assert.deepEqual(messages, [
+        "Cấu hình sản phẩm đã xuất hiện trong đơn hàng.",
+      ]);
 
       return true;
     },

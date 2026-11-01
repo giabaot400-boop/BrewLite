@@ -140,14 +140,51 @@ test("UT-S03: Product does not exist - HTTP 400", async () => {
     product: null,
   });
 
-  await expectHttpError(
+  await assert.rejects(
     () => service.createOrder(USER_ID, REQUEST_KEY, createDto()),
-    400,
-    "VALIDATION_ERROR",
+    (error: unknown) => {
+      assert.ok(error instanceof HttpException);
+      assert.equal(error.getStatus(), 400);
+
+      const response = error.getResponse() as {
+        error: {
+          code: string;
+          fieldErrors: Record<string, string[]>;
+        };
+      };
+
+      assert.equal(response.error.code, "VALIDATION_ERROR");
+
+      const messages = response.error.fieldErrors["items[0]"];
+
+      assert.ok(Array.isArray(messages));
+      assert.deepEqual(messages, ["Sản phẩm không tồn tại."]);
+
+      return true;
+    },
   );
 
   assert.equal(calls.ordersCreated.length, 0);
   assert.equal(calls.requestsCreated.length, 1);
+  const savedRequest = calls.requestsCreated[0] as {
+    data: {
+      state: string;
+      httpStatus: number;
+      responseJson: {
+        error: {
+          fieldErrors: Record<string, string[]>;
+        };
+      };
+    };
+  };
+
+  assert.equal(savedRequest.data.state, "REJECTED");
+  assert.equal(savedRequest.data.httpStatus, 400);
+
+  assert.deepEqual(
+    savedRequest.data.responseJson.error.fieldErrors["items[0]"],
+    ["Sản phẩm không tồn tại."],
+  );
 });
 
 test("UT-S04: Same key and hash - replay HTTP 200", async () => {
@@ -208,4 +245,89 @@ test("UT-S06: Advisory lock unavailable - HTTP 409", async () => {
   );
 
   assert.equal(calls.ordersCreated.length, 0);
+});
+test("UT-S07: Rejected replay remaps fieldErrors after item reorder", async () => {
+  const originalDto: CreateOrderDto = {
+    items: [
+      {
+        productId: "coffee-milk",
+        size: "M",
+        toppingIds: ["cream"],
+        qty: 2,
+        expectedUnitPrice: 47000,
+      },
+      {
+        productId: "invalid-product",
+        size: "S",
+        toppingIds: [],
+        qty: 1,
+        expectedUnitPrice: 35000,
+      },
+    ],
+  };
+
+  const replayDto: CreateOrderDto = {
+    items: [...originalDto.items].reverse(),
+  };
+
+  const originalCanonical = canonicalizeOrder(originalDto);
+  const replayCanonical = canonicalizeOrder(replayDto);
+
+  // Đảo thứ tự món không làm thay đổi requestHash
+  assert.equal(originalCanonical.requestHash, replayCanonical.requestHash);
+
+  // Xác định vị trí canonical của sản phẩm lỗi
+  const canonicalIndex = originalCanonical.items.findIndex(
+    (item) => item.productId === "invalid-product",
+  );
+
+  assert.ok(canonicalIndex >= 0);
+
+  // Giả lập ledger REJECTED đã lưu lỗi theo canonical index
+  const { service, calls } = createMock({
+    existing: {
+      requestHash: originalCanonical.requestHash,
+      state: "REJECTED",
+      httpStatus: 400,
+      responseJson: {
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "Đơn hàng chứa sản phẩm không hợp lệ.",
+          fieldErrors: {
+            [`items[${canonicalIndex}]`]: ["Sản phẩm không tồn tại."],
+          },
+        },
+      },
+    },
+  });
+
+  await assert.rejects(
+    () => service.createOrder(USER_ID, REQUEST_KEY, replayDto),
+    (error: unknown) => {
+      assert.ok(error instanceof HttpException);
+      assert.equal(error.getStatus(), 400);
+
+      const response = error.getResponse() as {
+        error: {
+          code: string;
+          fieldErrors: Record<string, string[]>;
+        };
+      };
+
+      assert.equal(response.error.code, "VALIDATION_ERROR");
+
+      // Trong replay, sản phẩm lỗi nằm ở items[0]
+      assert.deepEqual(response.error.fieldErrors["items[0]"], [
+        "Sản phẩm không tồn tại.",
+      ]);
+
+      assert.equal(response.error.fieldErrors["items[1]"], undefined);
+
+      return true;
+    },
+  );
+
+  // Replay không được tạo thêm Order hoặc ledger
+  assert.equal(calls.ordersCreated.length, 0);
+  assert.equal(calls.requestsCreated.length, 0);
 });

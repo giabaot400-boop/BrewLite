@@ -48,8 +48,9 @@ export function canonicalizeOrder(dto: CreateOrderDto) {
           code: "VALIDATION_ERROR",
           message: "Đơn hàng có cấu hình món bị trùng.",
           fieldErrors: {
-            [`items[${current.originalIndex}]`]:
+            [`items[${current.originalIndex}]`]: [
               "Cấu hình sản phẩm đã xuất hiện trong đơn hàng.",
+            ],
           },
         },
       });
