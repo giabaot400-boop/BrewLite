@@ -141,3 +141,36 @@ auth state khi nối phiên; không chuyển auth backend hoặc BFF auth sang A
   đang cài do A cung cấp: Provider là Client Component, layout có thể là Server Component.
 - https://react.dev/reference/react/useReducer
 - https://react.dev/reference/react/useEffect
+
+## Hiệu đính theo review PR #13 ngày 01/11/2026
+
+Nền trước hiệu đính: `17758ef`. B đã approve nền này và ghi nhận
+109 unit test, typecheck, lint, build đạt. Kết quả đó không tự áp dụng
+cho bản hiệu đính; cần ghi nhận kiểm tra sau khi áp dụng.
+
+- Thêm script `test` dùng mẫu `src/**/*.test.mjs` trong frontend/package.json.
+  Chạy từ thư mục repo bằng `npm test --workspace frontend`; khi tích hợp
+  auth, cùng script sẽ tìm cả test cart và auth, không khóa vào số 109.
+- CartBadge giữ số lượng nhìn thấy và tên liên kết có số ly. Bỏ aria-label
+  trên liên kết, tách vùng thông báo `role="status"` ra ngoài liên kết.
+  Vùng này luôn có trong DOM, để trống khi chưa xác định số lượng và cập
+  nhật cả câu khi số ly thay đổi; không chuyển focus. Chưa kiểm chứng
+  phát âm thực tế bằng trình đọc màn hình.
+- Giỏ cần trình duyệt có Web Locks và localStorage dùng được. Web Locks
+  yêu cầu secure context, thông thường là HTTPS hoặc localhost; HTTP
+  qua địa chỉ IP trong mạng LAN không tương đương localhost. HTTPS hoặc
+  localhost vẫn cần trình duyệt hỗ trợ API. Không có phương án ghi không
+  khóa khi Web Locks thiếu hoặc bị từ chối: giỏ báo lỗi, chặn thao tác
+  đọc/ghi cần khóa, giữ dữ liệu đã lưu và cho thử lại. Menu/chi tiết vẫn xem được.
+- `ADOPT_OWNER` và `LOGOUT_CONFIRMED` đã có ở helper A4 nhưng chưa nối
+  vào UI. Bước tích hợp auth vẫn thuộc Sprint 2: nhận owner từ phiên đã
+  xác thực; chỉ logout giỏ sau phản hồi 204 với scope hợp lệ; không tự
+  gửi đơn sau đăng nhập. Hiệu đính này chưa thêm luồng auth.
+
+Kiểm tra sau áp dụng: chạy script test, frontend typecheck/lint/build,
+kiểm tra khoảng trắng; thử liên kết giỏ và số lượng sau sửa, kể cả đổi
+ở tab khác. Giữ kiểm tra trình đọc màn hình ở trạng thái chưa chạy
+nếu chưa thực hiện.
+
+Tham khảo vùng thông báo:
+https://www.w3.org/WAI/WCAG21/Techniques/aria/ARIA22
