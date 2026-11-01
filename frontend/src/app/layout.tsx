@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Header } from "@/components/layout/header";
 import { SkipLink } from "@/components/layout/skip-link";
+import { ToastProvider } from "@/components/ui/toast";
+import { AuthProvider } from "@/features/auth/auth-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,9 +20,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="vi">
       <body>
-        <SkipLink />
-        <Header />
-        {children}
+        <ToastProvider>
+          <AuthProvider>
+            <SkipLink />
+            <Header />
+            {children}
+          </AuthProvider>
+        </ToastProvider>
       </body>
     </html>
   );

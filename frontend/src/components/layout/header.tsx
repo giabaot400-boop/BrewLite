@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AuthNav } from "@/features/auth/components/auth-nav";
 import { PAGE_WIDTH } from "./page-container";
 
 export function Header() {
@@ -6,7 +7,7 @@ export function Header() {
     <header className="border-b border-stone-200 bg-white">
       <nav
         aria-label="Điều hướng chính"
-        className={`${PAGE_WIDTH} flex items-center justify-between py-3`}
+        className={`${PAGE_WIDTH} flex flex-wrap items-center justify-between gap-x-2 py-3`}
       >
         <Link
           href="/"
@@ -14,12 +15,15 @@ export function Header() {
         >
           BrewLite
         </Link>
-        <Link
-          href="/"
-          className="flex min-h-11 items-center rounded-md px-3 text-sm font-semibold text-coffee"
-        >
-          Menu
-        </Link>
+        <div className="flex flex-wrap items-center justify-end gap-1">
+          <Link
+            href="/"
+            className="flex min-h-11 items-center rounded-md px-3 text-sm font-semibold text-coffee"
+          >
+            Menu
+          </Link>
+          <AuthNav />
+        </div>
       </nav>
     </header>
   );

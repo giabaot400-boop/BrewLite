@@ -15,7 +15,8 @@ body {
 
 a:focus-visible,
 button:focus-visible,
-input:focus-visible {
+input:focus-visible,
+dialog:focus-visible {
   outline: 3px solid #925e32;
   outline-offset: 4px;
 }
