@@ -6,17 +6,19 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/components/ui/toast";
 import { useAuth } from "../auth-provider";
 import { AuthApiError, messageForAuthError } from "../auth-error";
+import { logoutDialogLines, needsLogoutConfirmation } from "./logout-dialog-copy";
 
 /**
- * Nút Đăng xuất + hộp xác nhận. Chỉ báo "đã đăng xuất" khi BFF trả 204.
- * Lỗi mạng/5xx: giữ trạng thái đăng nhập và giỏ, báo lỗi, cho thử lại.
+ * Nút Đăng xuất. Chỉ báo "đã đăng xuất" khi BFF xác nhận (204 + scope hợp lệ).
+ * Lỗi mạng/5xx/phản hồi sai hợp đồng: giữ trạng thái đăng nhập và giỏ, báo lỗi, cho thử lại.
  */
 export function LogoutControl() {
   const router = useRouter();
   const toast = useToast();
-  const { logout } = useAuth();
+  const { logout, getLogoutInfo } = useAuth();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [lines, setLines] = useState<string[]>([]);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const inFlight = useRef(false);
 
@@ -26,7 +28,7 @@ export function LogoutControl() {
     triggerRef.current?.focus();
   }
 
-  async function confirm() {
+  async function run(): Promise<void> {
     if (inFlight.current) return;
     inFlight.current = true;
     setBusy(true);
@@ -50,25 +52,43 @@ export function LogoutControl() {
     }
   }
 
+  function onClick() {
+    // Đọc trạng thái giỏ tại thời điểm bấm, không dùng bản cũ.
+    const info = getLogoutInfo();
+    if (needsLogoutConfirmation(info)) {
+      setLines(logoutDialogLines(info));
+      setOpen(true);
+    } else {
+      void run();
+    }
+  }
+
   return (
     <>
       <button
         ref={triggerRef}
         type="button"
-        onClick={() => setOpen(true)}
-        className="inline-flex min-h-11 items-center rounded-md px-3 text-sm font-semibold text-coffee"
+        onClick={onClick}
+        disabled={busy && !open}
+        aria-busy={busy || undefined}
+        className="inline-flex min-h-11 items-center rounded-md px-3 text-sm font-semibold text-coffee disabled:opacity-60"
       >
-        Đăng xuất
+        {busy && !open ? "Đang đăng xuất…" : "Đăng xuất"}
       </button>
       <ConfirmDialog
         open={open}
         title="Đăng xuất?"
         confirmLabel="Đăng xuất"
+        cancelLabel="Ở lại"
         busy={busy}
-        onConfirm={confirm}
+        onConfirm={() => void run()}
         onCancel={close}
       >
-        Bạn có chắc muốn đăng xuất không? Giỏ hàng trên thiết bị này vẫn được giữ.
+        {lines.map((line) => (
+          <p key={line} className="mt-2 first:mt-0">
+            {line}
+          </p>
+        ))}
       </ConfirmDialog>
     </>
   );

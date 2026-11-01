@@ -21,6 +21,7 @@ export function isOutcomeUnknown(error: AuthApiError): boolean {
     error.code === "CLIENT_TIMEOUT" ||
     error.code === "UPSTREAM_TIMEOUT" ||
     error.code === "UPSTREAM_UNAVAILABLE" ||
+    error.code === "INVALID_RESPONSE" ||
     error.code === "INTERNAL_ERROR" ||
     error.status >= 500
   );

@@ -22,6 +22,8 @@ export type AuthErrorCode =
   | "INTERNAL_ERROR"
   | "UPSTREAM_UNAVAILABLE"
   | "UPSTREAM_TIMEOUT"
+  // Phản hồi 2xx nhưng thân/header không đúng contract: chưa kết luận được kết quả.
+  | "INVALID_RESPONSE"
   // Chỉ phát sinh ở trình duyệt: không có phản hồi HTTP hoặc quá 15.000 ms.
   | "NETWORK_ERROR"
   | "CLIENT_TIMEOUT"

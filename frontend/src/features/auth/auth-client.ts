@@ -34,16 +34,27 @@ async function readError(response: Response): Promise<AuthApiError> {
   return new AuthApiError(code, body.error?.message ?? "", response.status, body.error?.fieldErrors ?? {});
 }
 
-/** Gọi BFF; chuyển lỗi mạng và timeout thành AuthApiError để UI không phải đoán. */
-async function request(
+/**
+ * Gọi BFF với MỘT deadline chung cho gửi request VÀ đọc body (v0.6: 15 s).
+ * `read` chạy trong cùng cửa sổ thời gian; timer chỉ được dọn sau khi đọc xong.
+ * Chỉ dùng AbortSignal là chưa đủ với adapter không hỗ trợ abort, nên có thêm Promise.race.
+ */
+async function request<T>(
   fetchImpl: FetchLike,
   path: string,
   init: { method: "GET" | "POST"; body?: unknown },
   timeoutMs: number,
-): Promise<Response> {
+  read: (response: Response) => Promise<T>,
+): Promise<T> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      controller.abort();
+      reject(new AuthApiError("CLIENT_TIMEOUT", "Hết thời gian chờ phản hồi."));
+    }, timeoutMs);
+  });
+  const work = (async () => {
     const response = await fetchImpl(path, {
       method: init.method,
       headers: init.method === "POST" ? JSON_HEADERS : undefined,
@@ -53,7 +64,12 @@ async function request(
       signal: controller.signal,
     });
     if (!response.ok) throw await readError(response);
-    return response;
+    return await read(response);
+  })();
+  // Nếu deadline thắng, work có thể reject muộn: chặn unhandled rejection.
+  work.catch(() => undefined);
+  try {
+    return await Promise.race([work, deadline]);
   } catch (error) {
     if (error instanceof AuthApiError) throw error;
     if (controller.signal.aborted) {
@@ -65,24 +81,56 @@ async function request(
   }
 }
 
+function isUser(value: unknown): value is { id: string; email: string } {
+  const v = value as { id?: unknown; email?: unknown } | null;
+  return typeof v === "object" && v !== null && typeof v.id === "string" && typeof v.email === "string";
+}
+
+async function readJson(response: Response): Promise<unknown> {
+  try {
+    return await response.json();
+  } catch (error) {
+    // Lỗi do abort/timeout phải giữ nguyên để request() phân loại; còn lại là thân sai.
+    if (error instanceof DOMException && error.name === "AbortError") throw error;
+    throw new AuthApiError("INVALID_RESPONSE", "Phản hồi không hợp lệ.", response.status);
+  }
+}
+
+async function readSession(response: Response): Promise<AuthSession> {
+  const data = (await readJson(response)) as { user?: unknown; expiresAt?: unknown } | null;
+  const okExpiry = typeof data?.expiresAt === "string" || typeof data?.expiresAt === "number";
+  if (!data || !isUser(data.user) || !okExpiry) {
+    throw new AuthApiError("INVALID_RESPONSE", "Phản hồi không hợp lệ.", response.status);
+  }
+  return { user: data.user, expiresAt: data.expiresAt as string | number };
+}
+
 export function createHttpAuthClient(fetchImpl: FetchLike = fetch, timeoutMs = CLIENT_TIMEOUT_MS): AuthClient {
   return {
-    async register(input) {
-      const res = await request(fetchImpl, "/api/auth/register", { method: "POST", body: input }, timeoutMs);
-      const data = (await res.json()) as { user: { id: string; email: string } };
-      return data.user;
+    register(input) {
+      return request(fetchImpl, "/api/auth/register", { method: "POST", body: input }, timeoutMs, async (res) => {
+        const data = (await readJson(res)) as { user?: unknown } | null;
+        if (!data || !isUser(data.user)) {
+          throw new AuthApiError("INVALID_RESPONSE", "Phản hồi không hợp lệ.", res.status);
+        }
+        return data.user;
+      });
     },
-    async login(input) {
-      const res = await request(fetchImpl, "/api/auth/login", { method: "POST", body: input }, timeoutMs);
-      return (await res.json()) as AuthSession;
+    login(input) {
+      return request(fetchImpl, "/api/auth/login", { method: "POST", body: input }, timeoutMs, readSession);
     },
-    async me() {
-      const res = await request(fetchImpl, "/api/auth/me", { method: "GET" }, timeoutMs);
-      return (await res.json()) as AuthSession;
+    me() {
+      return request(fetchImpl, "/api/auth/me", { method: "GET" }, timeoutMs, readSession);
     },
-    async logout() {
-      const res = await request(fetchImpl, "/api/auth/logout", { method: "POST", body: {} }, timeoutMs);
-      return res.headers.get("X-BrewLite-Logout-Scope") === "local" ? "local" : "session";
+    logout() {
+      // P05: chỉ HTTP 204 với scope đúng "session" hoặc "local" mới là đã xác nhận đăng xuất.
+      return request(fetchImpl, "/api/auth/logout", { method: "POST", body: {} }, timeoutMs, async (res) => {
+        const scope = res.headers.get("X-BrewLite-Logout-Scope");
+        if (res.status !== 204 || (scope !== "session" && scope !== "local")) {
+          throw new AuthApiError("INVALID_RESPONSE", "Phản hồi đăng xuất không đúng hợp đồng.", res.status);
+        }
+        return scope;
+      });
     },
   };
 }

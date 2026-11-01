@@ -1,27 +1,17 @@
 "use client";
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createAuthClient, type AuthClient, type Credentials } from "./auth-client";
-import { AuthApiError } from "./auth-error";
+import {
+  INITIAL_AUTH_SNAPSHOT,
+  createAuthSession,
+  type AuthStatus,
+  type LogoutInfo,
+  type SignOutHandler,
+} from "./auth-session";
 import type { AuthUser, LogoutScope } from "./types";
 
-/**
- * loading: đang hỏi /api/auth/me.
- * anonymous: chắc chắn chưa đăng nhập (AUTH_REQUIRED/SESSION_INVALID/SESSION_EXPIRED).
- * unknown: không kiểm tra được (mạng, 5xx); KHÔNG suy ra là hết hạn.
- */
-export type AuthStatus = "loading" | "authenticated" | "anonymous" | "unknown";
-
-type SignOutHandler = (scope: LogoutScope) => void;
+export type { AuthStatus, LogoutInfo };
 
 export type AuthContextValue = {
   status: AuthStatus;
@@ -33,74 +23,36 @@ export type AuthContextValue = {
   /** Ném AuthApiError nếu chưa xác nhận đăng xuất; khi đó trạng thái đăng nhập được giữ nguyên. */
   logout: () => Promise<LogoutScope>;
   refresh: () => Promise<void>;
-  /** Cho module khác (giỏ hàng, đơn) dọn dữ liệu riêng tư sau đăng xuất thành công. Trả hàm hủy đăng ký. */
+  /** Cho giỏ hàng/đơn dọn dữ liệu sau khi BFF xác nhận 204 (scope session hoặc local). Trả hàm hủy. */
   onSignedOut: (handler: SignOutHandler) => () => void;
+  /** Giỏ hàng đăng ký để hộp xác nhận đăng xuất nêu đúng số món và lần đặt chưa rõ kết quả. */
+  setLogoutInfoSource: (source: () => LogoutInfo) => () => void;
+  getLogoutInfo: () => LogoutInfo | null;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children, client }: { children: ReactNode; client?: AuthClient }) {
-  const clientRef = useRef<AuthClient>(client ?? createAuthClient());
-  const handlers = useRef(new Set<SignOutHandler>());
-  const [status, setStatus] = useState<AuthStatus>("loading");
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [sessionExpired, setSessionExpired] = useState(false);
-
-  const refresh = useCallback(async () => {
-    try {
-      const session = await clientRef.current.me();
-      setUser(session.user);
-      setStatus("authenticated");
-      setSessionExpired(false);
-    } catch (error) {
-      const code = error instanceof AuthApiError ? error.code : "UNKNOWN";
-      if (code === "AUTH_REQUIRED" || code === "SESSION_INVALID" || code === "SESSION_EXPIRED") {
-        setUser(null);
-        setStatus("anonymous");
-        setSessionExpired(code === "SESSION_EXPIRED");
-      } else {
-        // Lỗi hệ thống: giữ người dùng hiện tại nếu có, không giả định hết hạn.
-        setStatus((current) => (current === "authenticated" ? current : "unknown"));
-      }
-    }
-  }, []);
+  const [session] = useState(() => createAuthSession(client ?? createAuthClient()));
+  const snapshot = useSyncExternalStore(session.subscribe, session.getSnapshot, () => INITIAL_AUTH_SNAPSHOT);
 
   useEffect(() => {
-    // Kiểm tra phiên một lần khi tải trang; setState chạy sau await nên không đồng bộ trong effect.
-    void refresh();
-  }, [refresh]);
-
-  const login = useCallback(async (input: Credentials) => {
-    const session = await clientRef.current.login(input);
-    setUser(session.user);
-    setStatus("authenticated");
-    setSessionExpired(false);
-  }, []);
-
-  const register = useCallback(async (input: Credentials) => {
-    // Đăng ký không cấp phiên (v0.6); người dùng phải đăng nhập sau đó.
-    await clientRef.current.register(input);
-  }, []);
-
-  const logout = useCallback(async () => {
-    const scope = await clientRef.current.logout();
-    setUser(null);
-    setStatus("anonymous");
-    setSessionExpired(false);
-    handlers.current.forEach((handler) => handler(scope));
-    return scope;
-  }, []);
-
-  const onSignedOut = useCallback((handler: SignOutHandler) => {
-    handlers.current.add(handler);
-    return () => {
-      handlers.current.delete(handler);
-    };
-  }, []);
+    // Kiểm tra phiên một lần khi tải trang; kết quả đến sau await nên không setState đồng bộ.
+    void session.refresh();
+  }, [session]);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ status, user, sessionExpired, login, register, logout, refresh, onSignedOut }),
-    [status, user, sessionExpired, login, register, logout, refresh, onSignedOut],
+    () => ({
+      ...snapshot,
+      login: session.login,
+      register: session.register,
+      logout: session.logout,
+      refresh: session.refresh,
+      onSignedOut: session.onSignedOut,
+      setLogoutInfoSource: session.setLogoutInfoSource,
+      getLogoutInfo: session.getLogoutInfo,
+    }),
+    [snapshot, session],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

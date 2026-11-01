@@ -76,3 +76,55 @@ test("mock: đăng ký không cấp phiên, đăng nhập mới có phiên, đă
   assert.equal(await client.logout(), "local");
   await assert.rejects(client.me(), (e) => e.code === "AUTH_REQUIRED");
 });
+
+test("timeout bao phủ cả đọc body: headers đến nhanh, body chậm -> CLIENT_TIMEOUT", async () => {
+  const slowBody = () =>
+    new Response(
+      new ReadableStream({
+        start(controller) {
+          setTimeout(() => {
+            controller.enqueue(new TextEncoder().encode(JSON.stringify({ user: { id: "1", email: "a@b.co" }, expiresAt: 1 })));
+            controller.close();
+          }, 200);
+        },
+      }),
+      { status: 200 },
+    );
+  for (const call of ["login", "me", "register"]) {
+    const client = createHttpAuthClient(async () => slowBody(), 20);
+    const started = Date.now();
+    await assert.rejects(client[call]({ email: "a@b.co", password: "x" }), (e) => e.code === "CLIENT_TIMEOUT", call);
+    assert.ok(Date.now() - started < 150, `${call} phải dừng theo deadline, không chờ body`);
+  }
+});
+
+test("timeout hoạt động cả khi adapter bỏ qua AbortSignal (body treo vĩnh viễn)", async () => {
+  const hang = { ok: true, status: 200, headers: new Headers(), json: () => new Promise(() => {}) };
+  const client = createHttpAuthClient(async () => hang, 20);
+  await assert.rejects(client.login({ email: "a@b.co", password: "x" }), (e) => e.code === "CLIENT_TIMEOUT");
+});
+
+test("thân 2xx sai contract -> INVALID_RESPONSE, không coi là đăng nhập thành công", async () => {
+  for (const body of [null, {}, { user: { id: 1, email: "a" }, expiresAt: 1 }, { user: { id: "1", email: "a" } }]) {
+    const client = createHttpAuthClient(async () => new Response(JSON.stringify(body), { status: 200 }));
+    await assert.rejects(client.login({ email: "a@b.co", password: "x" }), (e) => e.code === "INVALID_RESPONSE");
+  }
+  const notJson = createHttpAuthClient(async () => new Response("<html>", { status: 200 }));
+  await assert.rejects(notJson.me(), (e) => e.code === "INVALID_RESPONSE");
+});
+
+test("logout chỉ xác nhận khi HTTP 204 và scope chính xác", async () => {
+  const cases = [
+    [200, "session"],
+    [200, null],
+    [204, null],
+    [204, "global"],
+    [204, "SESSION"],
+    [204, ""],
+  ];
+  for (const [status, scope] of cases) {
+    const headers = scope === null ? {} : { "X-BrewLite-Logout-Scope": scope };
+    const client = createHttpAuthClient(async () => new Response(null, { status, headers }));
+    await assert.rejects(client.logout(), (e) => e.code === "INVALID_RESPONSE", `${status}/${scope}`);
+  }
+});
