@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AuthNav } from "@/features/auth/components/auth-nav";
+import { CartBadge } from "@/features/cart/components/cart-badge";
 import { PAGE_WIDTH } from "./page-container";
 
 export function Header() {
@@ -22,6 +23,7 @@ export function Header() {
           >
             Menu
           </Link>
+          <CartBadge />
           <AuthNav />
         </div>
       </nav>

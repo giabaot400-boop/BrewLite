@@ -20,7 +20,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         <div className="py-3">
           <h1 className="text-3xl font-bold">{product.name}</h1>
           <p className="mt-5 leading-7 text-stone-600">{product.description}</p>
-          <ProductOptions key={product.id} basePrice={product.price} sizes={product.sizes} toppings={product.toppings}/>
+          <ProductOptions key={product.id} product={product}/>
         </div>
       </div>
     </PageContainer>
