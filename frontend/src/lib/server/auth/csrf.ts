@@ -16,7 +16,7 @@ export function assertSameOriginPost(request: NextRequest): Response | null {
     return Response.json({ error: { code: 'REQUEST_FORBIDDEN', message: 'Thiếu thông tin nguồn yêu cầu.', fieldErrors: {} } }, { status: 403 });
   }
   try {
-    if (new URL(origin).origin !== new URL(request.url).origin) {
+    if (!process.env.APP_ORIGIN || new URL(origin).origin !== new URL(process.env.APP_ORIGIN).origin) {
       return Response.json({ error: { code: 'REQUEST_FORBIDDEN', message: 'Nguồn yêu cầu không được phép.', fieldErrors: {} } }, { status: 403 });
     }
   } catch {

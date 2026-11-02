@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { NextRequest } from 'next/server';
 import { assertSameOriginPost } from './csrf';
 
+process.env.APP_ORIGIN = 'http://localhost:3000';
+
 function makeRequest(headers: Record<string, string>): NextRequest {
   return new NextRequest('http://localhost:3000/api/auth/login', { method: 'POST', headers: { 'content-type': 'application/json', ...headers } });
 }
