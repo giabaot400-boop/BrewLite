@@ -1,0 +1,28 @@
+@startuml
+title BrewLite - System Context Diagram
+
+left to right direction
+
+actor "Khách hàng" as Customer
+rectangle "Hệ thống BrewLite" as BrewLite
+rectangle "Cổng thanh toán\n(Mock Payment Gateway)" as Payment
+actor "Nhân viên quầy\nBarista" as Barista
+
+Customer --> BrewLite : Xem menu, chọn sản phẩm,\nđặt hàng và thanh toán
+BrewLite --> Customer : Sản phẩm, giá,\nxác nhận và trạng thái đơn
+
+BrewLite --> Payment : Yêu cầu thanh toán
+Payment --> BrewLite : Kết quả thành công / thất bại
+
+Barista ..> BrewLite : Nhận và cập nhật trạng thái\n(Phần mở rộng ngoài MVP)
+BrewLite ..> Barista : Thông tin đơn\n(Phần mở rộng ngoài MVP)
+
+note bottom of BrewLite
+  Sprint 1:
+  - Xem menu
+  - Xem chi tiết
+  - Chọn size / topping
+  - Hiển thị giá
+end note
+
+@enduml

@@ -1,0 +1,89 @@
+@startuml
+
+title BrewLite - Entity Relationship Diagram v0.9
+
+hide circle
+skinparam linetype ortho
+
+entity "Product" as Product {
+  * id : string <<PK>>
+  --
+  name : string
+  description : text
+  price : integer
+  image_url : string
+  stock : integer
+}
+
+entity "Topping" as Topping {
+  * id : string <<PK>>
+  --
+  name : string
+  price : integer
+  stock : integer
+}
+
+entity "ProductTopping" as ProductTopping {
+  * product_id : string <<PK, FK>>
+  * topping_id : string <<PK, FK>>
+}
+
+entity "User" as UserEntity {
+  * id : string <<PK>>
+  --
+  email : string <<UK>>
+  password_hash : string
+  loyalty_points : integer
+}
+
+entity "Order" as OrderEntity {
+  * id : string <<PK>>
+  --
+  user_id : string <<FK>>
+  status : string
+  total : integer
+  created_at : datetime
+}
+
+entity "OrderItem" as OrderItem {
+  * id : string <<PK>>
+  --
+  order_id : string <<FK>>
+  product_id : string <<FK>>
+  size : string
+  quantity : integer
+  unit_price : integer
+  line_total : integer
+}
+
+entity "OrderItemTopping" as OrderItemTopping {
+  * order_item_id : string <<PK, FK>>
+  * topping_id : string <<PK, FK>>
+  --
+  price_at_order : integer
+}
+
+entity "Payment" as Payment {
+  * id : string <<PK>>
+  --
+  order_id : string <<FK>>
+  idempotency_key : string <<UK>>
+  amount : integer
+  method : string
+  status : string
+  created_at : datetime
+}
+
+UserEntity ||--o{ OrderEntity : dat
+OrderEntity ||--|{ OrderItem : chua
+Product ||--o{ OrderItem : duoc_dat
+
+Product ||--o{ ProductTopping : ho_tro
+Topping ||--o{ ProductTopping : gan_cho
+
+OrderItem ||--o{ OrderItemTopping : co
+Topping ||--o{ OrderItemTopping : duoc_chon
+
+OrderEntity ||--o{ Payment : co
+
+@enduml

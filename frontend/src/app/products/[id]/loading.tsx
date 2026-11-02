@@ -1,3 +1,10 @@
+import { PageContainer } from "@/components/layout/page-container";
+import { LoadingState } from "@/components/ui/state-message";
+
 export default function ProductLoading() {
-  return <main className="mx-auto max-w-6xl px-5 py-12 sm:px-8"><p role="status">Đang tải chi tiết sản phẩm…</p></main>;
+  return (
+    <PageContainer spacing="compact">
+      <LoadingState message="Đang tải chi tiết sản phẩm…" />
+    </PageContainer>
+  );
 }

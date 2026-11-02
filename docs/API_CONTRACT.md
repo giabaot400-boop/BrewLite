@@ -49,7 +49,18 @@ Không có sản phẩm theo id thì trả 404. Sprint 1 không thêm `stock` ha
 Ảnh mẫu đang dùng SVG local thay ảnh chụp; phần mở rộng ảnh không phải ràng buộc
 của contract. Có thể đổi ảnh khi vẫn giữ field `imageUrl` và đường dẫn hợp lệ.
 
-## Trạng thái triển khai ban đầu
+## Trạng thái triển khai Sprint 1
 
-Backend mới có `GET /health`. C tiếp tục triển khai hai endpoint trên bằng Prisma.
-D kiểm tra raw array, 404, dữ liệu hợp lệ và thời gian phản hồi theo v1.0.
+Hai endpoint sản phẩm đã được tích hợp vào main qua PR #7.
+Migration PostgreSQL đã được tích hợp qua PR #6.
+Mốc code đối chiếu: 7df9f61.
+
+Đã kiểm tra trên máy A với DEMO_MODE=false:
+- GET /products trả raw JSON array, HTTP 200.
+- GET /products/coffee-milk trả đúng chi tiết, sizes và toppings.
+- ID không tồn tại trả HTTP 404 với message Product not found.
+- Các lần đo API đã thực hiện đều dưới 500 ms trong môi trường local.
+
+Chi tiết kết quả và những mục còn cần xác nhận nằm trong
+SPRINT1_CHECKLIST.md. Trạng thái triển khai API không thay thế
+nghiệm thu toàn Sprint theo 24 AC/DoD.

@@ -1,10 +1,16 @@
 # Làm việc với Git
 
+> Repository chung đã được thiết lập tại
+> https://github.com/giabaot400-boop/BrewLite.
+> Mục “Đưa bộ khung lên repo chung” ghi lại hướng dẫn khởi tạo ban đầu,
+> chỉ áp dụng khi tạo repository mới. Các quy tắc nhánh và review bên dưới
+> tiếp tục được áp dụng.
+
 ## Đưa bộ khung lên repo chung
 
-Repo này khởi tạo local với `main` và nhánh phần việc đầu tiên `feature/menu`.
-Chưa gắn tài khoản hoặc remote của bất kỳ ai. Chưa có PR trên GitHub.
-Các commit khởi tạo được ghi tác giả BrewLite Starter; không ghi thay danh tính thành viên.
+Repository chung: https://github.com/giabaot400-boop/BrewLite.
+Nhánh mặc định là main. Các bước bên dưới lưu hướng dẫn khởi tạo ban đầu,
+chỉ áp dụng khi tạo repository mới.
 
 Người phụ trách tạo một GitHub repository trống, chưa thêm README hay gitignore.
 Sau đó mở terminal trong thư mục `brewlite`:

@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { PageContainer } from "@/components/layout/page-container";
+import { ResponsiveGrid } from "@/components/layout/responsive-grid";
+import { EmptyState, ErrorState, LoadingState, ProductCardSkeleton } from "@/components/ui/state-message";
 import { getProducts } from "../api";
 import type { ProductSummary } from "../types";
 import { ProductCard } from "./product-card";
@@ -32,43 +35,36 @@ export function Menu() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
+    <PageContainer>
       <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Chọn món bạn thích</h1>
       <p className="mt-3 text-stone-600">Giá hiển thị là giá size S.</p>
 
       <section aria-label="Danh sách đồ uống" aria-live="polite" aria-busy={state.status === "loading"} className="mt-10">
         {state.status === "loading" && (
           <div>
-            <p role="status" className="mb-4 text-stone-600">Đang tải thực đơn…</p>
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4" aria-hidden="true">
-              {[1, 2, 3, 4].map((number) => (
-                <div key={number} className="rounded-2xl border border-stone-200 bg-white p-4">
-                  <div className="aspect-4/3 rounded-xl bg-stone-100" />
-                  <div className="mt-5 h-5 w-2/3 rounded bg-stone-100" />
-                  <div className="mt-3 h-5 w-1/3 rounded bg-stone-100" />
-                </div>
-              ))}
+            <div className="mb-4">
+              <LoadingState message="Đang tải thực đơn…" />
             </div>
+            <ResponsiveGrid hidden>
+              {[1, 2, 3, 4].map((number) => <ProductCardSkeleton key={number} />)}
+            </ResponsiveGrid>
           </div>
         )}
 
         {state.status === "error" && (
-          <div className="rounded-xl border border-stone-200 bg-white px-6 py-10">
-            <p role="alert">Không tải được thực đơn. Anh/chị vui lòng thử lại.</p>
-            <button type="button" onClick={retry} className="mt-5 min-h-11 rounded-lg bg-coffee px-5 py-3 font-semibold text-white">Thử lại</button>
-          </div>
+          <ErrorState message="Không tải được thực đơn. Anh/chị vui lòng thử lại." onRetry={retry} />
         )}
 
         {state.status === "ready" && state.products.length === 0 && (
-          <p className="rounded-xl border border-stone-200 bg-white px-6 py-10 text-stone-600">Hiện chưa có sản phẩm.</p>
+          <EmptyState message="Hiện chưa có sản phẩm." />
         )}
 
         {state.status === "ready" && state.products.length > 0 && (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <ResponsiveGrid>
             {state.products.map((product) => <ProductCard key={product.id} product={product} />)}
-          </div>
+          </ResponsiveGrid>
         )}
       </section>
-    </main>
+    </PageContainer>
   );
 }

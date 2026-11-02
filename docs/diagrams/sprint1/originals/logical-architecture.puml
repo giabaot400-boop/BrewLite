@@ -1,0 +1,28 @@
+@startuml
+
+title BrewLite - Logical Architecture Diagram v0.9
+
+top to bottom direction
+skinparam componentStyle rectangle
+
+actor "Khách hàng\nWeb Browser" as Customer
+
+rectangle "Hệ thống BrewLite" {
+
+  component "Next.js Frontend\nReact + TypeScript + TailwindCSS" as Frontend
+
+  component "NestJS Backend\nREST API + Validation + Business Logic" as Backend
+
+  database "PostgreSQL\nPrisma hoặc TypeORM" as Database
+
+  Frontend --> Backend : REST request / JSON response
+  Backend --> Database : Read và write qua ORM
+}
+
+rectangle "Mock Payment Gateway\nVí điện tử / Thẻ" as PaymentGateway
+
+Customer --> Frontend : HTTP / HTTPS
+Backend ..> PaymentGateway : Yêu cầu thanh toán
+PaymentGateway ..> Backend : Thành công / Thất bại
+
+@enduml

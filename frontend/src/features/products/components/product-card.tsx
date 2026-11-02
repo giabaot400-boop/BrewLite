@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cardClassName } from "@/components/ui/card";
 import type { ProductSummary } from "../types";
 import { formatPrice } from "../format-price";
 import { ProductImage } from "./product-image";
@@ -8,7 +9,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
     <article>
       <Link
         href={`/products/${encodeURIComponent(product.id)}`}
-        className="block rounded-2xl border border-stone-200 bg-white p-4 transition-colors hover:border-coffee"
+        className={`${cardClassName} block p-4 transition-colors hover:border-coffee motion-reduce:transition-none`}
       >
         <ProductImage key={product.imageUrl} src={product.imageUrl} name={product.name} />
         <h2 className="mt-5 text-lg font-semibold">{product.name}</h2>
