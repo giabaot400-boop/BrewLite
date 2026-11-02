@@ -24,10 +24,10 @@ Căn cứ thiết kế: BrewLite Sprint 2 v0.6.
 ## Cần phối hợp tiếp
 - C rà soát User/AuthSession trước khi tích hợp auth.
 - D rà soát schema đơn hàng và hợp đồng httpStatus của ledger.
-- Chưa hoàn thành helper transaction advisory lock.
-- Chưa kiểm tra tính nhất quán giữa Order và OrderRequest,
-  rollback luồng tạo đơn, replay và gửi đồng thời.
-- Chưa xác nhận migration trên máy thành viên khác.
+- Phối hợp D tích hợp helper vào cùng transaction tạo đơn;
+  kiểm tra tính nhất quán Order–OrderRequest, rollback,
+  replay và gửi đồng thời.
+- Xác nhận migration trên máy thành viên khác.
 
 Schema/migration nền chưa đồng nghĩa hoàn thành Sprint 2.
 
