@@ -9,7 +9,7 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import type { Request, Response } from "express";
-
+import { AuthGuard } from "../auth/auth.guard.js";
 import { OrdersService } from "./orders.service.js";
 import { CreateOrderDto } from "./dto/create-order.dto.js";
 
@@ -20,6 +20,7 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
+  @UseGuards(AuthGuard)
   async createOrder(
     @Body() dto: CreateOrderDto,
     @Headers("idempotency-key") requestKey: string,
