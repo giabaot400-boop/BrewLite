@@ -323,21 +323,72 @@ export class OrdersService {
       return false;
     }
 
-    if (error.code === "P2034") return true;
-
-    // Chỉ retry unique race trên userId/requestKey.
-    if (error.code === "P2002") {
-      const target = error.meta?.target;
-      const value = Array.isArray(target)
-        ? target.join(",")
-        : typeof target === "string"
-          ? target
-          : "";
-
-      return value.includes("user_id") && value.includes("request_key");
+    // Lỗi transaction conflict / deadlock.
+    if (error.code === "P2034") {
+      return true;
     }
 
-    return false;
+    if (error.code !== "P2002") {
+      return false;
+    }
+
+    // Trường hợp Prisma trả về meta.target.
+    const target = error.meta?.target;
+
+    const targetValue = Array.isArray(target)
+      ? target.join(",")
+      : typeof target === "string"
+        ? target
+        : "";
+
+    const normalizedTarget = targetValue.replace(/[_"]/g, "").toLowerCase();
+
+    const isIdempotencyTarget =
+      normalizedTarget.includes("userid") &&
+      normalizedTarget.includes("requestkey");
+
+    if (isIdempotencyTarget) {
+      return true;
+    }
+
+    // Prisma 7 + adapter-pg có thể trả thông tin
+    // unique constraint trong driverAdapterError.
+    const adapterError = error.meta?.driverAdapterError;
+
+    if (
+      typeof adapterError !== "object" ||
+      adapterError === null ||
+      !("cause" in adapterError)
+    ) {
+      return false;
+    }
+
+    const cause = adapterError.cause;
+
+    if (typeof cause !== "object" || cause === null) {
+      return false;
+    }
+
+    const originalCode =
+      "originalCode" in cause ? cause.originalCode : undefined;
+
+    const originalMessage =
+      "originalMessage" in cause ? cause.originalMessage : undefined;
+
+    if (originalCode !== "23505" || typeof originalMessage !== "string") {
+      return false;
+    }
+
+    // Chỉ retry hai unique constraint liên quan
+    // trực tiếp đến idempotency của Orders.
+    const allowedConstraints = [
+      "orders_user_id_request_key_key",
+      "order_requests_user_id_request_key_key",
+    ];
+
+    return allowedConstraints.some((constraint) =>
+      originalMessage.includes(`violates unique constraint "${constraint}"`),
+    );
   }
 
   async createOrder(
