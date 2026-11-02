@@ -148,13 +148,11 @@ export class AuthService {
       },
     });
 
-    if (
-      !session ||
-      session.userId !== claims.sub ||
-      session.revokedAt ||
-      session.expiresAt.getTime() <= Date.now()
-    ) {
-      throw apiError(401, 'SESSION_EXPIRED', 'Session is no longer valid.');
+    if (!session || session.userId !== claims.sub) {
+      throw apiError(401, 'SESSION_INVALID', 'Phiên đăng nhập không hợp lệ.');
+    }
+    if (session.revokedAt || session.expiresAt.getTime() <= Date.now()) {
+      throw apiError(401, 'SESSION_EXPIRED', 'Phiên đăng nhập đã hết hạn hoặc bị thu hồi.');
     }
 
     return session.user;
@@ -174,11 +172,41 @@ export class AuthService {
 
   async logout(authorization?: string): Promise<void> {
     const token = this.bearer(authorization);
+    // Expiration is ignored only for revocation; signature and claims are still verified.
     const claims = this.verify(token, true);
-    await this.prisma.authSession.updateMany({
+    const session = await this.prisma.authSession.findUnique({
+      where: { id: claims.sid },
+      select: { id: true, userId: true, revokedAt: true },
+    });
+
+    if (!session) {
+      throw apiError(401, 'SESSION_INVALID', 'Phiên đăng nhập không tồn tại.');
+    }
+    if (session.userId !== claims.sub) {
+      throw apiError(401, 'SESSION_INVALID', 'Phiên đăng nhập không thuộc tài khoản này.');
+    }
+    // Repeated logout is idempotent.
+    if (session.revokedAt) return;
+
+    const result = await this.prisma.authSession.updateMany({
       where: { id: claims.sid, userId: claims.sub, revokedAt: null },
       data: { revokedAt: new Date() },
     });
+    if (result.count === 0) {
+      const latest = await this.prisma.authSession.findUnique({
+        where: { id: claims.sid },
+        select: { id: true, userId: true, revokedAt: true },
+      });
+      if (!latest) {
+        throw apiError(401, 'SESSION_INVALID', 'Phiên đăng nhập không tồn tại.');
+      }
+      if (latest.userId !== claims.sub) {
+        throw apiError(401, 'SESSION_INVALID', 'Phiên đăng nhập không thuộc tài khoản này.');
+      }
+      if (!latest.revokedAt) {
+        throw new InternalServerErrorException('Không thể thu hồi phiên đăng nhập.');
+      }
+    }
   }
 
   private bearer(value?: string): string {

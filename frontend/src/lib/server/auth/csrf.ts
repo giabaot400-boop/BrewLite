@@ -5,7 +5,9 @@ import type { NextRequest } from 'next/server';
  * This is a same-origin BFF endpoint; no wildcard CORS is enabled for it.
  */
 export function assertSameOriginPost(request: NextRequest): Response | null {
-  if (!request.headers.get('content-type')?.toLowerCase().startsWith('application/json')) {
+  const contentType = request.headers.get('content-type') ?? '';
+  const mediaType = contentType.split(';', 1)[0].trim().toLowerCase();
+  if (mediaType !== 'application/json') {
     return Response.json({ error: { code: 'REQUEST_FORBIDDEN', message: 'Yêu cầu phải sử dụng JSON.', fieldErrors: {} } }, { status: 403, headers: { 'Cache-Control': 'no-store' } });
   }
   if (request.headers.get('x-brewlite-request') !== '1') {
@@ -16,7 +18,13 @@ export function assertSameOriginPost(request: NextRequest): Response | null {
     return Response.json({ error: { code: 'REQUEST_FORBIDDEN', message: 'Thiếu thông tin nguồn yêu cầu.', fieldErrors: {} } }, { status: 403 });
   }
   try {
-    if (!process.env.APP_ORIGIN || new URL(origin).origin !== new URL(process.env.APP_ORIGIN).origin) {
+    const configuredOrigin = process.env.APP_ORIGIN;
+    if (!configuredOrigin) throw new Error('APP_ORIGIN is not configured');
+    const expected = new URL(configuredOrigin);
+    const received = new URL(origin);
+    const configuredIsOrigin = expected.pathname === '/' && !expected.search && !expected.hash;
+    const receivedIsOrigin = received.origin === origin;
+    if (!configuredIsOrigin || !receivedIsOrigin || received.origin !== expected.origin) {
       return Response.json({ error: { code: 'REQUEST_FORBIDDEN', message: 'Nguồn yêu cầu không được phép.', fieldErrors: {} } }, { status: 403 });
     }
   } catch {

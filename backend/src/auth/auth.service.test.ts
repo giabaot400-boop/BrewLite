@@ -45,7 +45,7 @@ test('login creates AuthSession; me reads it; logout revokes it', async () => {
         session = { ...data, revokedAt: null };
         return session;
       },
-      findUnique: async () => session ? { ...session, user } : null,
+      findUnique: async () => session ? { ...session, user: { id: user.id, email: user.email } } : null,
       updateMany: async ({ data }: { data: { revokedAt: Date } }) => {
         if (session) session.revokedAt = data.revokedAt;
         return { count: session ? 1 : 0 };
@@ -82,7 +82,7 @@ test('me rejects a database session that has expired even if the JWT has not yet
         session = { ...data, revokedAt: null };
         return session;
       },
-      findUnique: async () => session ? { ...session, user } : null,
+      findUnique: async () => session ? { ...session, user: { id: user.id, email: user.email } } : null,
     },
   } as unknown as PrismaService;
   const service = new AuthService(prisma);

@@ -17,10 +17,18 @@ export async function forwardError(response: Response): Promise<Response> {
 }
 
 export async function backendFetch(url: string, init: RequestInit): Promise<Response> {
+  const timeoutSignal = AbortSignal.timeout(10_000);
   try {
-    return await fetch(url, { ...init, cache: 'no-store', signal: AbortSignal.timeout(10_000) });
+    const upstream = await fetch(url, { ...init, cache: 'no-store', signal: timeoutSignal });
+    // Read the full body within the same deadline, not after returning the response.
+    const body = [204, 205, 304].includes(upstream.status) ? null : await upstream.arrayBuffer();
+    const headers = new Headers(upstream.headers);
+    headers.delete('content-length');
+    headers.delete('content-encoding');
+    headers.delete('transfer-encoding');
+    return new Response(body, { status: upstream.status, statusText: upstream.statusText, headers });
   } catch (error) {
-    if (error instanceof Error && error.name === 'TimeoutError') {
+    if (timeoutSignal.aborted || (error instanceof Error && error.name === 'TimeoutError')) {
       return errorResponse(504, 'UPSTREAM_TIMEOUT', 'Yêu cầu đến máy chủ mất quá nhiều thời gian.');
     }
     return errorResponse(502, 'UPSTREAM_UNAVAILABLE', 'Không thể kết nối đến máy chủ.');
