@@ -15,6 +15,7 @@ model Product {
   price       Int
   imageUrl    String           @map("image_url")
   toppings    ProductTopping[]
+  orderItems OrderItem[]
 
   @@map("products")
 }
@@ -24,6 +25,7 @@ model Topping {
   name     String
   price    Int
   products ProductTopping[]
+  orderItemToppings OrderItemTopping[]
 
   @@map("toppings")
 }
@@ -36,4 +38,110 @@ model ProductTopping {
 
   @@id([productId, toppingId])
   @@map("product_toppings")
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  passwordHash String        @map("password_hash")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  sessions     AuthSession[]
+  orders        Order[]
+  orderRequests OrderRequest[]
+
+  @@map("users")
+}
+
+model AuthSession {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  createdAt DateTime  @default(now()) @map("created_at")
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("auth_sessions")
+}
+
+enum OrderStatus {
+  PENDING
+}
+
+enum OrderRequestState {
+  SUCCEEDED
+  REJECTED
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  userId      String      @map("user_id")
+  status      OrderStatus @default(PENDING)
+  total       Int
+  createdAt   DateTime    @default(now()) @map("created_at")
+  requestKey  String      @map("request_key")
+  requestHash String      @map("request_hash")
+
+  user    User          @relation(fields: [userId], references: [id], onDelete: Restrict)
+  items   OrderItem[]
+  request OrderRequest?
+
+  @@unique([userId, requestKey])
+  @@map("orders")
+}
+
+model OrderItem {
+  id             String @id @default(uuid())
+  orderId        String @map("order_id")
+  productId      String @map("product_id")
+  productName    String @map("product_name")
+  size           String
+  basePrice      Int    @map("base_price")
+  sizeExtraPrice Int    @map("size_extra_price")
+  unitPrice      Int    @map("unit_price")
+  qty            Int
+  lineTotal      Int    @map("line_total")
+
+  order    Order              @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  product  Product            @relation(fields: [productId], references: [id], onDelete: Restrict)
+  toppings OrderItemTopping[]
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+model OrderItemTopping {
+  orderItemId String @map("order_item_id")
+  toppingId   String @map("topping_id")
+  name        String
+  price       Int
+
+  orderItem OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Restrict)
+  topping   Topping   @relation(fields: [toppingId], references: [id], onDelete: Restrict)
+
+  @@id([orderItemId, toppingId])
+  @@index([toppingId])
+  @@map("order_item_toppings")
+}
+
+model OrderRequest {
+  id               String            @id @default(uuid())
+  userId           String            @map("user_id")
+  requestKey       String            @map("request_key")
+  requestHash      String            @map("request_hash")
+  canonicalVersion Int               @default(1) @map("canonical_version")
+  state            OrderRequestState
+  orderId          String?           @unique @map("order_id")
+  httpStatus       Int               @map("http_status")
+  responseJson     Json              @map("response_json")
+  createdAt        DateTime          @default(now()) @map("created_at")
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Restrict)
+  order Order? @relation(fields: [orderId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, requestKey])
+  @@map("order_requests")
 }

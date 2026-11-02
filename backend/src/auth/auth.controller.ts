@@ -13,6 +13,7 @@ export class AuthController {
 
   @Header('Cache-Control', 'no-store')
   @Post('login')
+  @HttpCode(200)
   login(@Body() body: unknown) {
     return this.auth.login(body);
   }
