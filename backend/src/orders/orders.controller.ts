@@ -9,24 +9,23 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import type { Request, Response } from "express";
-
+import { AuthGuard } from "../auth/auth.guard.js";
 import { OrdersService } from "./orders.service.js";
 import { CreateOrderDto } from "./dto/create-order.dto.js";
 
-// TODO: Import JWT guard thực tế của thành viên C.
 
 @Controller("orders")
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
+  @UseGuards(AuthGuard)
   async createOrder(
     @Body() dto: CreateOrderDto,
     @Headers("idempotency-key") requestKey: string,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    // TODO: Chỉ sử dụng userId do JWT guard xác thực.
     // Tuyệt đối không lấy userId từ request body.
 
     const userId = (
