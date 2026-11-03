@@ -68,6 +68,32 @@ test("/me mới nhất vẫn được áp dụng khi không có login/logout xen
   assert.equal(s.getSnapshot().user.email, "x@y.co");
 });
 
+test("hai /me đồng thời: phản hồi cũ không ghi đè tài khoản mới nhất", async () => {
+  const older = deferred(), newer = deferred();
+  let calls = 0;
+  const s = createAuthSession(fakeClient({ me: () => ++calls === 1 ? older.promise : newer.promise }));
+  const first = s.refresh(), second = s.refresh();
+  newer.resolve({ user: { id: "2", email: "new@example.com" }, expiresAt: 1 });
+  await second;
+  const identity = s.getSnapshot();
+  older.resolve(session());
+  await first;
+  assert.equal(s.getSnapshot(), identity);
+  assert.equal(s.getSnapshot().user.id, "2");
+});
+
+test("401 của /me cũ không xóa phiên đã được /me mới xác nhận", async () => {
+  const older = deferred();
+  let calls = 0;
+  const s = createAuthSession(fakeClient({ me: () => ++calls === 1 ? older.promise : Promise.resolve(session()) }));
+  const first = s.refresh();
+  await s.refresh();
+  const identity = s.getSnapshot();
+  older.reject(authRequired());
+  await first;
+  assert.equal(s.getSnapshot(), identity);
+});
+
 test("login thất bại không làm kẹt trạng thái loading do /me ban đầu", async () => {
   const s = createAuthSession(
     fakeClient({

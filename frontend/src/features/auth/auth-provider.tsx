@@ -8,25 +8,31 @@ import {
   type AuthStatus,
   type LogoutInfo,
   type SignOutHandler,
+  type AuthSnapshot,
+  type SignOutPreparer,
 } from "./auth-session";
 import type { AuthUser, LogoutScope } from "./types";
 
 export type { AuthStatus, LogoutInfo };
 
 export type AuthContextValue = {
+  sessionSnapshot: AuthSnapshot;
+  getSessionSnapshot: () => AuthSnapshot;
   status: AuthStatus;
   user: AuthUser | null;
   /** Hết hạn phiên đã được phát hiện ở lần kiểm tra gần nhất. */
   sessionExpired: boolean;
   login: (input: Credentials) => Promise<void>;
   register: (input: Credentials) => Promise<void>;
-  /** Ném AuthApiError nếu chưa xác nhận đăng xuất; khi đó trạng thái đăng nhập được giữ nguyên. */
+  /** AuthApiError: chưa xác nhận logout. ConfirmedLogoutError: đã có 204, nhưng dọn giỏ hoặc phiên cục bộ thay đổi. */
   logout: () => Promise<LogoutScope>;
   refresh: () => Promise<void>;
   /** Cho giỏ hàng/đơn dọn dữ liệu sau khi BFF xác nhận 204 (scope session hoặc local). Trả hàm hủy. */
   onSignedOut: (handler: SignOutHandler) => () => void;
+  /** Chụp checkpoint trước HTTP; complete được await sau 204, cancel giải phóng khi lỗi hoặc phiên thay đổi. */
+  prepareSignOut: (handler: SignOutPreparer) => () => void;
   /** Giỏ hàng đăng ký để hộp xác nhận đăng xuất nêu đúng số món và lần đặt chưa rõ kết quả. */
-  setLogoutInfoSource: (source: () => LogoutInfo) => () => void;
+  setLogoutInfoSource: (source: () => LogoutInfo | null) => () => void;
   getLogoutInfo: () => LogoutInfo | null;
 };
 
@@ -44,11 +50,14 @@ export function AuthProvider({ children, client }: { children: ReactNode; client
   const value = useMemo<AuthContextValue>(
     () => ({
       ...snapshot,
+      sessionSnapshot: snapshot,
+      getSessionSnapshot: session.getSnapshot,
       login: session.login,
       register: session.register,
       logout: session.logout,
       refresh: session.refresh,
       onSignedOut: session.onSignedOut,
+      prepareSignOut: session.prepareSignOut,
       setLogoutInfoSource: session.setLogoutInfoSource,
       getLogoutInfo: session.getLogoutInfo,
     }),

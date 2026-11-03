@@ -20,6 +20,24 @@ export type LogoutInfo = { cartItemCount: number; hasPendingOrder: boolean };
 
 export type SignOutHandler = (scope: LogoutScope) => void;
 
+export type SignOutPreparation = {
+  complete: (scope: LogoutScope) => Promise<unknown>;
+  cancel: () => void;
+};
+export type SignOutPreparer = () => Promise<SignOutPreparation>;
+
+// The server confirmed logout. This error must not be presented as an upstream failure.
+export class ConfirmedLogoutError extends Error {
+  readonly scope: LogoutScope;
+  readonly reason: "cart" | "session-changed";
+  constructor(scope: LogoutScope, reason: "cart" | "session-changed") {
+    super(reason === "cart" ? "Chưa xác nhận dọn được giỏ trên thiết bị." : "Phiên hiện tại đã thay đổi.");
+    this.name = "ConfirmedLogoutError";
+    this.scope = scope;
+    this.reason = reason;
+  }
+}
+
 export const INITIAL_AUTH_SNAPSHOT: AuthSnapshot = { status: "loading", user: null, sessionExpired: false };
 
 /**
@@ -30,9 +48,11 @@ export const INITIAL_AUTH_SNAPSHOT: AuthSnapshot = { status: "loading", user: nu
 export function createAuthSession(client: AuthClient) {
   let snapshot = INITIAL_AUTH_SNAPSHOT;
   let epoch = 0;
-  let logoutInfoSource: (() => LogoutInfo) | null = null;
+  let refreshVersion = 0;
+  let logoutInfoSource: (() => LogoutInfo | null) | null = null;
   const listeners = new Set<() => void>();
   const signOutHandlers = new Set<SignOutHandler>();
+  const signOutPreparers = new Set<SignOutPreparer>();
 
   function set(next: AuthSnapshot) {
     snapshot = next;
@@ -41,12 +61,13 @@ export function createAuthSession(client: AuthClient) {
 
   async function refresh(): Promise<void> {
     const startedAt = epoch;
+    const version = ++refreshVersion;
     try {
       const session = await client.me();
-      if (startedAt !== epoch) return;
+      if (startedAt !== epoch || version !== refreshVersion) return;
       set({ status: "authenticated", user: session.user, sessionExpired: false });
     } catch (error) {
-      if (startedAt !== epoch) return;
+      if (startedAt !== epoch || version !== refreshVersion) return;
       const code = error instanceof AuthApiError ? error.code : "UNKNOWN";
       if (code === "AUTH_REQUIRED" || code === "SESSION_INVALID" || code === "SESSION_EXPIRED") {
         set({ status: "anonymous", user: null, sessionExpired: code === "SESSION_EXPIRED" });
@@ -68,13 +89,29 @@ export function createAuthSession(client: AuthClient) {
     await client.register(input);
   }
 
-  /** Ném AuthApiError nếu chưa xác nhận đăng xuất; khi đó trạng thái và giỏ giữ nguyên. */
+  /** Chuẩn bị giỏ trước HTTP. Sau 204, lỗi dọn giỏ không đảo ngược kết quả logout. */
   async function logout(): Promise<LogoutScope> {
-    const scope = await client.logout();
-    epoch++;
-    set({ status: "anonymous", user: null, sessionExpired: false });
-    signOutHandlers.forEach((handler) => handler(scope));
-    return scope;
+    const startedAt = epoch;
+    const startedOwner = snapshot.user?.id;
+    const changed = () => startedAt !== epoch || snapshot.user?.id !== startedOwner;
+    const prepared: SignOutPreparation[] = [];
+    try {
+      for (const prepare of signOutPreparers) prepared.push(await prepare());
+      if (changed()) throw new AuthApiError("UNKNOWN", "Phiên đã thay đổi. Vui lòng thử lại.");
+      const scope = await client.logout();
+      if (changed()) throw new ConfirmedLogoutError(scope, "session-changed");
+      epoch++;
+      set({ status: "anonymous", user: null, sessionExpired: false });
+      try {
+        for (const preparation of prepared) await preparation.complete(scope);
+      } catch {
+        throw new ConfirmedLogoutError(scope, "cart");
+      }
+      signOutHandlers.forEach((handler) => handler(scope));
+      return scope;
+    } finally {
+      prepared.forEach((preparation) => preparation.cancel());
+    }
   }
 
   return {
@@ -89,6 +126,10 @@ export function createAuthSession(client: AuthClient) {
     login,
     register,
     logout,
+    prepareSignOut(handler: SignOutPreparer) {
+      signOutPreparers.add(handler);
+      return () => { signOutPreparers.delete(handler); };
+    },
     onSignedOut(handler: SignOutHandler) {
       signOutHandlers.add(handler);
       return () => {
@@ -96,13 +137,13 @@ export function createAuthSession(client: AuthClient) {
       };
     },
     /** Module giỏ hàng đăng ký nguồn thông tin; trả hàm hủy đăng ký. */
-    setLogoutInfoSource(source: () => LogoutInfo) {
+    setLogoutInfoSource(source: () => LogoutInfo | null) {
       logoutInfoSource = source;
       return () => {
         if (logoutInfoSource === source) logoutInfoSource = null;
       };
     },
-    /** null = chưa có module giỏ hàng đăng ký (không được nói gì về giỏ). */
+    /** null = chưa có thông tin giỏ đã xác minh cho phiên hiện tại. */
     getLogoutInfo: (): LogoutInfo | null => (logoutInfoSource ? logoutInfoSource() : null),
   };
 }

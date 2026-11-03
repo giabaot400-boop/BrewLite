@@ -48,6 +48,25 @@ test("owned cart is hidden because local owner metadata is not authentication", 
   assert.equal(state.status, "locked"); assert.equal(state.cart, null);
 });
 
+test("owned cart is shown only for its matching verified identity", () => {
+  const cart = { ...createInitialCartState().cart, ownerId: "user-a" };
+  for (const verifiedOwnerId of ["user-b", null]) {
+    const state = cartViewReducer(createCartViewState(), { type: "SNAPSHOT", sequence: 1, cart, verifiedOwnerId });
+    assert.equal(state.status, "locked");
+    assert.equal(state.cart, null);
+  }
+  const state = cartViewReducer(createCartViewState(), { type: "SNAPSHOT", sequence: 1, cart, verifiedOwnerId: "user-a" });
+  assert.equal(state.status, "ready");
+  assert.equal(state.cart, cart);
+});
+
+test("authenticated UI cannot publish a guest cart before durable adoption", () => {
+  const cart = createInitialCartState().cart;
+  const state = cartViewReducer(createCartViewState(), { type: "SNAPSHOT", sequence: 1, cart, verifiedOwnerId: "user-a" });
+  assert.equal(state.status, "locked");
+  assert.equal(state.cart, null);
+});
+
 test("failed refresh hides stale totals; retry can recover without clearing storage", () => {
   const cart = createInitialCartState().cart;
   let state = cartViewReducer(createCartViewState(), { type: "SNAPSHOT", sequence: 1, cart });
