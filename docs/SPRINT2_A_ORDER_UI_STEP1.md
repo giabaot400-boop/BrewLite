@@ -72,7 +72,7 @@ Sau ca đổi giá, cần trả giá sản phẩm về mức ban đầu bằng c
 
 Các kết quả 267/267 unit test, typecheck, lint, build và 12/12 kiểm tra DOM giả lập ở phần trên thuộc môi trường triển khai của trợ lý. Tại mốc ghi nhận, chưa có log riêng của các lệnh này trên máy A để bổ sung vào hồ sơ.
 
-## Phạm vi còn cần kiểm tra
+## Phạm vi còn cần kiểm tra tại mốc A8b ban đầu
 
 - Lỗi validation theo dòng qua API thật; thao tác bàn phím, Esc, focus, vùng cuộn nhiều món và responsive.
 - Hết hạn phiên, đổi tài khoản hoặc đăng xuất khi có lần đặt chưa rõ kết quả; đồng bộ nhiều tab và xử lý phản hồi muộn trên trình duyệt thật.
@@ -101,3 +101,26 @@ Nguyên nhân trong code: sự kiện focus gọi kiểm tra lại phiên/giỏ;
 Kiểm tra bản sửa trong môi trường triển khai của trợ lý: **284/284 unit test đạt** (thêm 5 ca auth và 12 ca xác nhận); frontend typecheck, lint và production build đạt. Build dùng nguồn sản phẩm fixture. **19/19 kiểm tra DOM giả lập đạt**, gồm 12 ca trước đó và 7 ca giữ dialog, khóa xác nhận khi chờ, kiểm tra chồng nhau, hủy khi chờ, lỗi mạng, đổi owner/giỏ và retry cùng key/payload. Auth/network/storage/Web Locks của lượt DOM được giả lập; chưa thay thế kiểm tra bàn phím trên trình duyệt thật hoặc PostgreSQL.
 
 Ngày 04/11/2026, A xác nhận kiểm tra lại trên trình duyệt: hộp xác nhận giữ nguyên khi Tab lên thanh công cụ rồi quay lại trang; Esc và Hủy đóng hộp, giữ giỏ và không phát sinh POST tạo đơn. A báo các lệnh unit test, typecheck, lint và build đạt. Ca chủ động làm chậm /me chưa được xác nhận riêng trên máy A.
+
+## Kiểm tra bổ sung trên máy A ngày 04/11/2026
+
+Baseline: `34f8850`. Ghi nhận theo phản hồi kiểm tra thủ công của A, chưa kèm HAR hoặc bản xuất request/response để đối chiếu độc lập.
+
+| Tình huống | Kết quả A báo |
+| --- | --- |
+| Sửa giỏ ở tab khác khi hộp xác nhận đang mở | Xác nhận cũ mất hiệu lực; giỏ cập nhật số lượng, mở lại xác nhận thấy nội dung mới; không tự tạo đơn. |
+| Đăng xuất/đăng nhập khi có lần đặt chưa rõ kết quả | Giỏ được dọn sau đăng xuất nhưng lần đặt cũ được giữ. Đăng nhập lại đúng tài khoản phục hồi snapshot dù giỏ rỗng, không tự gửi đơn; chủ động thử lại dùng key/nội dung cũ và nhận kết quả PENDING. |
+| Validation theo dòng qua API thật | Dùng công cụ `BrewLite_S2_A8b_Row_Error_Fixture.cjs` tạm gỡ liên kết `coffee-milk`–`cream` trong database test. A báo kết quả khớp hướng dẫn: 400 `VALIDATION_ERROR`, lỗi ở dòng Cà phê sữa có Kem, không gắn nhầm vào Americano; giữ giỏ, mở lại thao tác sửa và khôi phục liên kết sau lượt thử. |
+| Kiểm tra lại thông báo sau Alt+Tab | A thử lại hai lượt: chỉ đổi cửa sổ khi fixture còn hoạt động, và quay lại sau khi khôi phục topping. Cả hai lượt thông báo lỗi vẫn còn sau khi trang ổn định. Chưa tái hiện được nhận xét ban đầu rằng lỗi bị mất hẳn; không ghi đó là lỗi xóa feedback đã xác nhận. |
+
+## Giữ bố cục khi kiểm tra lại phiên
+
+A báo có lúc cú bấm Đặt hàng đầu tiên sau Alt+Tab không mở hộp và trang cuộn lên, phải cuộn xuống bấm lại. Code hiện tại gỡ phần giỏ, thông báo và nút trong trạng thái khôi phục, nên có thể làm chiều cao trang thay đổi và mất mục tiêu nhấn.
+
+Bản sửa bổ sung `CartRefreshBoundary` cho phần giỏ và nội dung đặt đơn bên ngoài dialog. Trong lúc khôi phục cùng phiên bản UI đăng nhập, cây hiển thị gần nhất được giữ để bảo toàn bố cục nhưng đặt `visibility: hidden`, `inert` và `aria-hidden`; có thông báo đang kiểm tra. Nội dung cũ không hiển thị, không nhận thao tác và không dùng để cấp quyền đặt đơn. Phiên bản đăng nhập đổi thì bỏ phần giữ lại. Sau kiểm tra, React cập nhật cây hiện có bằng dữ liệu mới. Dialog xác nhận nằm ngoài vùng ẩn để tiếp tục hành vi đã sửa ở `34f8850`.
+
+Không xếp hàng hoặc tự thực hiện cú bấm khi phiên chưa được kiểm tra xong. Người dùng thao tác sau khi thông báo chờ kết thúc. Không thay guard provider/lifecycle/BFF, API, storage hoặc quy tắc xóa feedback; `CartNotice` ở trang sản phẩm giữ hành vi hiện có.
+
+Kiểm tra trong môi trường triển khai của trợ lý: **284/284 unit test đạt**, typecheck, lint và build đạt (nguồn sản phẩm fixture); **21/21 kiểm tra DOM giả lập đạt**. Ca bổ sung kiểm tra giữ cùng node giỏ/nút khi chờ, vùng giữ lại ẩn và inert, từ chối nhấn nút cũ trong lúc chờ, feedback xuất hiện lại, bytes giỏ không đổi, mở/hủy sau kiểm tra không POST và bỏ cây của owner cũ khi đổi tài khoản. Các ca DOM dùng auth/network/storage giả lập. Chưa đo độ cao hoặc vị trí cuộn bằng trình duyệt thật và chưa ghi kết quả sau sửa trên máy A.
+
+Ngày 04/11/2026, A xác nhận kiểm tra lại sau sửa: trang giữ vị trí khi Alt+Tab ra ngoài rồi quay lại; sau khi kiểm tra phiên hoàn tất, bấm Đặt hàng mở được hộp xác nhận và Hủy đóng hộp. Các mục của đặc tả chưa có bằng chứng vẫn để chờ; không suy ra toàn bộ 37 TC đã đạt.

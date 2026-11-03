@@ -12,6 +12,7 @@ import { getCartLineKey, selectCartQuantity, selectCartTotal } from "../cart-red
 import { captureOrderConfirmation, reconcileOrderConfirmation } from "../cart-order-confirmation";
 import type { OrderConfirmation } from "../cart-order-confirmation";
 import type { Cart } from "../types";
+import { CartRefreshBoundary } from "./cart-refresh-boundary";
 
 function Snapshot({ cart }: { cart: Cart }) {
   return (
@@ -54,6 +55,8 @@ export function CartOrderPanel() {
 
   return (
     <section aria-label="Đặt đơn và kết quả" className="mt-6 space-y-4">
+      <CartRefreshBoundary ready={state.status === "ready"} restoring={state.status === "restoring"} sessionVersion={sessionVersion}>
+      <div className="space-y-4">
       {reconciled?.status === "invalid" && <p role="alert">{reconciled.message}</p>}
       {busy && <p role="status" aria-live="polite" className="font-semibold text-coffee">Đang tạo đơn…</p>}
       {feedback && (
@@ -96,6 +99,8 @@ export function CartOrderPanel() {
           <p className="text-sm text-stone-600">Đây là kết quả tạo đơn đã nhận trên thiết bị này.</p>
         </Card>
       )}
+      </div>
+      </CartRefreshBoundary>
       <ConfirmDialog open={currentReview !== null} title={currentReview?.kind === "RETRY" ? "Thử lại cùng lần đặt?" : "Xác nhận đặt đơn?"}
         confirmLabel={currentReview?.kind === "RETRY" ? "Xác nhận thử lại" : "Xác nhận đặt hàng"}
         confirmDisabled={checking}
