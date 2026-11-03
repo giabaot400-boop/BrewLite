@@ -84,7 +84,7 @@ test("one explicit POST uses fixed BFF path, exact saved payload and required he
   assert.equal(options.method, "POST"); assert.equal(options.credentials, "same-origin");
   assert.equal(options.cache, "no-store"); assert.equal(options.redirect, "error");
   assert.deepEqual(options.headers, { "Content-Type": "application/json", Accept: "application/json",
-    "X-BrewLite-Request": "1", "Idempotency-Key": KEY });
+    "X-BrewLite-Request": "1", "Idempotency-Key": KEY, "X-BrewLite-Expected-Owner": "user-a" });
   assert.equal(options.body, JSON.stringify(input.payload));
   assert.deepEqual(result, { reply: { ownerId: "user-a", requestKey: KEY, receivedAt: TIME,
     status: 201, body: success() }, failure: null });
