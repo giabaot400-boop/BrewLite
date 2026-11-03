@@ -1,16 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useAuth } from "@/features/auth/auth-provider";
-import type { AuthSnapshot } from "@/features/auth/auth-session";
 import { withReturnTo } from "@/features/auth/return-to";
 import { formatPrice } from "@/features/products/format-price";
 import { useCart } from "../cart-provider";
 import { getCartLineKey, selectCartQuantity, selectCartTotal } from "../cart-reducer";
-import type { OrderReview } from "../cart-order-client";
+import { captureOrderConfirmation, reconcileOrderConfirmation } from "../cart-order-confirmation";
+import type { OrderConfirmation } from "../cart-order-confirmation";
 import type { Cart } from "../types";
 
 function Snapshot({ cart }: { cart: Cart }) {
@@ -31,22 +31,30 @@ function Snapshot({ cart }: { cart: Cart }) {
 }
 
 export function CartOrderPanel() {
-  const { status, sessionExpired, sessionSnapshot, getSessionSnapshot } = useAuth();
+  const { status, sessionExpired, sessionSnapshot, getSessionSnapshot, sessionVersion, getSessionVersion } = useAuth();
   const { state, pending, lastOrder, orderPhase, orderFeedback: feedback, reviewOrder, submitOrder, reload } = useCart();
-  const [confirmation, setConfirmation] = useState<{ review: OrderReview; identity: AuthSnapshot } | null>(null);
+  const [confirmation, setConfirmation] = useState<OrderConfirmation | null>(null);
+  const triggerId = useId();
+  const environment = { identity: sessionSnapshot, sessionVersion, state, pending, orderPhase };
+  // Adjust only this component's state; invalid reviews cannot reappear after A -> B -> A.
+  const reconciled = reconcileOrderConfirmation(confirmation, environment);
+  if (reconciled !== confirmation) setConfirmation(reconciled);
   const cart = state.status === "ready" ? state.cart : null;
   const busy = orderPhase !== "IDLE";
   const authenticated = status === "authenticated";
   const loginHref = withReturnTo("/login", "/cart") + `&reason=${sessionExpired ? "expired" : "required"}`;
-  const currentReview = authenticated && cart && confirmation?.identity === sessionSnapshot
-    && confirmation.review.ownerId === cart.ownerId ? confirmation.review : null;
+  const currentReview = reconciled && reconciled.status !== "invalid" ? reconciled.review : null;
+  const checking = reconciled?.status === "checking";
   function openReview(retry = false) {
     const review = reviewOrder(retry);
-    setConfirmation(review ? { review, identity: getSessionSnapshot() } : null);
+    setConfirmation(review ? captureOrderConfirmation(review, {
+      ...environment, identity: getSessionSnapshot(), sessionVersion: getSessionVersion(),
+    }) : null);
   }
 
   return (
     <section aria-label="Đặt đơn và kết quả" className="mt-6 space-y-4">
+      {reconciled?.status === "invalid" && <p role="alert">{reconciled.message}</p>}
       {busy && <p role="status" aria-live="polite" className="font-semibold text-coffee">Đang tạo đơn…</p>}
       {feedback && (
         <div role={feedback.kind === "confirmed" ? "status" : "alert"} className="rounded-xl border border-stone-200 bg-white p-4">
@@ -69,13 +77,13 @@ export function CartOrderPanel() {
           <h2 className="text-xl font-semibold">Lần đặt chưa rõ kết quả</h2>
           <p>Thông tin dưới đây thuộc lần đặt đã lưu. Thử lại sẽ kiểm tra hoặc tạo đơn cho chính lần đặt đó, kể cả giỏ hiện tại đã trống.</p>
           <Snapshot cart={pending.cartSnapshot} />
-          <Button disabled={busy || state.isSaving || cart === null} onClick={() => openReview(true)}>
+          <Button id={triggerId} disabled={busy || state.isSaving || cart === null} onClick={() => openReview(true)}>
             Thử lại cùng lần đặt
           </Button>
         </Card>
       )}
       {authenticated && !pending && cart && cart.items.length > 0 && (
-        <Button disabled={busy || state.isSaving} onClick={() => openReview()}>
+        <Button id={triggerId} disabled={busy || state.isSaving} onClick={() => openReview()}>
           {feedback?.repriced ? "Kiểm tra và đặt theo giá mới" : "Đặt hàng"}
         </Button>
       )}
@@ -90,12 +98,16 @@ export function CartOrderPanel() {
       )}
       <ConfirmDialog open={currentReview !== null} title={currentReview?.kind === "RETRY" ? "Thử lại cùng lần đặt?" : "Xác nhận đặt đơn?"}
         confirmLabel={currentReview?.kind === "RETRY" ? "Xác nhận thử lại" : "Xác nhận đặt hàng"}
+        confirmDisabled={checking}
+        returnFocusId={triggerId}
         onCancel={() => setConfirmation(null)} onConfirm={() => {
-          if (!currentReview) return;
+          if (!currentReview || reconciled?.status !== "ready"
+            || getSessionVersion() !== reconciled.sessionVersion || getSessionSnapshot() !== reconciled.identity) return;
           setConfirmation(null);
           void submitOrder(currentReview);
         }}>
         {currentReview && <>
+          {checking && <p role="status" className="mb-3 text-sm">Đang kiểm tra lại phiên và giỏ…</p>}
           <div tabIndex={0} role="region" aria-label="Các món đang xác nhận" className="max-h-[45vh] overflow-y-auto pr-2">
             <Snapshot cart={currentReview.displayCart} />
           </div>

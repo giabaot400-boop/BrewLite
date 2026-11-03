@@ -54,6 +54,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [bridge] = useState(() => createCartSessionBridge(storage, getSessionSnapshot));
   const alive = useRef(false);
   const sequence = useRef(0);
+  const verificationSequence = useRef(0);
   const ready = useRef(false);
   const saving = useRef(false);
   const identityRef = useRef<AuthSnapshot | null>(null);
@@ -115,6 +116,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [bridge, getSessionSnapshot, publish, fail]);
 
   const reload = useCallback(async () => {
+    const verification = ++verificationSequence.current;
     // Invalidate a displayed cart immediately while verifying the shared cookie.
     const before = getSessionSnapshot();
     const version = ++sequence.current;
@@ -122,6 +124,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     logoutInfo.current = null;
     if (alive.current) dispatch({ type: "READ_STARTED", sequence: version });
     await refresh(); // No Web Lock is held across HTTP.
+    // Focus + visibilitychange may overlap. An ignored older /me must not
+    // publish cached auth/cart while the newer verification is still pending.
+    if (!alive.current || verification !== verificationSequence.current) return;
     const after = getSessionSnapshot();
     await read(after !== before && after.status === "authenticated" ? after : undefined);
   }, [getSessionSnapshot, refresh, read]);
@@ -145,7 +150,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const reviewOrder = useCallback((retry = false): OrderReview | null => {
     const identity = getSessionSnapshot();
-    if (saving.current || publishedIdentity !== identity || state.status !== "ready" || !state.cart) return null;
+    if (saving.current || state.sequence !== sequence.current || publishedIdentity !== identity
+      || state.status !== "ready" || !state.cart) return null;
     try {
       if (retry && !records.pending) throw new CartStorageError("PENDING_NOT_FOUND", "Không còn lần đặt để thử lại.");
       if (!retry && records.pending) throw new CartStorageError("PENDING_REQUEST", "Hãy thử lại cùng lần đặt đang chờ.");
@@ -160,6 +166,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const submitOrder = useCallback(async (review: OrderReview) => {
     try {
+      // A focus/storage refresh invalidates readiness synchronously, before React rerenders.
+      if (saving.current || state.sequence !== sequence.current || state.status !== "ready"
+        || publishedIdentity !== getSessionSnapshot()) {
+        throw new CartStorageError("CART_CHANGED", "Đang kiểm tra lại phiên hoặc giỏ. Vui lòng mở lại xác nhận.");
+      }
       const result = await orderClient.submit(review);
       if (alive.current && getSessionSnapshot().user?.id === result.request.ownerId) {
         setFeedback({ ownerId: result.request.ownerId, revision: result.settlement.envelope.cart.revision,
@@ -177,7 +188,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
     }
     await read();
-  }, [orderClient, getSessionSnapshot, reload, read]);
+  }, [orderClient, getSessionSnapshot, reload, read, state, publishedIdentity]);
 
   useEffect(() => {
     alive.current = true;

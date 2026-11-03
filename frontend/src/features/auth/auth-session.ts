@@ -48,13 +48,17 @@ export const INITIAL_AUTH_SNAPSHOT: AuthSnapshot = { status: "loading", user: nu
 export function createAuthSession(client: AuthClient) {
   let snapshot = INITIAL_AUTH_SNAPSHOT;
   let epoch = 0;
+  // UI continuity only. Storage guards still compare the exact snapshot object.
+  let sessionVersion = 0;
   let refreshVersion = 0;
   let logoutInfoSource: (() => LogoutInfo | null) | null = null;
   const listeners = new Set<() => void>();
   const signOutHandlers = new Set<SignOutHandler>();
   const signOutPreparers = new Set<SignOutPreparer>();
 
-  function set(next: AuthSnapshot) {
+  function set(next: AuthSnapshot, newLogin = false) {
+    if (newLogin || snapshot.status !== next.status || snapshot.user?.id !== next.user?.id
+      || snapshot.user?.email !== next.user?.email) sessionVersion++;
     snapshot = next;
     listeners.forEach((listener) => listener());
   }
@@ -81,7 +85,7 @@ export function createAuthSession(client: AuthClient) {
   async function login(input: Credentials): Promise<void> {
     const session = await client.login(input);
     epoch++;
-    set({ status: "authenticated", user: session.user, sessionExpired: false });
+    set({ status: "authenticated", user: session.user, sessionExpired: false }, true);
   }
 
   async function register(input: Credentials): Promise<void> {
@@ -116,6 +120,7 @@ export function createAuthSession(client: AuthClient) {
 
   return {
     getSnapshot: () => snapshot,
+    getSessionVersion: () => sessionVersion,
     subscribe(listener: () => void) {
       listeners.add(listener);
       return () => {

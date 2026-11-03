@@ -159,3 +159,63 @@ test("logout info: null khi chưa đăng ký, đọc mới nhất khi đã đăn
   off();
   assert.equal(s.getLogoutInfo(), null);
 });
+
+test("same-owner /me refresh preserves UI continuity but still replaces the guarded snapshot", async () => {
+  const s = createAuthSession(fakeClient({ me: async () => session() }));
+  await s.refresh();
+  const before = s.getSnapshot(), version = s.getSessionVersion();
+  await s.refresh();
+  assert.notEqual(s.getSnapshot(), before);
+  assert.equal(s.getSessionVersion(), version);
+});
+
+test("explicit same-owner login invalidates reviews even without a logout", async () => {
+  const s = createAuthSession(fakeClient({ me: async () => session() }));
+  await s.refresh();
+  const version = s.getSessionVersion();
+  await s.login({ email: "a@b.co", password: "fixture" });
+  assert.ok(s.getSessionVersion() > version);
+});
+
+test("account A -> B -> A advances continuity so a batched return cannot revive an old review", async () => {
+  let current = session();
+  const s = createAuthSession(fakeClient({ me: async () => current }));
+  await s.refresh();
+  const version = s.getSessionVersion();
+  current = { user: { id: "2", email: "b@example.com" }, expiresAt: 1 };
+  await s.refresh();
+  current = session();
+  await s.refresh();
+  assert.equal(s.getSnapshot().user.id, "1");
+  assert.equal(s.getSessionVersion(), version + 2);
+});
+
+test("session expiry and re-login invalidate continuity; a late old /me cannot change it", async () => {
+  let action = async () => session();
+  const s = createAuthSession(fakeClient({ me: () => action() }));
+  await s.refresh();
+  const version = s.getSessionVersion();
+  action = async () => { throw new AuthApiError("SESSION_EXPIRED", "", 401); };
+  await s.refresh();
+  assert.ok(s.getSessionVersion() > version);
+  const old = deferred(); action = () => old.promise;
+  const lateRefresh = s.refresh();
+  await s.login({ email: "a@b.co", password: "fixture" });
+  const afterLogin = s.getSessionVersion();
+  old.resolve({ user: { id: "2", email: "b@example.com" }, expiresAt: 1 });
+  await lateRefresh;
+  assert.equal(s.getSessionVersion(), afterLogin);
+  assert.equal(s.getSnapshot().user.id, "1");
+});
+
+test("failed /me is not new verification and logout then same-owner login changes continuity", async () => {
+  const s = createAuthSession(fakeClient({ me: async () => { throw new AuthApiError("NETWORK_ERROR", ""); } }));
+  await s.login({ email: "a@b.co", password: "fixture" });
+  const identity = s.getSnapshot(), version = s.getSessionVersion();
+  await s.refresh();
+  assert.equal(s.getSnapshot(), identity);
+  assert.equal(s.getSessionVersion(), version);
+  await s.logout();
+  await s.login({ email: "a@b.co", password: "fixture" });
+  assert.ok(s.getSessionVersion() > version);
+});

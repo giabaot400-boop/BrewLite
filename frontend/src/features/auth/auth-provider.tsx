@@ -18,6 +18,9 @@ export type { AuthStatus, LogoutInfo };
 export type AuthContextValue = {
   sessionSnapshot: AuthSnapshot;
   getSessionSnapshot: () => AuthSnapshot;
+  /** Same-owner /me refresh keeps this version; login/logout/account changes invalidate reviews. */
+  sessionVersion: number;
+  getSessionVersion: () => number;
   status: AuthStatus;
   user: AuthUser | null;
   /** Hết hạn phiên đã được phát hiện ở lần kiểm tra gần nhất. */
@@ -52,6 +55,8 @@ export function AuthProvider({ children, client }: { children: ReactNode; client
       ...snapshot,
       sessionSnapshot: snapshot,
       getSessionSnapshot: session.getSnapshot,
+      sessionVersion: session.getSessionVersion(),
+      getSessionVersion: session.getSessionVersion,
       login: session.login,
       register: session.register,
       logout: session.logout,

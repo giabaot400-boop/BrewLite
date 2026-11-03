@@ -20,7 +20,7 @@
 
 ## Phiên, nhiều tab và phản hồi muộn
 
-- Dialog gắn với auth snapshot tại lúc mở; thay phiên thì dialog cũ đóng và không tự mở lại khi quay về tài khoản trước. Cart thay đổi ở tab khác làm checkpoint cũ bị từ chối trước HTTP; khách phải mở lại xác nhận.
+- Dialog giữ nguyên nội dung đã xem trong lúc kiểm tra lại phiên cùng tài khoản; chỉ nút xác nhận bị khóa, vẫn cho Hủy/Esc. Kiểm tra thành công và giỏ/lần đặt không đổi thì tiếp tục xác nhận cũ. Đăng nhập lại, đăng xuất, đổi tài khoản hoặc thay đổi giỏ/lần đặt làm xác nhận cũ mất hiệu lực; không tự mở lại khi quay về tài khoản trước. Lifecycle tiếp tục kiểm tra checkpoint trước HTTP.
 - Review là snapshot được sao chép/đóng băng; controller giữ dữ liệu xác nhận riêng và kiểm tra payload sau chuẩn bị. Không gửi nội dung bị đổi so với phần đã review, kể cả storage bị thay mà không tăng revision.
 - Mỗi owner có trạng thái xử lý riêng trong tab. Double click cùng owner không phát thêm POST; owner khác có thể tiếp tục sau chuyển tài khoản mà không bị request cũ khóa giỏ mới.
 - Khi nhận phản hồi, luôn settle bằng owner/key đã gửi. Phiên/giỏ hiện tại khác thì không xóa giỏ mới hoặc hiển thị kết quả của owner cũ. Nếu tab khác đã settle cùng key và có kết quả đã xác nhận trong storage, feedback không đổi kết quả đó thành chưa rõ.
@@ -82,3 +82,22 @@ Các kết quả 267/267 unit test, typecheck, lint, build và 12/12 kiểm tra 
 Các lượt kiểm tra trên chưa đủ để kết luận toàn bộ 37 ca kiểm thử của đặc tả đều đạt. PR tích hợp tiếp tục được review theo quy trình của nhóm.
 
 ORDER-AC-08 vẫn dọn phần giỏ khớp khi tạo đơn PENDING thành công. Cách giữ/khôi phục các món khi thanh toán thất bại thuộc thiết kế Sprint 3, chưa được bổ sung vào luồng này.
+
+## Sửa hộp xác nhận tự đóng khi trang nhận focus
+
+Baseline sửa lỗi: `cce62c3`. Khi kiểm tra bàn phím, A báo Tab/Shift+Tab đi đến thanh công cụ trình duyệt, sau đó hộp xác nhận tự đóng khi trở lại trang. Việc focus đến thanh công cụ được phép với dialog HTML gốc; nội dung trang phía sau vẫn phải bị khóa. Hiện tượng tự đóng được ghi nhận là lỗi cần sửa, chưa tính lượt kiểm tra đó là đạt.
+
+Nguyên nhân trong code: sự kiện focus gọi kiểm tra lại phiên/giỏ; trạng thái giỏ tạm khôi phục và object auth snapshot mới làm điều kiện mở dialog mất hiệu lực ngay cả khi tài khoản không đổi.
+
+Điều chỉnh:
+
+- Bổ sung phiên bản liên tục của trạng thái đăng nhập trong bộ điều phối auth. `/me` thành công cho cùng tài khoản giữ phiên bản này; đăng nhập chủ động, đăng xuất hoặc đổi trạng thái/tài khoản làm phiên bản thay đổi. Đây là dấu mốc UI, không phải JWT/session ID hay bằng chứng xác thực từ server. Các guard storage vẫn đối chiếu chính xác object auth snapshot như trước.
+- Lưu riêng nội dung xác nhận và so sánh lại giỏ, revision và dữ liệu pending bất biến sau khi kiểm tra. Giữ dialog mở trong lúc chờ; chỉ tiếp tục khi có snapshot xác thực mới, phiên bản liên tục không đổi và dữ liệu vẫn khớp. Lỗi mạng chỉ giữ auth cache thì không đủ để mở khóa xác nhận cũ.
+- Xác nhận cũ bị hủy hiệu lực khi đổi tài khoản, đăng nhập lại, lỗi đọc giỏ hoặc thay đổi dữ liệu; trở lại tài khoản trước không khôi phục dialog cũ. Không thay nội dung đã xem bằng giỏ mới.
+- Hai lần kiểm tra focus/visibility chạy chồng nhau chỉ cho lượt mới nhất công bố kết quả. Chặn thao tác xác nhận bắt đầu trong lúc đọc lại ngay cả trước khi React kịp cập nhật giao diện.
+- ConfirmDialog dùng chung có thêm tùy chọn chỉ khóa nút xác nhận và trả focus về nút mở hiện tại sau khi giỏ được dựng lại; hành vi `busy`, Hủy/Esc của các nơi sử dụng khác giữ nguyên. Phần auth/UI dùng chung cần B/C đối chiếu khi review tích hợp.
+- Không đổi API, cookie, schema, key/payload, giá hoặc quy tắc retry. Kiểm tra owner ở BFF và guard lifecycle tiếp tục áp dụng trước khi gửi đơn.
+
+Kiểm tra bản sửa trong môi trường triển khai của trợ lý: **284/284 unit test đạt** (thêm 5 ca auth và 12 ca xác nhận); frontend typecheck, lint và production build đạt. Build dùng nguồn sản phẩm fixture. **19/19 kiểm tra DOM giả lập đạt**, gồm 12 ca trước đó và 7 ca giữ dialog, khóa xác nhận khi chờ, kiểm tra chồng nhau, hủy khi chờ, lỗi mạng, đổi owner/giỏ và retry cùng key/payload. Auth/network/storage/Web Locks của lượt DOM được giả lập; chưa thay thế kiểm tra bàn phím trên trình duyệt thật hoặc PostgreSQL.
+
+Ngày 04/11/2026, A xác nhận kiểm tra lại trên trình duyệt: hộp xác nhận giữ nguyên khi Tab lên thanh công cụ rồi quay lại trang; Esc và Hủy đóng hộp, giữ giỏ và không phát sinh POST tạo đơn. A báo các lệnh unit test, typecheck, lint và build đạt. Ca chủ động làm chậm /me chưa được xác nhận riêng trên máy A.

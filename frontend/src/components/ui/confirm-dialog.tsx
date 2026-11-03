@@ -11,6 +11,10 @@ type ConfirmDialogProps = {
   cancelLabel?: string;
   /** Đang xử lý: khóa nút, không cho đóng bằng Esc hoặc Hủy. */
   busy?: boolean;
+  /** Chỉ khóa xác nhận trong lúc kiểm tra lại; vẫn cho Hủy/Esc. */
+  confirmDisabled?: boolean;
+  /** Nút mở có thể được dựng lại sau khi kiểm tra giỏ. */
+  returnFocusId?: string;
   onConfirm: () => void;
   onCancel: () => void;
 };
@@ -27,6 +31,8 @@ export function ConfirmDialog({
   confirmLabel,
   cancelLabel = "Hủy",
   busy = false,
+  confirmDisabled = false,
+  returnFocusId,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
@@ -43,8 +49,9 @@ export function ConfirmDialog({
       cancelRef.current?.focus();
     } else if (!open && dialog.open) {
       dialog.close();
+      if (returnFocusId) document.getElementById(returnFocusId)?.focus();
     }
-  }, [open]);
+  }, [open, returnFocusId]);
 
   return (
     <dialog
@@ -74,7 +81,7 @@ export function ConfirmDialog({
         >
           {cancelLabel}
         </button>
-        <Button onClick={onConfirm} disabled={busy} aria-busy={busy || undefined}>
+        <Button onClick={onConfirm} disabled={busy || confirmDisabled} aria-busy={busy || undefined}>
           {busy ? "Đang xử lý…" : confirmLabel}
         </Button>
       </div>
