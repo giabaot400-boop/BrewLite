@@ -4,6 +4,7 @@ import type { createCartStorage } from "./cart-storage";
 import type { AuthSnapshot } from "../auth/auth-session";
 import type { LogoutScope } from "../auth/types";
 import type { CartAction } from "./types";
+import type { CartLifecycleCommand } from "./cart-lifecycle";
 
 type StoragePort = ReturnType<typeof createCartStorage>;
 
@@ -64,6 +65,19 @@ export function createCartSessionBridge(storage: StoragePort, getSnapshot: () =>
         () => current.isCurrent() && !logoutBusy);
       requireCurrent(current.isCurrent);
       return { ...visible(saved.envelope, current.ownerId), error: saved.error };
+    },
+
+    async prepareOrder(command: Extract<CartLifecycleCommand, { type: "BEGIN_ORDER" | "RETRY_ORDER" }>) {
+      if (logoutBusy) throw new CartStorageError("CART_CHANGED", "Đang xử lý đăng xuất.");
+      const current = capture();
+      if (current.ownerId === null || command.ownerId !== current.ownerId) {
+        throw new CartStorageError("OWNER_MISMATCH", "Cần đăng nhập đúng tài khoản của lần đặt.");
+      }
+      const saved = await storage.applyLifecycle(command, () => current.isCurrent() && !logoutBusy);
+      // A transition after the durable write must not permit a stale send.
+      // The persisted SUBMITTING record remains recoverable as UNKNOWN.
+      requireCurrent(current.isCurrent);
+      return saved;
     },
 
     // Call before HTTP, then release the lock before sending logout.

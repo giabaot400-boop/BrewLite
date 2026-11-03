@@ -5,6 +5,12 @@ import type { ReactNode } from "react";
 import { useAuth } from "../auth/auth-provider";
 import type { AuthSnapshot, LogoutInfo } from "../auth/auth-session";
 import { CartStorageError } from "./cart-envelope";
+import type { PendingCartRequest, ConfirmedCartOrder } from "./cart-envelope";
+import { createCartOrderClient } from "./cart-order-client";
+import type { OrderPhase, OrderReview } from "./cart-order-client";
+import { createCartOrderTransport } from "./cart-order-transport";
+import { orderFeedback, localOrderError } from "./cart-order-feedback";
+import type { CartOrderFeedback } from "./cart-order-feedback";
 import { selectCartQuantity } from "./cart-reducer";
 import { createCartSessionBridge } from "./cart-session-bridge";
 import { CART_STORAGE_KEY, createCartStorage } from "./cart-storage";
@@ -20,6 +26,12 @@ type CartContextValue = {
   decrement: (lineKey: string) => Promise<boolean>;
   removeItem: (lineKey: string) => Promise<boolean>;
   reload: () => Promise<void>;
+  pending: PendingCartRequest | null;
+  lastOrder: ConfirmedCartOrder | null;
+  orderPhase: OrderPhase;
+  orderFeedback: CartOrderFeedback | null;
+  reviewOrder: (retry?: boolean) => OrderReview | null;
+  submitOrder: (review: OrderReview) => Promise<void>;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -35,6 +47,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartViewReducer, undefined, createCartViewState);
   const [publishedIdentity, setPublishedIdentity] = useState<AuthSnapshot | null>(null);
   const [hasPending, setHasPending] = useState(false);
+  const [records, setRecords] = useState<{ pending: PendingCartRequest | null; result: ConfirmedCartOrder | null }>({ pending: null, result: null });
+  const [phases, setPhases] = useState<ReadonlyMap<string, OrderPhase>>(new Map());
+  const [feedback, setFeedback] = useState<{ ownerId: string; revision: number | null; value: CartOrderFeedback } | null>(null);
   const [storage] = useState(() => createCartStorage());
   const [bridge] = useState(() => createCartSessionBridge(storage, getSessionSnapshot));
   const alive = useRef(false);
@@ -50,6 +65,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     identityRef.current = identity;
     setPublishedIdentity(identity);
     setHasPending(saved.pending !== null);
+    setRecords({ pending: saved.pending, result: saved.result });
     ready.current = saved.cart !== null && saved.pending === null;
     logoutInfo.current = saved.cart === null ? null : {
       cartItemCount: selectCartQuantity(saved.cart), hasPendingOrder: saved.pending !== null,
@@ -109,6 +125,59 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const after = getSessionSnapshot();
     await read(after !== before && after.status === "authenticated" ? after : undefined);
   }, [getSessionSnapshot, refresh, read]);
+
+  const [orderClient] = useState(() => createCartOrderClient({ storage, bridge, getSnapshot: getSessionSnapshot,
+    transport: createCartOrderTransport({ fetch: (url, init) => fetch(url, init) }),
+  }));
+
+  useEffect(() => orderClient.subscribePhase((ownerId, phase) => {
+      if (!alive.current) return;
+      setPhases(current => {
+        const next = new Map(current);
+        if (phase === "IDLE") next.delete(ownerId); else next.set(ownerId, phase);
+        return next;
+      });
+      if (getSessionSnapshot().user?.id === ownerId) {
+        if (phase === "PREPARING") ready.current = false;
+        if (phase === "SENDING") void read(); // Publish durable pending, never send from read().
+      }
+  }), [orderClient, getSessionSnapshot, read]);
+
+  const reviewOrder = useCallback((retry = false): OrderReview | null => {
+    const identity = getSessionSnapshot();
+    if (saving.current || publishedIdentity !== identity || state.status !== "ready" || !state.cart) return null;
+    try {
+      if (retry && !records.pending) throw new CartStorageError("PENDING_NOT_FOUND", "Không còn lần đặt để thử lại.");
+      if (!retry && records.pending) throw new CartStorageError("PENDING_REQUEST", "Hãy thử lại cùng lần đặt đang chờ.");
+      const review = orderClient.review(state.cart, retry ? records.pending : null);
+      setFeedback(null);
+      return review;
+    } catch (error) {
+      if (identity.user) setFeedback({ ownerId: identity.user.id, revision: null, value: localOrderError(errorMessage(error)) });
+      return null;
+    }
+  }, [getSessionSnapshot, publishedIdentity, state, records.pending, orderClient]);
+
+  const submitOrder = useCallback(async (review: OrderReview) => {
+    try {
+      const result = await orderClient.submit(review);
+      if (alive.current && getSessionSnapshot().user?.id === result.request.ownerId) {
+        setFeedback({ ownerId: result.request.ownerId, revision: result.settlement.envelope.cart.revision,
+          value: orderFeedback(result.settlement, result.request) });
+        const outcome = result.settlement.outcome;
+        if (outcome.kind === "UNKNOWN" && ["AUTH_REQUIRED", "SESSION_INVALID", "SESSION_EXPIRED", "REQUEST_FORBIDDEN"].includes(outcome.code)) {
+          await reload(); // Recheck the cookie; a mismatch must not sign out another account.
+          return;
+        }
+      }
+    } catch (error) {
+      if (alive.current && getSessionSnapshot().user?.id === review.ownerId) {
+        setFeedback({ ownerId: review.ownerId, revision: null, value: localOrderError(errorMessage(error)
+          + " Nếu còn lần đặt đang chờ, hãy giữ nguyên và thử lại cùng lần đặt đó.") });
+      }
+    }
+    await read();
+  }, [orderClient, getSessionSnapshot, reload, read]);
 
   useEffect(() => {
     alive.current = true;
@@ -192,6 +261,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     try {
       const saved = await bridge.mutate(action);
       publish(version, identity, saved, saved.error?.message);
+      if (saved.error === null && alive.current && getSessionSnapshot() === identity) setFeedback(null);
       return saved.error === null;
     } catch (error) {
       fail(version, identity, error);
@@ -207,16 +277,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const value = useMemo<CartContextValue>(() => {
     const visibleState = publishedIdentity === sessionSnapshot ? state
       : { ...state, status: "restoring" as const, cart: null, message: null };
+    const ownerId = sessionSnapshot.status === "authenticated" ? sessionSnapshot.user?.id : null;
+    const orderPhase = ownerId ? phases.get(ownerId) ?? "IDLE" : "IDLE";
+    const visibleRecords = visibleState.status === "ready" && ownerId !== null;
+    const visibleFeedback = visibleRecords && feedback !== null && feedback.ownerId === ownerId &&
+      (feedback.revision === null || feedback.revision === visibleState.cart?.revision) ? feedback.value : null;
     return {
       state: visibleState,
-      canMutate: visibleState.status === "ready" && !visibleState.isSaving && !hasPending,
+      canMutate: visibleState.status === "ready" && !visibleState.isSaving && !hasPending && orderPhase === "IDLE",
+      pending: visibleRecords ? records.pending : null,
+      lastOrder: visibleRecords ? records.result : null,
+      orderPhase,
+      orderFeedback: visibleFeedback,
+      reviewOrder,
+      submitOrder,
       addItem: (item) => mutate({ type: "ADD_ITEM", item }),
       increment: (lineKey) => mutate({ type: "INCREMENT", lineKey }),
       decrement: (lineKey) => mutate({ type: "DECREMENT", lineKey }),
       removeItem: (lineKey) => mutate({ type: "REMOVE_ITEM", lineKey }),
       reload,
     };
-  }, [publishedIdentity, sessionSnapshot, state, hasPending, mutate, reload]);
+  }, [publishedIdentity, sessionSnapshot, state, hasPending, mutate, reload, phases, feedback, records, reviewOrder, submitOrder]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
