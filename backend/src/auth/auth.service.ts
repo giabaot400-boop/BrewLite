@@ -137,7 +137,7 @@ export class AuthService {
     return { token, user: { id: user.id, email: user.email }, expiresAt: expiresAt.toISOString() };
   }
 
-  async validateSession(authorization?: string): Promise<PublicUser> {
+  private async requireActiveSession(authorization?: string) {
     const token = this.bearer(authorization);
     const claims = this.verify(token);
 
@@ -148,25 +148,20 @@ export class AuthService {
       },
     });
 
-    if (!session || session.userId !== claims.sub) {
+    if (!session || session.userId !== claims.sub || session.revokedAt) {
       throw apiError(401, 'SESSION_INVALID', 'Phiên đăng nhập không hợp lệ.');
     }
-    if (session.revokedAt || session.expiresAt.getTime() <= Date.now()) {
-      throw apiError(401, 'SESSION_EXPIRED', 'Phiên đăng nhập đã hết hạn hoặc bị thu hồi.');
+    if (session.expiresAt.getTime() <= Date.now()) {
+      throw apiError(401, 'SESSION_EXPIRED', 'Phiên đăng nhập đã hết hạn.');
     }
 
-    return session.user;
+    return session;
+  }
+  async validateSession(authorization?: string): Promise<PublicUser> {
+    return (await this.requireActiveSession(authorization)).user;
   }
   async me(authorization?: string): Promise<{ user: PublicUser; expiresAt: string }> {
-    const token = this.bearer(authorization);
-    const claims = this.verify(token);
-    const session = await this.prisma.authSession.findUnique({
-      where: { id: claims.sid },
-      include: { user: { select: { id: true, email: true } } },
-    });
-    if (!session || session.userId !== claims.sub || session.revokedAt || session.expiresAt.getTime() <= Date.now()) {
-      throw apiError(401, 'SESSION_EXPIRED', 'Phiên đăng nhập không còn hiệu lực.');
-    }
+    const session = await this.requireActiveSession(authorization);
     return { user: session.user, expiresAt: session.expiresAt.toISOString() };
   }
 
@@ -180,7 +175,8 @@ export class AuthService {
     });
 
     if (!session) {
-      throw apiError(401, 'SESSION_INVALID', 'Phiên đăng nhập không tồn tại.');
+      // P05: a verified token whose session no longer exists is already logged out.
+      return;
     }
     if (session.userId !== claims.sub) {
       throw apiError(401, 'SESSION_INVALID', 'Phiên đăng nhập không thuộc tài khoản này.');
@@ -198,7 +194,7 @@ export class AuthService {
         select: { id: true, userId: true, revokedAt: true },
       });
       if (!latest) {
-        throw apiError(401, 'SESSION_INVALID', 'Phiên đăng nhập không tồn tại.');
+        return;
       }
       if (latest.userId !== claims.sub) {
         throw apiError(401, 'SESSION_INVALID', 'Phiên đăng nhập không thuộc tài khoản này.');
@@ -215,4 +211,3 @@ export class AuthService {
     return match[1];
   }
 }
-
