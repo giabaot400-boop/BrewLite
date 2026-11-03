@@ -76,9 +76,12 @@ export function createCartStorage(environment?: CartStorageEnvironment) {
       return underLock(readStored);
     },
 
-    applyLifecycle(command: CartLifecycleCommand): Promise<CartLifecycleResult> {
+    applyLifecycle(command: CartLifecycleCommand, isCurrent?: () => boolean): Promise<CartLifecycleResult> {
       const captured = structuredClone(command);
       return underLock((storage) => {
+        if (isCurrent && !isCurrent()) {
+          throw new CartStorageError("OWNER_MISMATCH", "Phiên xác thực đã thay đổi. Vui lòng thử lại.");
+        }
         const envelope = readStored(storage);
         const saved = applyCartLifecycle(envelope, captured);
         if (saved.envelope !== envelope) writeStored(storage, saved.envelope);
@@ -98,10 +101,13 @@ export function createCartStorage(environment?: CartStorageEnvironment) {
       });
     },
 
-    mutateCart(action: CartAction, expectedOwnerId: string | null): Promise<SavedCartMutation> {
+    mutateCart(action: CartAction, expectedOwnerId: string | null, isCurrent?: () => boolean): Promise<SavedCartMutation> {
       // Capture the command before waiting; caller cannot change it while queued.
       const captured = structuredClone(action);
       return underLock((storage) => {
+        if (isCurrent && !isCurrent()) {
+          throw new CartStorageError("OWNER_MISMATCH", "Phiên xác thực đã thay đổi. Vui lòng thử lại.");
+        }
         const envelope = readStored(storage);
         if (envelope.cart.ownerId !== expectedOwnerId) {
           throw new CartStorageError("OWNER_MISMATCH", "Tài khoản của giỏ đã thay đổi. Vui lòng tải lại trạng thái.");
