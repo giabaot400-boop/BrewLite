@@ -1,4 +1,5 @@
 import { CartStorageError, isCartEnvelope } from "./cart-envelope.ts";
+import { ORDER_OWNER_HEADER, encodeOrderOwner } from "../../lib/order-owner.ts";
 import type { PendingCartRequest } from "./cart-envelope";
 import type { OrderSettlementCommand } from "./cart-order-settlement";
 
@@ -40,6 +41,10 @@ export function createCartOrderTransport(environment: OrderTransportEnvironment)
   return {
     async send(request: PendingCartRequest, signal?: AbortSignal): Promise<OrderTransportResult> {
       const captured = capturePreparedRequest(request);
+      let encodedOwner: string;
+      try { encodedOwner = encodeOrderOwner(captured.ownerId); } catch {
+        throw new CartStorageError("INVALID_DATA", "Owner của lần đặt không hợp lệ. Chưa gửi yêu cầu.");
+      }
       const now = environment.now ?? (() => new Date().toISOString());
       const finish = (observation: Observation): OrderTransportResult => ({
         reply: { ownerId: captured.ownerId, requestKey: captured.requestKey,
@@ -73,7 +78,8 @@ export function createCartOrderTransport(environment: OrderTransportEnvironment)
             const response = await environment.fetch("/api/orders", {
               method: "POST", credentials: "same-origin", cache: "no-store", redirect: "error",
               headers: { "Content-Type": "application/json", Accept: "application/json",
-                "X-BrewLite-Request": "1", "Idempotency-Key": captured.requestKey },
+                "X-BrewLite-Request": "1", "Idempotency-Key": captured.requestKey,
+                [ORDER_OWNER_HEADER]: encodedOwner },
               body: JSON.stringify(captured.payload), signal: controller.signal,
             });
             // Ignore late fetch completion after the deadline; do not start body work.

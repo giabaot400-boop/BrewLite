@@ -9,7 +9,7 @@ test("login gửi header bắt buộc, cookie same-origin, không trả token", 
   let seen;
   const client = createHttpAuthClient(async (url, init) => {
     seen = { url, init };
-    return json(200, { user: { id: "1", email: "a@b.co" }, expiresAt: 123 });
+    return json(200, { user: { id: "1", email: "a@b.co" }, expiresAt: 123 }, { "X-BrewLite-Session-Binding": "a".repeat(64) });
   });
   const session = await client.login({ email: "a@b.co", password: "x" });
   assert.equal(seen.url, "/api/auth/login");
@@ -17,7 +17,7 @@ test("login gửi header bắt buộc, cookie same-origin, không trả token", 
   assert.equal(seen.init.headers["Content-Type"], "application/json");
   assert.equal(seen.init.headers["X-BrewLite-Request"], "1");
   assert.equal(seen.init.credentials, "same-origin");
-  assert.deepEqual(Object.keys(session).sort(), ["expiresAt", "user"]);
+  assert.deepEqual(Object.keys(session).sort(), ["binding", "expiresAt", "user"]);
 });
 
 test("map lỗi theo contract {error:{code,message,fieldErrors}}", async () => {
@@ -53,7 +53,7 @@ test("quá thời gian -> CLIENT_TIMEOUT (abort)", async () => {
   await assert.rejects(client.login({ email: "a@b.co", password: "x" }), (e) => e.code === "CLIENT_TIMEOUT");
 });
 
-test("logout đọc scope từ header; mặc định là session", async () => {
+test("logout đọc đúng scope từ header", async () => {
   const local = createHttpAuthClient(async () => new Response(null, { status: 204, headers: { "X-BrewLite-Logout-Scope": "local" } }));
   const session = createHttpAuthClient(async () => new Response(null, { status: 204, headers: { "X-BrewLite-Logout-Scope": "session" } }));
   assert.equal(await local.logout(), "local");

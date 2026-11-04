@@ -2,19 +2,24 @@
 
 import { ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useAuth } from "@/features/auth/auth-provider";
 import { formatPrice } from "@/features/products/format-price";
 import { getCartLineKey, MAX_CART_QUANTITY, selectCartQuantity, selectCartTotal } from "../cart-reducer";
 import { useCart } from "../cart-provider";
-import { CartNotice } from "./cart-notice";
+import { CartNoticeContent } from "./cart-notice";
+import { CartOrderPanel } from "./cart-order-panel";
+import { CartRefreshBoundary } from "./cart-refresh-boundary";
 
 const controlClass = "min-h-11 min-w-11 rounded-lg border border-stone-300 px-3 font-semibold disabled:cursor-not-allowed disabled:opacity-50";
 
 export function CartPanel() {
-  const { state, canMutate, increment, decrement, removeItem } = useCart();
+  const { state, canMutate, increment, decrement, removeItem, orderFeedback, reload } = useCart();
+  const { sessionVersion } = useAuth();
   const cart = state.status === "ready" ? state.cart : null;
   return (
     <>
-      <CartNotice />
+      <CartRefreshBoundary ready={state.status === "ready"} restoring={state.status === "restoring"} sessionVersion={sessionVersion}>
+      {state.status !== "restoring" && <CartNoticeContent state={state} reload={reload} />}
       {state.isSaving && <p role="status" className="mt-4 text-sm text-stone-600">Đang lưu giỏ hàng…</p>}
       {cart !== null && (
         <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
@@ -35,6 +40,9 @@ export function CartPanel() {
                       <h2 className="text-xl font-semibold">{item.productName}</h2>
                       <p className="mt-2 text-sm text-stone-600">Size {item.size} · {toppings || "Không topping"}</p>
                       <p className="mt-3 text-sm">Đơn giá xem trước: {formatPrice(item.previewUnitPrice)}</p>
+                      {orderFeedback?.lineErrors[lineKey]?.map((message, index) => (
+                        <p key={index} role="alert" className="mt-2 text-sm text-red-700">{message}</p>
+                      ))}
                       <div className="mt-4 flex flex-wrap items-center gap-3">
                         <button type="button" className={controlClass} aria-label={`Giảm số lượng ${label}`}
                           disabled={!canMutate || item.qty === 1} onClick={() => { void decrement(lineKey); }}>−</button>
@@ -63,6 +71,8 @@ export function CartPanel() {
         </div>
       )}
       {cart === null && <div className="mt-6"><ButtonLink href="/" variant="text">Về menu</ButtonLink></div>}
+      </CartRefreshBoundary>
+      <CartOrderPanel />
     </>
   );
 }

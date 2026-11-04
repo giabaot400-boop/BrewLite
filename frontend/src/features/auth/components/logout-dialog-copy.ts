@@ -22,4 +22,3 @@ export function logoutDialogLines(info: LogoutInfo | null): string[] {
 export function needsLogoutConfirmation(info: LogoutInfo | null): boolean {
   return info === null || info.cartItemCount > 0 || info.hasPendingOrder;
 }
-

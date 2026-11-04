@@ -1,6 +1,7 @@
 import { AuthApiError } from "./auth-error.ts";
 import type { AuthErrorCode, AuthSession, FieldErrors, LogoutScope } from "./types.ts";
 import { normalizeEmail, validateNewPassword } from "./validation.ts";
+import { EXPECTED_SESSION_HEADER, SESSION_BINDING_HEADER, isSessionBinding } from "../../lib/session-binding.ts";
 
 /** UI → BFF chờ tối đa 15 giây (mục "Thời gian chờ" của v0.6). */
 export const CLIENT_TIMEOUT_MS = 15_000;
@@ -15,8 +16,8 @@ export type Credentials = { email: string; password: string };
 export type AuthClient = {
   register(input: Credentials): Promise<{ id: string; email: string }>;
   login(input: Credentials): Promise<AuthSession>;
-  me(): Promise<AuthSession>;
-  logout(): Promise<LogoutScope>;
+  me(options?: { timeoutMs?: number }): Promise<AuthSession>;
+  logout(expectedBinding?: string, options?: { timeoutMs?: number }): Promise<LogoutScope>;
 };
 
 type FetchLike = typeof fetch;
@@ -42,7 +43,7 @@ async function readError(response: Response): Promise<AuthApiError> {
 async function request<T>(
   fetchImpl: FetchLike,
   path: string,
-  init: { method: "GET" | "POST"; body?: unknown },
+  init: { method: "GET" | "POST"; body?: unknown; headers?: Record<string, string> },
   timeoutMs: number,
   read: (response: Response) => Promise<T>,
 ): Promise<T> {
@@ -57,7 +58,7 @@ async function request<T>(
   const work = (async () => {
     const response = await fetchImpl(path, {
       method: init.method,
-      headers: init.method === "POST" ? JSON_HEADERS : undefined,
+      headers: init.method === "POST" ? { ...JSON_HEADERS, ...init.headers } : undefined,
       body: init.body === undefined ? undefined : JSON.stringify(init.body),
       credentials: "same-origin",
       cache: "no-store",
@@ -99,10 +100,11 @@ async function readJson(response: Response): Promise<unknown> {
 async function readSession(response: Response): Promise<AuthSession> {
   const data = (await readJson(response)) as { user?: unknown; expiresAt?: unknown } | null;
   const okExpiry = typeof data?.expiresAt === "string" || typeof data?.expiresAt === "number";
-  if (!data || !isUser(data.user) || !okExpiry) {
+  const binding = response.headers.get(SESSION_BINDING_HEADER);
+  if (!data || !isUser(data.user) || !okExpiry || !isSessionBinding(binding)) {
     throw new AuthApiError("INVALID_RESPONSE", "Phản hồi không hợp lệ.", response.status);
   }
-  return { user: data.user, expiresAt: data.expiresAt as string | number };
+  return { user: data.user, expiresAt: data.expiresAt as string | number, binding };
 }
 
 export function createHttpAuthClient(fetchImpl: FetchLike = fetch, timeoutMs = CLIENT_TIMEOUT_MS): AuthClient {
@@ -119,12 +121,14 @@ export function createHttpAuthClient(fetchImpl: FetchLike = fetch, timeoutMs = C
     login(input) {
       return request(fetchImpl, "/api/auth/login", { method: "POST", body: input }, timeoutMs, readSession);
     },
-    me() {
-      return request(fetchImpl, "/api/auth/me", { method: "GET" }, timeoutMs, readSession);
+    me(options) {
+      return request(fetchImpl, "/api/auth/me", { method: "GET" }, Math.min(timeoutMs, options?.timeoutMs ?? timeoutMs), readSession);
     },
-    logout() {
+    logout(expectedBinding, options) {
       // P05: chỉ HTTP 204 với scope đúng "session" hoặc "local" mới là đã xác nhận đăng xuất.
-      return request(fetchImpl, "/api/auth/logout", { method: "POST", body: {} }, timeoutMs, async (res) => {
+      const headers: Record<string, string> = isSessionBinding(expectedBinding) ? { [EXPECTED_SESSION_HEADER]: expectedBinding } : {};
+      return request(fetchImpl, "/api/auth/logout", { method: "POST", body: {}, headers },
+        Math.min(timeoutMs, options?.timeoutMs ?? timeoutMs), async (res) => {
         const scope = res.headers.get("X-BrewLite-Logout-Scope");
         if (res.status !== 204 || (scope !== "session" && scope !== "local")) {
           throw new AuthApiError("INVALID_RESPONSE", "Phản hồi đăng xuất không đúng hợp đồng.", res.status);

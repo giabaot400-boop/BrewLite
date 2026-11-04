@@ -12,3 +12,5 @@ backend/src/generated/
 .DS_Store
 Thumbs.db
 frontend/next-env.d.ts
+
+/db-backups/

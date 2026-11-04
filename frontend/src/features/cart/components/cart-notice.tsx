@@ -2,9 +2,15 @@
 
 import { Button } from "@/components/ui/button";
 import { useCart } from "../cart-provider";
+import type { CartViewState } from "../cart-view";
 
 export function CartNotice() {
   const { state, reload } = useCart();
+  return <CartNoticeContent state={state} reload={reload} />;
+}
+
+/** Explicit props let a refresh boundary retain the previous layout without reading new context. */
+export function CartNoticeContent({ state, reload }: { state: CartViewState; reload: () => Promise<void> }) {
   if (state.status === "restoring") {
     return <p role="status" className="mt-4 text-sm text-stone-600">Đang khôi phục giỏ hàng…</p>;
   }

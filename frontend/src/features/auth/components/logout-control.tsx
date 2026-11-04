@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/toast";
 import { useAuth } from "../auth-provider";
 import { AuthApiError, messageForAuthError } from "../auth-error";
 import { logoutDialogLines, needsLogoutConfirmation } from "./logout-dialog-copy";
+import { ConfirmedLogoutError } from "../auth-session";
 
 /**
  * Nút Đăng xuất. Chỉ báo "đã đăng xuất" khi BFF xác nhận (204 + scope hợp lệ).
@@ -15,7 +16,7 @@ import { logoutDialogLines, needsLogoutConfirmation } from "./logout-dialog-copy
 export function LogoutControl() {
   const router = useRouter();
   const toast = useToast();
-  const { logout, getLogoutInfo } = useAuth();
+  const { logout, getLogoutInfo, refresh } = useAuth();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [lines, setLines] = useState<string[]>([]);
@@ -43,9 +44,21 @@ export function LogoutControl() {
       );
       router.replace("/");
     } catch (error) {
+      if (error instanceof ConfirmedLogoutError) {
+        setOpen(false);
+        toast.show(error.reason === "session-changed"
+          ? "Đã nhận xác nhận đăng xuất; phiên đăng nhập đã thay đổi trong lúc xử lý. Vui lòng kiểm tra lại phiên và giỏ."
+          : error.scope === "local"
+            ? "Đã dọn phiên cục bộ, chưa xác nhận thu hồi server; chưa dọn được giỏ. Vui lòng mở giỏ và thử đọc lại."
+            : "Đã đăng xuất khỏi phiên server; chưa dọn được giỏ trên thiết bị. Vui lòng mở giỏ và thử đọc lại.", "info");
+        if (error.reason === "cart") router.replace("/cart");
+        else void refresh();
+        return;
+      }
       const apiError = error instanceof AuthApiError ? error : new AuthApiError("UNKNOWN", "");
       toast.show(messageForAuthError(apiError, "logout"), "error");
       close();
+      if (apiError.code === "REQUEST_FORBIDDEN") void refresh();
     } finally {
       inFlight.current = false;
       setBusy(false);
