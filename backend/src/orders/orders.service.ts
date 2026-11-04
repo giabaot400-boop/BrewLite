@@ -391,6 +391,43 @@ export class OrdersService {
     );
   }
 
+  private async assertSucceededRequest(
+    tx: Prisma.TransactionClient,
+    userId: string,
+    requestKey: string,
+    requestHash: string,
+    orderId: string,
+  ): Promise<void> {
+    const saved = await tx.orderRequest.findUnique({
+      where: { userId_requestKey: { userId, requestKey } },
+      select: {
+        userId: true,
+        requestKey: true,
+        requestHash: true,
+        state: true,
+        orderId: true,
+        order: {
+          select: { id: true, userId: true, requestKey: true, requestHash: true },
+        },
+      },
+    });
+
+    if (
+      !saved ||
+      saved.state !== "SUCCEEDED" ||
+      saved.userId !== userId ||
+      saved.requestKey !== requestKey ||
+      saved.requestHash !== requestHash ||
+      saved.orderId !== orderId ||
+      saved.order?.id !== orderId ||
+      saved.order.userId !== userId ||
+      saved.order.requestKey !== requestKey ||
+      saved.order.requestHash !== requestHash
+    ) {
+      throw new Error("ORDER_REQUEST_INVARIANT_VIOLATION");
+    }
+  }
+
   async createOrder(
     userId: string,
     requestKey: string,
@@ -546,6 +583,11 @@ export class OrdersService {
                 responseJson: body as Prisma.InputJsonValue,
               },
             });
+
+            // P07: đối chiếu dữ liệu đã ghi trong cùng tx; sai thì rollback.
+            await this.assertSucceededRequest(
+              tx, userId, requestKey, requestHash, order.id,
+            );
 
             return {
               kind: "SUCCEEDED",
