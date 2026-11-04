@@ -46,6 +46,7 @@ type MockOptions = {
   acquired?: boolean;
   product?: ReturnType<typeof createProduct> | null;
   existing?: Record<string, unknown> | null;
+  storedCorruption?: string;
 };
 
 function createMock(options: MockOptions = {}) {
@@ -53,6 +54,9 @@ function createMock(options: MockOptions = {}) {
     ordersCreated: [] as unknown[],
     requestsCreated: [] as unknown[],
   };
+
+  let storedRequest: Record<string, unknown> | null = null;
+  let storedOrder: Record<string, unknown> | null = null;
 
   const tx = {
     $queryRaw: async () => [{ acquired: options.acquired ?? true }],
@@ -63,20 +67,31 @@ function createMock(options: MockOptions = {}) {
     },
 
     orderRequest: {
-      findUnique: async () => options.existing ?? null,
-      create: async (args: unknown) => {
+      findUnique: async () => storedRequest === null
+        ? options.existing ?? null
+        : { ...storedRequest, order: storedOrder },
+      create: async (args: { data: Record<string, unknown> }) => {
         calls.requestsCreated.push(args);
-        return args;
+        storedRequest = { ...args.data };
+        for (const field of ["userId", "requestKey", "requestHash"]) {
+          if (options.storedCorruption === `ledger.${field}`) {
+            storedRequest[field] = "unexpected-value";
+          }
+        }
+        return storedRequest;
       },
     },
 
     order: {
-      create: async (args: unknown) => {
+      create: async (args: { data: Record<string, unknown> }) => {
         calls.ordersCreated.push(args);
-        return {
-          id: "order-001",
-          total: 94000,
-        };
+        storedOrder = { ...args.data, id: "order-001", total: 94000 };
+        for (const field of ["userId", "requestKey", "requestHash"]) {
+          if (options.storedCorruption === `order.${field}`) {
+            storedOrder[field] = "unexpected-value";
+          }
+        }
+        return storedOrder;
       },
     },
   };
@@ -331,3 +346,17 @@ test("UT-S07: Rejected replay remaps fieldErrors after item reorder", async () =
   assert.equal(calls.ordersCreated.length, 0);
   assert.equal(calls.requestsCreated.length, 0);
 });
+
+for (const side of ["order", "ledger"]) {
+  for (const field of ["userId", "requestKey", "requestHash"]) {
+    test(`ORDER-08: persisted ${side}.${field} mismatch aborts before commit`, async () => {
+      const { service, calls } = createMock({ storedCorruption: `${side}.${field}` });
+      await assert.rejects(
+        () => service.createOrder(USER_ID, REQUEST_KEY, createDto()),
+        { message: "ORDER_REQUEST_INVARIANT_VIOLATION" },
+      );
+      assert.equal(calls.ordersCreated.length, 1);
+      assert.equal(calls.requestsCreated.length, 1);
+    });
+  }
+}
