@@ -7,9 +7,11 @@ Cập nhật ngày 04/11/2026. Phạm vi: giỏ hàng, đăng ký/đăng nhập/
 | Hạng mục | Phiên bản | Trạng thái tại thời điểm tổng hợp |
 |---|---|---|
 | Nền Sprint 2 | PR [#24](https://github.com/giabaot400-boop/BrewLite/pull/24), merge `ec042b5` | Đã tích hợp vào main sau review của B. Tree trùng bản được review `d5712de`. |
-| Hiệu năng auth | PR [#26](https://github.com/giabaot400-boop/BrewLite/pull/26), `38cecc5` | Đã kiểm tra; đang chờ review/merge. |
-| Nhất quán Order/ledger | Nhánh `fix/sprint2-orders-invariant`, `0c37393` | Đã push; ORDER-08/10 đạt trên PostgreSQL thật. Chưa có PR trong danh sách PR mở tại thời điểm tổng hợp. |
-| Hồ sơ Sprint 2 | Nhánh `docs/sprint2-closeout` | Đang hoàn thiện để review và ghi quyết định nghiệm thu của PO. |
+| Hiệu năng auth | PR [#26](https://github.com/giabaot400-boop/BrewLite/pull/26), HEAD `790e944`, merge `c46d7c0` | B approve đúng HEAD và merge ngày 04/11/2026 lúc 18:45 (UTC+7). |
+| Nhất quán Order/ledger | PR [#28](https://github.com/giabaot400-boop/BrewLite/pull/28), HEAD `0c37393`, merge `3a870ba` | B approve đúng HEAD và merge ngày 04/11/2026 lúc 18:46 (UTC+7). ORDER-08/10 đạt trên PostgreSQL thật. |
+| Hồ sơ Sprint 2 | PR [#27](https://github.com/giabaot400-boop/BrewLite/pull/27), nhánh `docs/sprint2-closeout` | PO đã chấp nhận phạm vi chức năng đã kiểm tra; chờ hoàn tất review/merge hồ sơ. |
+
+Main sau hai bản sửa là `3a870ba4b20da52d4af743d025100c5a225db8dc`.
 
 Yêu cầu đối chiếu là đặc tả Sprint 2 v0.6 và bộ sơ đồ đi kèm: 4 user story, 36 AC, 37 mã kiểm thử. File thiết kế được giữ làm baseline; kết quả chạy được ghi trong hồ sơ này. Product API, dữ liệu danh mục và migration Sprint 1 tiếp tục được sử dụng.
 
@@ -56,7 +58,7 @@ Bằng chứng gồm unit test với I/O giả lập, kiểm tra service/HTTP v�
 | REG-AC-05 | Thành công chuyển login, không tự login/đặt | Có kết quả | V08 UI đăng ký/login; V02 register không cấp phiên; V10 luồng chuyển trang. |
 | REG-AC-06 | Thất bại/mạng: giữ form, báo lỗi và thử lại | Có kết quả giả lập | V02 auth-client/auth-error; V10 form; chưa có đủ biến thể mạng trên UI thật. |
 | REG-AC-07 | Giữ giỏ và đích quay lại qua register/login | Có kết quả | V05 giỏ khách/login; V02 return-to/owner; V10 mock next. Riêng thất bại đăng ký giữ giỏ chưa có log UI thật. |
-| REG-AC-08 | 15 code point, tối đa 72 byte, không trim | Có kết quả unit backend/frontend; HTTP một phần | V02 frontend; V07 HTTP biên ASCII. V12 bổ sung test AuthService thật với Prisma giả cho ASCII/Unicode/emoji 72 byte, dấu cách, NUL và surrogate; HTTP xác nhận hash cost 12. Chưa có HTTP riêng cho mọi biến thể Unicode. Bản sửa ở PR #26. |
+| REG-AC-08 | 15 code point, tối đa 72 byte, không trim | Có kết quả unit backend/frontend; HTTP một phần | V02 frontend; V07 HTTP biên ASCII. V12 bổ sung test AuthService thật với Prisma giả cho ASCII/Unicode/emoji 72 byte, dấu cách, NUL và surrogate; HTTP xác nhận hash cost 12. Chưa có HTTP riêng cho mọi biến thể Unicode. Bản sửa đã tích hợp qua PR #26. |
 | LOGIN-AC-01 | Hai ô bắt buộc, mật khẩu che | Đối chiếu UI/code | V08 form thật; components/login-form.tsx. |
 | LOGIN-AC-02 | Thiếu/sai email bị chặn trước HTTP | Có kết quả | V02 validateLogin; V10 form mock. |
 | LOGIN-AC-03 | Sai thông tin: lỗi chung, có thể thử lại | Có kết quả | V07 HTTP INVALID_CREDENTIALS; V02 ánh xạ thông báo. |
@@ -91,11 +93,11 @@ Giữ nguyên 37 mã của v0.6. Các biến thể được tổng hợp trong m
 | S2-CART-07 | Điều hướng/reload, storage lỗi, nhiều tab | Một phần | V08 F5; V01/V05 nhiều tab; V02 lỗi storage/lock giả lập. Không có đủ lượt trình duyệt thật cho mọi lỗi storage. |
 | S2-CART-08 | Qua đăng ký/login từ giỏ | Có kết quả | V05/V10 + V02 return-to và guest adoption. |
 | S2-CART-09 | Logout/hủy/hết hạn/đổi owner/pending | Một phần | V05/V08/V09 logout/hủy/pending; V03 expiry API, V02 owner transition. Chưa đủ mọi biến thể UI thật. |
-| S2-AUTH-01 | Register hợp lệ, busy/hash/redirect | Chức năng có kết quả; NFR đạt trong mẫu sau sửa | V08/V10 UI; V11 có mẫu vượt ngưỡng. V12 register 5/5 dưới 500ms, max 385,749 ms, hash DB cost 12. Busy/redirect khi chậm mới có báo cáo mock. Bản sửa chờ merge #26. |
+| S2-AUTH-01 | Register hợp lệ, busy/hash/redirect | Chức năng có kết quả; NFR đạt trong mẫu sau sửa | V08/V10 UI; V11 có mẫu vượt ngưỡng. V12 register 5/5 dưới 500ms, max 385,749 ms, hash DB cost 12. Busy/redirect khi chậm mới có báo cáo mock. Đã tích hợp qua PR #26. |
 | S2-AUTH-02 | Input sai, API sai, masked fields | Một phần | V02 validation; V10 form; chưa có bảng HTTP từng sai kiểu/field. |
 | S2-AUTH-03 | Biên ký tự/byte/Unicode/dấu cách | Có kết quả unit backend/frontend; HTTP một phần | V07 HTTP ASCII; V02 frontend; V12 test AuthService với Prisma giả thực thi các biên ASCII/Unicode/emoji/dấu cách, NUL/surrogate và tương thích hash. HTTP/PostgreSQL chưa bao phủ riêng mọi biến thể. |
 | S2-AUTH-04 | Email trùng | Có kết quả HTTP | V07 E báo 409 sau normalize; không thêm tài khoản. |
-| S2-AUTH-05 | Login, phiên 1h, HttpOnly, không JWT ở JSON UI | Chức năng một phần; NFR đạt trong mẫu sau sửa | V11 có mẫu vượt ngưỡng. V12 login 5/5 dưới 500ms, max 387,496 ms; TTL 3600s và hash cũ hoạt động. V04/V08 BFF login thật; policy HttpOnly đọc code, chưa có log riêng thuộc tính cookie trong trình duyệt. Bản sửa chờ merge #26. |
+| S2-AUTH-05 | Login, phiên 1h, HttpOnly, không JWT ở JSON UI | Chức năng một phần; NFR đạt trong mẫu sau sửa | V11 có mẫu vượt ngưỡng. V12 login 5/5 dưới 500ms, max 387,496 ms; TTL 3600s và hash cũ hoạt động. V04/V08 BFF login thật; policy HttpOnly đọc code, chưa có log riêng thuộc tính cookie trong trình duyệt. Đã tích hợp qua PR #26. |
 | S2-AUTH-06 | Sai thông tin, không cấp phiên, giữ giỏ | Có kết quả | V07 HTTP sai password; V02 client/error/bridge; chưa có log UI riêng mọi biến thể. |
 | S2-AUTH-07 | Reload/me, expiresAt không đổi | Có kết quả | V08 F5 giữ phiên/giỏ; V07 me giữ expiresAt; V02 stale /me. |
 | S2-AUTH-08 | Phiên hết hạn, giữ giỏ, không auto-order | Một phần | V03 HTTP JWT và DB expiry; V02 bridge/owner. Chuỗi UI đầy đủ chưa ghi riêng. |
@@ -185,14 +187,25 @@ V12/V13 chạy khi patch còn trong cây làm việc trên nền `ec042b5`, nên
 - Một số biến thể UI, lỗi storage/network và lỗi hệ thống được kiểm chứng bằng unit hoặc công cụ giả lập; phần đã chạy với browser/HTTP/DB thật được phân biệt trong ma trận. Kiểm tra atomicity và snapshot tại ORDER-08/10 đã có PostgreSQL thật ở V13.
 - Hiệu năng auth sau sửa đạt trong mẫu V12. Product API/Orders có số đo V11; V13 kiểm tra tính đúng đắn transaction, không đo lại thời gian API sau bổ sung đối chiếu dữ liệu.
 - Góp ý không chặn từ B gồm Header 360px xuống dòng và helper clearSessionCookie không còn nơi gọi. Các JSON A9 chưa nằm trong bộ báo cáo gốc đã đối chiếu; kết quả A9 được dẫn theo log và thao tác UI đã ghi nhận.
-- PO đã chấp nhận hiệu đính P04/P05. Quyết định nghiệm thu phạm vi chức năng Sprint 2 sẽ được ghi sau khi các bản sửa hoàn tất review/merge. Bảng này không đánh dấu toàn bộ 37 TC hoặc mọi AC/DoD đều đạt.
+- PO đã chấp nhận hiệu đính P04/P05 và phạm vi chức năng Sprint 2 đã kiểm tra. Các mục có bằng chứng một phần giữ nguyên trạng thái trong ma trận; quyết định nghiệm thu không chuyển chúng thành kết quả đạt toàn bộ AC/TC hoặc DoD.
+
+## Quyết định nghiệm thu PO
+
+Ngày 04/11/2026, PO (vị trí A) chấp nhận kết quả chức năng Sprint 2 — giỏ hàng, đăng ký/đăng nhập/đăng xuất, phiên JWT và tạo đơn PENDING — trên main tại commit `3a870ba4b20da52d4af743d025100c5a225db8dc`, trong phạm vi đã kiểm tra. Phương pháp, kết quả và giới hạn kiểm thử được ghi trong `SPRINT2_CLOSEOUT.md`; các mục chưa được xác nhận tiếp tục giữ đúng trạng thái trong ma trận AC/TC.
+
+Quyết định được PO xác nhận khi chốt hồ sơ ngày 04/11/2026, sau khi PR #26 và #28 đã được review và merge. Phạm vi nghiệm thu này là cơ sở chuyển tiếp sang Sprint 3.
 
 ## Review và bài học triển khai
 
-B đã approve `d5712de` trước khi merge PR #24. Mốc đó không có CI check tự động; bằng chứng kiểm tra nằm ở log và review. Review này chưa thay review cho các commit sửa sau tích hợp.
+B đã approve `d5712de` trước khi merge PR #24. Mốc đó không có CI check tự động; bằng chứng kiểm tra nằm ở log và review.
+
+- [Review PR #26](https://github.com/giabaot400-boop/BrewLite/pull/26#pullrequestreview-5767658047), đúng `790e944`: B chạy npm ci trên bản sạch, xác nhận lockfile không đổi/bcrypt 6.0.0 nạp được, auth 37/37 đạt và kiểm tra tương thích hash. Typecheck/build và số đo hiệu năng theo kết quả A; B không chạy lại các mục này.
+- [Review PR #28](https://github.com/giabaot400-boop/BrewLite/pull/28#pullrequestreview-5767675478), đúng `0c37393`: B đọc bước đối chiếu trong transaction và chạy canonical/OrdersService 19/19 đạt. Typecheck/build và PostgreSQL 10/10 theo kết quả A; B không chạy lại các mục này.
+
+Cả hai review ghi nhận không có điểm chặn trong phạm vi đã xem. Các merge giữ nội dung bản sửa được review; PR #28 chỉ đưa thêm ba file Orders lên main sau PR #26.
 
 Các lỗi đã có retest gồm mã lỗi phiên AUTH-E-01, dialog đóng khi focus trở lại, bố cục đổi khi refresh, logout nhầm phiên/phản hồi cũ ảnh hưởng cookie mới, độ trễ bcrypt và thiếu đối chiếu Order/ledger. Lỗi thiết lập demo trên máy A được khắc phục bằng cách trỏ Product API về backend test 3002 và đặt APP_ORIGIN khớp localhost:3000; môi trường B dùng backend 3001.
 
 Bài học triển khai: ghi đủ cấu hình public/BFF/origin trước demo; phân biệt unit, HTTP/DB và UI; kiểm tra owner/revision trước HTTP; ghi source commit, hash và phương pháp của từng lượt chạy. Phần này tổng hợp từ quá trình làm việc, không ghi nhận một cuộc họp Retrospective riêng.
 
-Việc còn lại để chốt: review/merge bản sửa hiệu năng và nhất quán dữ liệu, hoàn thiện quyết định PO theo phạm vi đã kiểm tra, rồi review/merge nhánh tài liệu. Các PR nền đã tích hợp được xử lý theo quyết định của người phụ trách sau đối chiếu lịch sử.
+Phần code đã tích hợp và PO đã chấp nhận phạm vi chức năng đã kiểm tra. Bước cuối của hồ sơ là hoàn tất review/merge PR #27. Các PR nền đã tích hợp được xử lý theo quyết định của người phụ trách sau đối chiếu lịch sử.
