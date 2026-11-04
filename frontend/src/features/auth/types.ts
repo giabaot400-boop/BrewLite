@@ -3,7 +3,9 @@
 export type AuthUser = { id: string; email: string };
 
 /** expiresAt do backend quyết định; UI chỉ lưu nguyên giá trị nhận được. */
-export type AuthSession = { user: AuthUser; expiresAt: string | number };
+export type AuthSession = { user: AuthUser; expiresAt: string | number;
+  /** HTTP mode requires this public binding; mocks may omit it. Kept in memory. */
+  binding?: string };
 
 /** Giá trị của header X-BrewLite-Logout-Scope trong phản hồi 204. */
 export type LogoutScope = "session" | "local";

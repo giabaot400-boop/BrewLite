@@ -1,6 +1,8 @@
 import { assertSameOriginPost } from '@/lib/server/auth/csrf';
 import { backendAuthUrl } from '@/lib/server/auth/config';
 import { setSessionCookie } from '@/lib/server/auth/cookie';
+import { sessionBinding } from '@/lib/server/auth/session-binding';
+import { SESSION_BINDING_HEADER } from '@/lib/session-binding';
 import { backendFetch, backendUnavailable, forwardError, errorResponse } from '@/lib/server/auth/http';
 import type { NextRequest } from 'next/server';
 
@@ -23,7 +25,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     }
     await setSessionCookie(data.token, data.expiresAt);
     // Never expose the bearer JWT to browser JavaScript.
-    return Response.json({ user: data.user, expiresAt: data.expiresAt }, { headers: { 'Cache-Control': 'no-store' } });
+    return Response.json({ user: data.user, expiresAt: data.expiresAt }, { headers: { 'Cache-Control': 'no-store', [SESSION_BINDING_HEADER]: sessionBinding(data.token) } });
   } catch {
     return backendUnavailable();
   }

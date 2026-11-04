@@ -81,3 +81,34 @@ Chưa có xác nhận thao tác UI cho logout giỏ rỗng, lỗi mạng/quota, 
 ## Điểm còn chờ hợp đồng tích hợp đơn
 
 Owner/key/payload pending phải gắn với phiên thực tế khi gửi qua cookie HttpOnly, kể cả tab khác đổi tài khoản giữa lúc gửi. Một `/me` trước POST chưa đủ chứng minh việc này. A7b không thêm header/field mới và không tuyên bố đã giải quyết ràng buộc owner của request phía server. Cần ghi quyết định A/C/D vào tài liệu/PR trước khi kích hoạt POST đơn thật; đây cũng là giới hạn cần giữ rõ khi kiểm tra logout nhiều tab dùng cookie chung.
+
+## A9 — đề xuất hiệu đính logout khi các tab dùng chung cookie (04/11/2026)
+
+Mục này bổ sung cho trình tự A7b ở trên, baseline code `fcb473a` trên nhánh tích hợp. Đây là đề xuất hiệu đính P04/P05 cần PO chốt khi áp bản sửa; chưa ghi nhận nhóm đã đồng ý từng chi tiết.
+
+### Lỗi và ảnh hưởng
+
+A chạy `BrewLite_S2_A9_Logout_Owner_Check.cjs` với Next BFF, NestJS cổng 3002 và PostgreSQL `brewlite_s2_a_auth_test`: **0/2 ca an toàn**, tái hiện cả hai lỗi. Báo cáo console ghi file `BrewLite_S2_A9_Logout_Result_1793757009084.json`; chưa nhận nội dung JSON để kiểm tra độc lập.
+
+- `LOGOUT-OWNER-01`: UI còn xác nhận tài khoản A nhưng cookie chung đã là B; logout có thể thu hồi nhầm phiên B.
+- `LOGOUT-OWNER-02`: logout A đang xử lý, B đăng nhập thành công; phản hồi logout A đến muộn có thể xóa cookie B.
+
+Script dùng cookie jar, auth coordinator và storage/khóa được cung cấp trong Node; đây là kiểm tra HTTP/PostgreSQL, chưa phải thao tác trình duyệt thật. Cảnh báo `MODULE_TYPELESS_PACKAGE_JSON` không phải nguyên nhân lỗi.
+
+### Hợp đồng đề xuất và khác biệt với v0.6
+
+1. BFF login và `/me` thành công thêm header `X-BrewLite-Session-Binding`, là SHA-256 của đúng JWT được BFF nhận/đọc. Body xác thực không đổi. Đây là mã đối chiếu công khai, không phải token hay bằng chứng cho phép truy cập; NestJS vẫn kiểm tra JWT/AuthSession. HTTP client yêu cầu header hợp lệ, giữ binding trong bộ nhớ, không lưu JWT hoặc binding này vào giỏ/pending.
+2. Logout gửi JSON `{}` cùng header `X-BrewLite-Expected-Session` của snapshot đã xác minh khi bắt đầu. BFF đọc cookie một lần. Binding khớp mới chuyển POST logout bằng chính token đó. Binding khác hoặc thiếu: chỉ hỏi Nest `/me`; phiên còn hiệu lực hoặc hết hạn thì trả `403 REQUEST_FORBIDDEN`, không thu hồi nhầm phiên. Thiếu cookie hoặc Nest xác nhận `SESSION_INVALID` vẫn có thể trả `204 scope=local`. Lỗi mạng/database vẫn trả lỗi. Phiên hết hạn khớp binding tiếp tục dùng guard logout riêng để thu hồi theo P05.
+3. **Thay đổi chủ ý so với câu “Next.js xóa cookie” trong P04/P05:** logout và `/me` không gửi `Set-Cookie` xóa cookie `brewlite_session`. Với cookie tên cố định, phản hồi cũ không thể yêu cầu trình duyệt chỉ xóa nếu cookie vẫn bằng giá trị cũ. Phiên được thu hồi ở NestJS; cookie đã thu hồi hoặc không hợp lệ có thể còn trên thiết bị đến khi hết hạn hoặc lần đăng nhập tiếp ghi đè. Cookie này không cấp lại quyền truy cập vì API bảo vệ luôn kiểm tra phiên server. `scope=local` ở bản hiệu đính chỉ xác nhận dọn trạng thái ứng dụng, không xác nhận xóa vật lý cookie hoặc thu hồi server.
+4. Sau `204`, coordinator kiểm tra lại cookie qua `/me` trong **phần còn lại của tổng ngân sách 15 giây**. Nếu có phiên sống (kể cả cùng tài khoản nhưng phiên mới), giữ phiên đó và không chạy cleanup theo logout cũ. Nếu xác nhận chưa đăng nhập thì chuyển anonymous, dọn đúng checkpoint owner/revision, giữ pending. Nếu kiểm tra lại lỗi mạng/5xx hoặc hết ngân sách: đánh dấu unknown, giữ dữ liệu, thông báo đã có xác nhận logout nhưng cần kiểm tra lại phiên; không báo dọn giỏ thành công.
+5. Lỗi `403` do phiên khác khiến UI kiểm tra lại auth. `sessionVersion` đổi khi binding đổi, kể cả cùng owner; xác nhận đặt đơn cũ không được dùng lại. Không tự gửi đơn, không đổi owner/key/payload của pending, không giữ Web Lock qua HTTP.
+
+Không đổi Nest API, schema, migration, cookie name/thuộc tính hay quy tắc idempotency đơn. Hiệu đính chỉ áp dụng phần BFF/browser và cần được nêu trong PR tích hợp để các chat đối chiếu.
+
+### Kiểm tra bản sửa
+
+- Môi trường trợ lý: frontend unit test **315/315 đạt**, typecheck, lint và production build đạt. Có thêm 31 ca so với baseline 284: binding, sai/thiếu binding, cùng owner khác phiên, token hỏng/hết hạn, lỗi hệ thống, deadline và cleanup giữ pending.
+- Chạy lại cùng script A9 qua Next production HTTP và AuthService thật: **2/2 ca an toàn**. Ở lượt này database/SQL, cookie jar và storage/khóa được giả lập; không ghi nhận là PostgreSQL thật.
+- Máy A sau áp bản sửa: console xác nhận **315/315 unit test đạt**, không fail/skip; production build thành công. Không suy từ build ra kết quả kiểm thử chức năng.
+- A chạy lại script A9 với Next BFF, NestJS cổng 3002 và PostgreSQL `brewlite_s2_a_auth_test`: `SAFE` cho cả `LOGOUT-OWNER-01` và `LOGOUT-OWNER-02`, **LOGOUT SAFETY CHECKS: 2/2 PASSED**. Console ghi báo cáo `BrewLite_S2_A9_Logout_Result_1793759848952.json`; chưa nhận nội dung JSON để kiểm tra độc lập. Đây là kết quả HTTP/PostgreSQL với cookie jar/coordinator/storage/khóa trong Node, chưa phải kiểm tra trình duyệt thật.
+- Hai ca A9 đã chuyển từ **0/2 trước sửa** sang **2/2 sau sửa** theo log A cung cấp. Không dùng kết quả này để tự đánh dấu toàn bộ 37 ca nghiệm thu Sprint 2 đạt.

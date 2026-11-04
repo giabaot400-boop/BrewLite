@@ -205,3 +205,24 @@ test("unregistering the pre-logout hook removes it and nullable info stays unkno
   assert.equal(f.auth.getLogoutInfo(), null);
   assert.equal(await f.auth.logout(), "session");
 });
+
+for (const scope of ["session", "local"]) {
+  test("bound HTTP-style " + scope + " logout verifies the cookie, clears cart and retains pending", async () => {
+    let meCalls = 0;
+    const f = fixture({ pending: true, overrides: {
+      me: async () => {
+        if (++meCalls === 1) return { ...session(), binding: "a".repeat(64) };
+        throw new AuthApiError("SESSION_INVALID", "", 401);
+      },
+      logout: async () => scope,
+    } });
+    await f.auth.refresh();
+    const pending = f.saved().pendingRequests.a;
+    assert.equal(await f.auth.logout(), scope);
+    assert.equal(meCalls, 2);
+    assert.equal(f.auth.getSnapshot().status, "anonymous");
+    assert.equal(f.saved().cart.ownerId, null);
+    assert.equal(f.saved().cart.items.length, 0);
+    assert.deepEqual(f.saved().pendingRequests.a, pending);
+  });
+}

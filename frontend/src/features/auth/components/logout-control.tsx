@@ -58,6 +58,7 @@ export function LogoutControl() {
       const apiError = error instanceof AuthApiError ? error : new AuthApiError("UNKNOWN", "");
       toast.show(messageForAuthError(apiError, "logout"), "error");
       close();
+      if (apiError.code === "REQUEST_FORBIDDEN") void refresh();
     } finally {
       inFlight.current = false;
       setBusy(false);

@@ -1,5 +1,6 @@
 import type { AuthClient, Credentials } from "./auth-client.ts";
 import { AuthApiError } from "./auth-error.ts";
+import { CLIENT_TIMEOUT_MS } from "./auth-client.ts";
 import type { AuthUser, LogoutScope } from "./types.ts";
 
 /**
@@ -13,6 +14,7 @@ export type AuthSnapshot = {
   status: AuthStatus;
   user: AuthUser | null;
   sessionExpired: boolean;
+  binding?: string;
 };
 
 /** Thông tin giỏ do module giỏ hàng (A) cung cấp để hộp xác nhận đăng xuất nói đúng sự thật. */
@@ -45,7 +47,8 @@ export const INITIAL_AUTH_SNAPSHOT: AuthSnapshot = { status: "loading", user: nu
  * `epoch` tăng khi login/logout THÀNH CÔNG; kết quả /me bắt đầu trước đó là cũ và bị bỏ,
  * nên /me chậm không thể ghi đè phiên mới (và ngược lại).
  */
-export function createAuthSession(client: AuthClient) {
+export function createAuthSession(client: AuthClient, options: { now?: () => number; timeoutMs?: number } = {}) {
+  const now = options.now ?? Date.now;
   let snapshot = INITIAL_AUTH_SNAPSHOT;
   let epoch = 0;
   // UI continuity only. Storage guards still compare the exact snapshot object.
@@ -58,7 +61,7 @@ export function createAuthSession(client: AuthClient) {
 
   function set(next: AuthSnapshot, newLogin = false) {
     if (newLogin || snapshot.status !== next.status || snapshot.user?.id !== next.user?.id
-      || snapshot.user?.email !== next.user?.email) sessionVersion++;
+      || snapshot.user?.email !== next.user?.email || snapshot.binding !== next.binding) sessionVersion++;
     snapshot = next;
     listeners.forEach((listener) => listener());
   }
@@ -69,7 +72,7 @@ export function createAuthSession(client: AuthClient) {
     try {
       const session = await client.me();
       if (startedAt !== epoch || version !== refreshVersion) return;
-      set({ status: "authenticated", user: session.user, sessionExpired: false });
+      set({ status: "authenticated", user: session.user, sessionExpired: false, binding: session.binding });
     } catch (error) {
       if (startedAt !== epoch || version !== refreshVersion) return;
       const code = error instanceof AuthApiError ? error.code : "UNKNOWN";
@@ -85,7 +88,7 @@ export function createAuthSession(client: AuthClient) {
   async function login(input: Credentials): Promise<void> {
     const session = await client.login(input);
     epoch++;
-    set({ status: "authenticated", user: session.user, sessionExpired: false }, true);
+    set({ status: "authenticated", user: session.user, sessionExpired: false, binding: session.binding }, true);
   }
 
   async function register(input: Credentials): Promise<void> {
@@ -97,13 +100,38 @@ export function createAuthSession(client: AuthClient) {
   async function logout(): Promise<LogoutScope> {
     const startedAt = epoch;
     const startedOwner = snapshot.user?.id;
-    const changed = () => startedAt !== epoch || snapshot.user?.id !== startedOwner;
+    const startedBinding = snapshot.binding;
+    const changed = () => startedAt !== epoch || snapshot.user?.id !== startedOwner || snapshot.binding !== startedBinding;
     const prepared: SignOutPreparation[] = [];
     try {
       for (const prepare of signOutPreparers) prepared.push(await prepare());
       if (changed()) throw new AuthApiError("UNKNOWN", "Phiên đã thay đổi. Vui lòng thử lại.");
-      const scope = await client.logout();
+      const deadline = now() + (options.timeoutMs ?? CLIENT_TIMEOUT_MS);
+      const remaining = () => Math.max(0, deadline - now());
+      const scope = await client.logout(startedBinding, { timeoutMs: remaining() });
       if (changed()) throw new ConfirmedLogoutError(scope, "session-changed");
+      if (startedBinding) {
+        // Old /me requests cannot publish while we verify the cookie after 204.
+        ++refreshVersion;
+        try {
+          if (remaining() <= 0) throw new AuthApiError("CLIENT_TIMEOUT", "");
+          const current = await client.me({ timeoutMs: remaining() });
+          if (changed()) throw new ConfirmedLogoutError(scope, "session-changed");
+          ++refreshVersion;
+          set({ status: "authenticated", user: current.user, sessionExpired: false, binding: current.binding });
+          // Any live session belongs to the current cookie, not the old logout.
+          throw new ConfirmedLogoutError(scope, "session-changed");
+        } catch (error) {
+          if (error instanceof ConfirmedLogoutError) throw error;
+          if (changed()) throw new ConfirmedLogoutError(scope, "session-changed");
+          ++refreshVersion;
+          const code = error instanceof AuthApiError ? error.code : "UNKNOWN";
+          if (!["AUTH_REQUIRED", "SESSION_INVALID", "SESSION_EXPIRED"].includes(code)) {
+            set({ status: "unknown", user: null, sessionExpired: false });
+            throw new ConfirmedLogoutError(scope, "session-changed");
+          }
+        }
+      }
       epoch++;
       set({ status: "anonymous", user: null, sessionExpired: false });
       try {
