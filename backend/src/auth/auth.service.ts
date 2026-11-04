@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
-import { compare, hash } from 'bcryptjs';
+import { compare, hash } from 'bcrypt';
 import { PrismaService } from '../database/prisma.service.js';
 
 type PublicUser = { id: string; email: string };
