@@ -1,11 +1,12 @@
 # Sprint 2 — tổng hợp tích hợp và đối chiếu nghiệm thu
 
-Ngày tổng hợp: 04/11/2026. Trạng thái: **đã tích hợp code; đang chốt nghiệm thu với PO**.
+Ngày tổng hợp: 04/11/2026. Trạng thái: **nền Sprint 2 đã tích hợp; bản sửa hiệu năng auth ở PR #26 đang chờ review/merge; đang chốt nghiệm thu với PO**.
 
 ## Mốc và phạm vi
 
 - Code được xét: `d5712ded88d2be58a58f4a999145038e5baafae5`; PR [#24](https://github.com/giabaot400-boop/BrewLite/pull/24) được B merge bằng merge commit `ec042b54776febd8e3779c07073f3c317dcc2a01` ngày 04/11/2026. Hai tree giống nhau; không phát sinh thay đổi code do merge.
 - A cung cấp log local `main...origin/main`, HEAD `ec042b5`, cây làm việc sạch. Trên nhánh tài liệu `docs/sprint2-closeout`, A nhận báo cáo E từ `029319c` thành `4ef5e4f` (cherry-pick, 1 file/50 dòng, cây sạch).
+- Bản sửa hiệu năng auth: commit `38cecc5a72264658e7b19842d3e1b8e0b3869d83`, PR [#26](https://github.com/giabaot400-boop/BrewLite/pull/26), base `main`. Tại thời điểm cập nhật, PR đang mở, chưa có review; main vẫn là `ec042b5`. Không gọi bản sửa đã được tích hợp.
 - Baseline yêu cầu: `BrewLite_Sprint2_Phan_Tich_Thiet_Ke_v0.6(2).docx` và bộ sơ đồ v0.6; giữ 4 story, 36 AC, 37 mã TC. Mốc main cũ trong đặc tả chỉ là lịch sử, không phải HEAD hiện tại.
 - Phạm vi: Task 5–7 — giỏ, đăng ký/login/logout, JWT, tạo đơn và kết quả PENDING. Giá frontend là xem trước; backend tính chính thức. Giữ Product API và migration Sprint 1; không mở lại nghiệm thu Sprint 1.
 - Nguồn đóng góp giữ trong lịch sử PR #24: nền schema/lock của E; Auth của C; Orders của D; UI dùng chung của B; phần A nối giỏ–phiên–orders và sửa lỗi tích hợp. Không quy toàn bộ backend/schema thành phần A.
@@ -28,13 +29,14 @@ Ngày tổng hợp: 04/11/2026. Trạng thái: **đã tích hợp code; đang ch
 | V03 | Log A: HTTP cơ bản **9/9**, biên phiên **22/22** trên NestJS test 3002/PostgreSQL `brewlite_s2_a_auth_test`: register/login/me/create/replay/logout, DB expiry, JWT expiry, thiếu session, sai owner. | Script dùng tài khoản/phiên test. Lượt expiry đầu sai múi giờ SQL đã sửa fixture UTC rồi chạy 22/22; không tính lượt đầu là đạt. |
 | V04 | [A8a owner BFF](SPRINT2_A_ORDERS_BFF_OWNER_CONTRACT.md): A báo **22/22** BFF–NestJS–PostgreSQL thật, mismatch owner không POST; retry 201, replay 200, một Order/ledger. | Cookie jar và storage/locks được script điều khiển; chưa nhận JSON gốc để đối chiếu độc lập. |
 | V05 | [A8b UI](SPRINT2_A_ORDER_UI_STEP1.md): A xác nhận tạo đơn/PENDING/reload, offline trước gửi và retry key cũ, đổi giá thật và key mới, lỗi topping đúng dòng, pending qua logout/login, nhiều tab, retest dialog/focus/bố cục. | A quan sát key; chưa có HAR chứng minh body từng lượt. Offline trước gửi không phải mất phản hồi sau server commit. |
-| V06 | [E retest auth](SPRINT2_E_AUTH_SESSION_FIX_VERIFICATION.md), PR [#25](https://github.com/giabaot400-boop/BrewLite/pull/25), code `fe1cce2`: E báo auth 21/21 và HTTP PostgreSQL phiên thu hồi/thiếu/hết hạn DB/sai owner; AUTH-E-01 retest đạt. | Theo báo cáo E, chưa chạy lại trên máy E; JWT tự hết hạn HTTP, BFF/UI và hiệu năng không thuộc báo cáo. Có ghi lần đăng ký nhầm DB và loại khỏi bằng chứng test. |
+| V06 | [E retest auth](SPRINT2_E_AUTH_SESSION_FIX_VERIFICATION.md), PR [#25](https://github.com/giabaot400-boop/BrewLite/pull/25), code `fe1cce2`: E báo auth 21/21 và HTTP PostgreSQL phiên thu hồi/thiếu/hết hạn DB/sai owner; AUTH-E-01 retest đạt. | Theo báo cáo E; trợ lý chưa độc lập tái hiện lượt chạy này. JWT tự hết hạn HTTP, BFF/UI và hiệu năng không thuộc báo cáo. Có ghi lần đăng ký nhầm DB và loại khỏi bằng chứng test. |
 | V07 | Báo cáo E ở PR [#19](https://github.com/giabaot400-boop/BrewLite/pull/19) (`b5ddecc`, Orders `fecea6b`): service/PostgreSQL 11/11, replay/conflict/REJECTED/rollback/đồng thời; retry thật SUCCEEDED/REJECTED. PR [#22](https://github.com/giabaot400-boop/BrewLite/pull/22) (`3ea59f2`, code `3bfa4fb`): HTTP auth/orders, tổng 94.000đ, cặp Order/ledger đúng, ASCII password bounds và lỗi AUTH-E-01 cũ. | Hai báo cáo này được tham chiếu theo PR, chưa có trong main này. 11/11 gọi trực tiếp service; IT-D11 giả P2034; retry thật tăng timeout A lên 10s. Không dùng làm bằng chứng timeout vận hành 2s. AUTH-E-01 trong #22 được thay bằng kết quả retest V06, không xóa lịch sử phát hiện lỗi. |
 | V08 | [B review APPROVED](https://github.com/giabaot400-boop/BrewLite/pull/24#pullrequestreview-5763029365) đúng `d5712de`: Windows, Node 24.17.0, Docker PostgreSQL 17, backend 3001/FE 3000; migrate/seed/dev, UI register/login, F5 giữ giỏ/phiên, logout/hủy, PENDING, keyboard/responsive và 315 test/typecheck/lint/build. | Đây là kết quả B báo trong review. Chưa chạy trình đọc màn hình thật và kiểm thử backend chuyên sâu; Header 360 px Đăng ký xuống dòng là góp ý không chặn. |
 | V09 | [A9](SPRINT2_A_AUTH_CART_BRIDGE_STEP2.md): A gửi console trước sửa **0/2** (`BrewLite_S2_A9_Logout_Result_1793757009084.json`) và sau sửa **2/2** (`BrewLite_S2_A9_Logout_Result_1793759848952.json`), BFF/Nest/PG thật. Sau đó A xác nhận 4 bước UI login/thêm, hủy logout, logout dọn giỏ, F5/login lại không khôi phục món. | Hai JSON vẫn ở máy A, chưa trực tiếp đọc/đính kèm trong hồ sơ; cookie jar/coordinator/storage-lock của script chạy trong Node. Không đồng nhất với mọi biến thể multi-tab trình duyệt thật. |
 | V10 | [B auth UI ban đầu](SPRINT2_B_AUTH_UI.md): B báo 45 test và Playwright mock đăng ký/login/next, focus lỗi, dialog và responsive. | Báo cáo ở mốc trước tích hợp; phần “chưa backend thật” của mốc đó không phủ nhận review mới V08. |
+| V11 | A chạy `BrewLite_S2_Closeout_Check.cjs`: **9/9 chức năng đạt**, 40 mẫu thời gian (8 nhóm × 5), HTTP trực tiếp NestJS 3002 và đối chiếu PostgreSQL test. Ba ca bổ sung: cùng key/hai owner, replay giá cũ sau đổi danh mục, mất response sau xử lý rồi retry cùng đơn. Kiểm tra hash đã lưu có cost 12. | Đã đọc JSON gốc `BrewLite_S2_Closeout_Result_1793781471823.json`: 9 kiểm tra đạt, 40 mẫu; register 1/5 và login 2/5 vượt ngưỡng. Source HEAD ghi trong JSON là `4ef5e4f`, trước bản sửa native. Không qua BFF/UI; dữ liệu fixture được giữ trong DB test. Kết quả sau sửa xem V12. |
 
-| V11 | A chạy `BrewLite_S2_Closeout_Check.cjs`: **9/9 chức năng đạt**, 40 mẫu thời gian (8 nhóm × 5), HTTP trực tiếp NestJS 3002 và đối chiếu PostgreSQL test. Ba ca bổ sung: cùng key/hai owner, replay giá cũ sau đổi danh mục, mất response sau xử lý rồi retry cùng đơn. Kiểm tra hash đã lưu có cost 12. | Theo console A gửi; báo cáo `BrewLite_S2_Closeout_Result_1793781471823.json` chưa được trực tiếp đọc. Script đóng vai client, không qua BFF/UI; tạo và giữ dữ liệu fixture riêng trong test DB. NFR không đạt ở mọi mẫu register/login. |
+| V12 | Bản sửa [PR #26](https://github.com/giabaot400-boop/BrewLite/pull/26), `38cecc5`: runtime bcrypt native 6.0.0, giữ cost 12 và hash cũ. A gửi **37/37 test auth**, typecheck/build/diff check đạt; HTTP/PostgreSQL **5/5 kiểm tra chức năng**, **20/20 mẫu auth dưới 500ms**, gồm login hash bcryptjs cost 12 không rewrite. | Theo console A, báo cáo `BrewLite_S2_Auth_Performance_Result_1793784786074.json` chưa được trực tiếp đọc. Không qua BFF/UI, không thử tải; không đo lại sáu nhóm khác của V11. PR đang chờ review/merge, không sửa hồi tố kết quả V11. |
 
 ## Đối chiếu 36 AC
 
@@ -59,7 +61,7 @@ Bảng nêu kết quả, phương pháp và phần còn thiếu; PO quyết đ�
 | REG-AC-05 | Thành công chuyển login, không tự login/đặt | Có kết quả | V08 UI đăng ký/login; V02 register không cấp phiên; V10 luồng chuyển trang. |
 | REG-AC-06 | Thất bại/mạng: giữ form, báo lỗi và thử lại | Có kết quả giả lập | V02 auth-client/auth-error; V10 form; chưa có đủ biến thể mạng trên UI thật. |
 | REG-AC-07 | Giữ giỏ và đích quay lại qua register/login | Có kết quả | V05 giỏ khách/login; V02 return-to/owner; V10 mock next. Riêng thất bại đăng ký giữ giỏ chưa có log UI thật. |
-| REG-AC-08 | 15 code point, tối đa 72 byte, không trim | Một phần | V02 frontend Unicode/byte/NUL/surrogate/dấu cách; V07 HTTP biên ASCII; backend có validation. Chưa có đầy đủ log backend cho Unicode/dấu cách. |
+| REG-AC-08 | 15 code point, tối đa 72 byte, không trim | Có kết quả unit backend/frontend; HTTP một phần | V02 frontend; V07 HTTP biên ASCII. V12 bổ sung test AuthService thật với Prisma giả cho ASCII/Unicode/emoji 72 byte, dấu cách, NUL và surrogate; HTTP xác nhận hash cost 12. Chưa có HTTP riêng cho mọi biến thể Unicode. Bản sửa ở PR #26. |
 | LOGIN-AC-01 | Hai ô bắt buộc, mật khẩu che | Đối chiếu UI/code | V08 form thật; components/login-form.tsx. |
 | LOGIN-AC-02 | Thiếu/sai email bị chặn trước HTTP | Có kết quả | V02 validateLogin; V10 form mock. |
 | LOGIN-AC-03 | Sai thông tin: lỗi chung, có thể thử lại | Có kết quả | V07 HTTP INVALID_CREDENTIALS; V02 ánh xạ thông báo. |
@@ -94,11 +96,11 @@ Giữ nguyên mã của v0.6. Các biến thể được gộp đúng mã gốc,
 | S2-CART-07 | Điều hướng/reload, storage lỗi, nhiều tab | Một phần | V08 F5; V01/V05 nhiều tab; V02 lỗi storage/lock giả lập. Không có đủ lượt trình duyệt thật cho mọi lỗi storage. |
 | S2-CART-08 | Qua đăng ký/login từ giỏ | Có kết quả | V05/V10 + V02 return-to và guest adoption. |
 | S2-CART-09 | Logout/hủy/hết hạn/đổi owner/pending | Một phần | V05/V08/V09 logout/hủy/pending; V03 expiry API, V02 owner transition. Chưa đủ mọi biến thể UI thật. |
-| S2-AUTH-01 | Register hợp lệ, busy/hash/redirect | Chức năng có kết quả; NFR chưa đạt | V08/V10 UI; V11 xác nhận hash trong DB cost 12, 5 mẫu register. Max 660,450 ms; chưa đạt <500ms ở mọi mẫu. Busy/redirect khi chậm mới có báo cáo mock. |
+| S2-AUTH-01 | Register hợp lệ, busy/hash/redirect | Chức năng có kết quả; NFR đạt trong mẫu sau sửa | V08/V10 UI; V11 có mẫu vượt ngưỡng. V12 register 5/5 dưới 500ms, max 385,749 ms, hash DB cost 12. Busy/redirect khi chậm mới có báo cáo mock. Bản sửa chờ merge #26. |
 | S2-AUTH-02 | Input sai, API sai, masked fields | Một phần | V02 validation; V10 form; chưa có bảng HTTP từng sai kiểu/field. |
-| S2-AUTH-03 | Biên ký tự/byte/Unicode/dấu cách | Một phần | V07 HTTP ASCII; V02 frontend Unicode. Chưa có đủ log động backend Unicode/dấu cách. |
+| S2-AUTH-03 | Biên ký tự/byte/Unicode/dấu cách | Có kết quả unit backend/frontend; HTTP một phần | V07 HTTP ASCII; V02 frontend; V12 test AuthService với Prisma giả thực thi các biên ASCII/Unicode/emoji/dấu cách, NUL/surrogate và tương thích hash. Chưa coi bộ unit này là HTTP/PostgreSQL cho mọi biến thể. |
 | S2-AUTH-04 | Email trùng | Có kết quả HTTP | V07 E báo 409 sau normalize; không thêm tài khoản. |
-| S2-AUTH-05 | Login, phiên 1h, HttpOnly, không JWT ở JSON UI | Chức năng một phần; NFR chưa đạt | V11 kiểm tra TTL 3600s, 5 mẫu login, max 545,187 ms; V04/V08 BFF login thật; policy HttpOnly đọc code. Chưa có log riêng thuộc tính cookie trong trình duyệt. |
+| S2-AUTH-05 | Login, phiên 1h, HttpOnly, không JWT ở JSON UI | Chức năng một phần; NFR đạt trong mẫu sau sửa | V11 có mẫu vượt ngưỡng. V12 login 5/5 dưới 500ms, max 387,496 ms; TTL 3600s và hash cũ hoạt động. V04/V08 BFF login thật; policy HttpOnly đọc code, chưa có log riêng thuộc tính cookie trong trình duyệt. Bản sửa chờ merge #26. |
 | S2-AUTH-06 | Sai thông tin, không cấp phiên, giữ giỏ | Có kết quả | V07 HTTP sai password; V02 client/error/bridge; chưa có log UI riêng mọi biến thể. |
 | S2-AUTH-07 | Reload/me, expiresAt không đổi | Có kết quả | V08 F5 giữ phiên/giỏ; V07 me giữ expiresAt; V02 stale /me. |
 | S2-AUTH-08 | Phiên hết hạn, giữ giỏ, không auto-order | Một phần | V03 HTTP JWT và DB expiry; V02 bridge/owner. Chuỗi UI đầy đủ chưa ghi riêng. |
@@ -126,7 +128,7 @@ Giữ nguyên mã của v0.6. Các biến thể được gộp đúng mã gốc,
 
 ## Kết quả bổ sung V11 — HTTP/PostgreSQL trên máy A
 
-A cung cấp console cho `BrewLite_S2_Closeout_Result_1793781471823.json`: **FUNCTIONAL CHECKS PASSED: 9/9**, **NFR <500ms: NOT MET IN ALL MEASURED SAMPLES**. Chưa nhận file JSON nên chưa tự đối chiếu CPU/Node, số sản phẩm ban đầu và danh sách 40 mẫu gốc. Không cần chạy lại chỉ để cung cấp JSON đã có.
+Đã đọc JSON gốc `BrewLite_S2_Closeout_Result_1793781471823.json`, khớp console A: **FUNCTIONAL CHECKS PASSED: 9/9**, **NFR <500ms: NOT MET IN ALL MEASURED SAMPLES**. Source HEAD là `4ef5e4f`; Windows 10 x64, Intel i5-6200U @ 2.30GHz, 4 CPU logic, RAM 19,87 GiB, Node 24.16.0, ban đầu 4 sản phẩm. Trong 40 mẫu, register có 1/5 và login có 2/5 vượt 500ms. Đây là baseline trước bản sửa native, không thay bằng kết quả V12.
 
 Phép đo: 5 request thành công nối tiếp mỗi nhóm, từ bắt đầu fetch đến đọc hết body; không thử tải đồng thời. Endpoint trực tiếp NestJS `http://127.0.0.1:3002`; không phải thời gian BFF, UI hay môi trường triển khai production. Bước chuẩn bị fixture/kiểm tra biên không nằm trong 40 mẫu thời gian. Script kiểm tra database `brewlite_s2_a_auth_test` và backend dùng cùng phiên test trước các HTTP ghi; không sửa bốn sản phẩm mẫu, nhưng giữ thêm một sản phẩm `[S2 test] Replay price`, user/đơn test do script tạo.
 
@@ -141,9 +143,27 @@ Phép đo: 5 request thành công nối tiếp mỗi nhóm, từ bắt đầu fe
 | POST /orders — replay | 5 | 7,481 | 8,978 | 12,212 | Đạt trong mẫu đo |
 | POST /auth/logout | 5 | 3,915 | 5,837 | 11,802 | Đạt trong mẫu đo |
 
-9 nhóm chức năng được console xác nhận: backend và DB test thống nhất; Product API; register lưu hash cost 12; login TTL và me không gia hạn; 5 cặp create/replay với mỗi key một Order/ledger; hai owner cùng UUID; replay giữ snapshot giá cũ; mất phản hồi sau server 201 rồi retry đúng đơn; logout thu hồi các phiên đo. Đây không phải 9 mã TC mới và không nâng kết luận thành 37/37 PASS.
+9 nhóm chức năng được console và JSON xác nhận: backend và DB test thống nhất; Product API; register lưu hash cost 12; login TTL và me không gia hạn; 5 cặp create/replay với mỗi key một Order/ledger; hai owner cùng UUID; replay giữ snapshot giá cũ; mất phản hồi sau server 201 rồi retry đúng đơn; logout thu hồi các phiên đo. Đây không phải 9 mã TC mới và không nâng kết luận thành 37/37 PASS.
 
 Proxy ở ca mất phản hồi đọc hết response 201 từ NestJS rồi đóng kết nối trước khi client nhận headers; script đối chiếu DB đã có cặp Order/ledger, sau đó POST lại cùng key/body nhận 200 và cùng mã đơn. Không sử dụng UI hoặc thay đổi timeout transaction cho ca này. Ca replay giá cũ sửa riêng sản phẩm fixture của lượt chạy, không tăng giá món mẫu dùng demo.
+
+
+## Kết quả bổ sung V12 — auth sau sửa hiệu năng
+
+Giữ bcrypt cost 12, chuyển implementation runtime sang bcrypt native 6.0.0. Không đổi validation, API, TTL, schema/migration; không rewrite hash cũ. Quyết định, kiểm thử tương thích và kết quả đo nằm trong `docs/SPRINT2_AUTH_PERFORMANCE.md` của PR #26; tài liệu đó chưa có trong main tại mốc tổng hợp này.
+
+A đã chạy 37/37 test auth, typecheck/build backend và diff check đạt. Sau khi khởi động lại bản build backend test, A cung cấp console cho `BrewLite_S2_Auth_Performance_Result_1793784786074.json`: **5/5 kiểm tra chức năng đạt; 20/20 mẫu auth dưới 500ms**. Chưa trực tiếp đọc JSON này; không suy source HEAD hoặc thông tin máy từ tên báo cáo.
+
+| API | n | Min (ms) | Mean (ms) | Max (ms) | Kết quả mẫu <500ms |
+|---|---|---|---|---|---|
+| POST /auth/register | 5 | 340,349 | 350,860 | 385,749 | 5/5 đạt |
+| POST /auth/login | 5 | 339,869 | 359,898 | 387,496 | 5/5 đạt |
+| GET /auth/me | 5 | 3,561 | 4,037 | 4,416 | 5/5 đạt |
+| POST /auth/logout | 5 | 4,211 | 6,361 | 13,011 | 5/5 đạt |
+
+Năm kiểm tra chức năng gồm: backend và DB test khớp phiên; register lưu hash cost 12; login được bằng hash bcryptjs cost 12 cũ mà không rewrite; TTL và thời điểm hết hạn không đổi khi gọi /me; logout thu hồi các phiên đã đo. Phép đo trực tiếp NestJS 3002/PostgreSQL test, tuần tự, bao gồm đọc hết response, không qua BFF/UI hoặc thử tải.
+
+Kết luận: vấn đề độ trễ auth được khắc phục trong lượt đo V12; bản sửa còn chờ review/merge #26. Sáu nhóm API khác dưới ngưỡng trong V11 không được chạy lại ở V12; không gộp hai lượt thành một bộ 40 mẫu sau sửa, không cam kết mọi request trên mọi máy đều dưới ngưỡng.
 
 ## Quyết định hợp đồng đã được ghi nhận
 
@@ -154,7 +174,7 @@ Proxy ở ca mất phản hồi đọc hết response 201 từ NestJS rồi đó
 
 ## Điểm cần chốt, không mặc định thêm yêu cầu
 
-1. **Hiệu năng chưa đạt trong lượt đo V11:** Assignment 1 mục 4.2 yêu cầu API <500ms với dữ liệu mẫu; cost bcrypt giữ 12. Đã có console thời gian theo endpoint, register max 660,450 ms và login max 545,187 ms. Trung bình dưới 500ms không đủ để gọi mọi mẫu đạt. Sáu nhóm còn lại dưới 500ms trong các mẫu đã đo. Cần đọc JSON V11 để đối chiếu môi trường và từng mẫu trước khi chọn bước xử lý; chưa hạ cost hoặc sửa code vì lượt đo này.
+1. **Bản sửa hiệu năng chờ tích hợp:** V11 đã được đối chiếu JSON và ghi nhận 3/40 mẫu vượt ngưỡng. PR #26 giữ cost 12, dùng bcrypt native; V12 có 20/20 mẫu auth dưới 500ms, chức năng 5/5 đạt. Chờ review và merge #26 rồi cập nhật mốc main; không cần chạy lại toàn bộ chỉ vì merge nếu tree khớp bản đã kiểm tra. NFR chỉ kết luận trong các mẫu/môi trường đã ghi.
 2. **Các biến thể chưa đủ bằng chứng:** xem chính hàng TC (nhất là ORDER-08/10 và AUTH-03; ORDER-12 còn các biến thể browser/timeout đã phân biệt trong hàng tương ứng). Có thể dùng lại script/log E đã chạy nếu đáp ứng đúng điều kiện; không yêu cầu chạy lại toàn bộ. Ca logic phù hợp có thể được chấp nhận bằng unit/giả lập; các kiểm tra atomicity/snapshot phải có PostgreSQL thật như v0.6.
 3. **Góp ý không chặn từ B:** Header 360 px xuống dòng, helper clearSessionCookie không còn nơi gọi, chưa xem JSON A9. Chưa có thay đổi code xử lý ba góp ý trong bản tổng hợp; PO đã chốt hiệu đính cookie, Node version trong review đã được B bổ sung. Có thể bổ sung JSON sẵn có thay vì chạy lại A9.
 4. Các log/hash fixture và giới hạn đã nêu là bằng chứng theo người chạy; không biến chúng thành báo cáo audit độc lập hoặc yêu cầu ảnh riêng từng AC.
@@ -167,3 +187,9 @@ Proxy ở ca mất phản hồi đọc hết response 201 từ NestJS rồi đó
 - Bài học rút từ các lượt triển khai: ghi đủ cấu hình public/BFF/origin trước demo; tách unit, HTTP/DB và UI; đặt checkpoint trước HTTP; giữ rõ source commit và giới hạn mỗi lượt thử. Đây là tổng hợp triển khai, **không phải biên bản một cuộc họp Retrospective đã diễn ra**.
 - **PO mới chấp nhận hiệu đính P04/P05, chưa có quyết định nghiệm thu toàn bộ Sprint 2 trong bản này.** Sau đối chiếu, PO ghi một trong các kết luận: chấp nhận phạm vi chức năng đã kiểm tra kèm ngoại lệ/điểm chưa xác nhận; hoặc yêu cầu bổ sung đúng các mục cần thiết rồi chốt. Không tự ghi mọi AC/DoD đạt hoặc Sprint 2 hoàn tất chỉ từ approve PR.
 - Việc đóng PR nền đã được tích hợp chỉ thực hiện sau đối chiếu lịch sử/nội dung và quyết định của người phụ trách; bản này không tự đóng PR hoặc xóa nhánh của thành viên.
+
+## Các bước chốt hồ sơ
+
+1. B review PR #26; khi đạt, merge và ghi commit main thực tế. Nếu có thay đổi code khi review, chỉ kiểm tra lại phần liên quan.
+2. Hoàn thiện quyết định PO: chấp nhận phạm vi chức năng đã kiểm tra kèm các giới hạn trong bảng, hoặc chỉ định đúng biến thể bắt buộc bổ sung. ORDER-08/10 chưa đủ bằng chứng PostgreSQL cho toàn bộ biến thể của v0.6; không tự chuyển thành đạt hoặc coi việc này đã được PO miễn trừ.
+3. Review/merge nhánh `docs/sprint2-closeout`, gồm báo cáo E đã cherry-pick và bản tổng hợp này. Sau khi có quyết định PO và mốc tích hợp thực tế mới đổi trạng thái chốt Sprint 2; không thêm tính năng Sprint 3 vào nhánh này.
