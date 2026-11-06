@@ -1,5 +1,5 @@
 @startuml erd-sprint3-core
-title BrewLite Sprint 3 - D07A\nERD logic: nền kế thừa và đơn hàng (v1.3, 04/11/2026)
+title BrewLite Sprint 3 - D07A\nERD logic: nền kế thừa và đơn hàng (06/11/2026)
 top to bottom direction
 skinparam defaultFontName DejaVu Sans
 skinparam defaultFontSize 14
@@ -109,7 +109,7 @@ Topping ||--o{ ProductTopping : được gắn
 legend bottom
   D07A và D07B là hai góc nhìn cùng một ERD 13 model, không nhân đôi bảng trùng tên.
   Kế thừa chín model từ ERD Sprint 2 v0.6; 13 model logic; không thêm bảng để đủ quota.
-  DEC-09 v1.3: chỉ tồn Product; Topping vẫn có giá/liên kết, không stock/reservation.
+  DEC-09 : chỉ tồn Product; Topping vẫn có giá/liên kết, không stock/reservation.
   Types/defaults/checks/index ở CONTRACTS.md; E tạo migration mới.
   Unique(userId,requestKey) trên OrderRequest và Order; v1/v2 chung namespace.
   REJECTED không có Order; mỗi Order có đúng một ledger SUCCEEDED liên kết cùng transaction.
@@ -120,7 +120,7 @@ endlegend
 @enduml
 
 @startuml erd-sprint3-business
-title BrewLite Sprint 3 - D07B\nERD logic: payment, giữ kho, khuyến mãi và điểm (v1.3, 04/11/2026)
+title BrewLite Sprint 3 - D07B\nERD logic: payment, giữ kho, khuyến mãi và điểm (06/11/2026)
 top to bottom direction
 skinparam defaultFontName DejaVu Sans
 skinparam defaultFontSize 14

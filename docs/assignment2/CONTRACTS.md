@@ -1,7 +1,6 @@
-# Contract kế thừa Sprint 3 v1.3
+# Contract kế thừa Sprint 3
 
-Bản nháp A2 v0.6 · 06/11/2026. Chi tiết hiện thực tham chiếu bộ thiết kế Sprint 3 v1.3; nội dung dưới dùng thống nhất cho sáu tài liệu, không tạo thêm FR/UC.
-
+Bản nháp A2 · 06/11/2026. Chi tiết hiện thực tham chiếu bộ thiết kế Sprint 3; nội dung dưới dùng thống nhất cho các tài liệu, không tạo thêm FR/UC.
 
 - Chỉ năm API nghiệp vụ đơn/thanh toán: `POST /orders`, `GET /orders/:id`, `GET /orders/me`, `POST /payments`, `POST /orders/:id/cancel`. API catalog/auth kế thừa vẫn dùng; không tạo API báo giá hoặc đọc payment riêng.
 - `GET /orders/:id` trả `latestPayment` gồm id, version, orderId, method, amount, status, failureCode, createdAt, resolvedAt, refundedAmount, refundedAt hoặc null, chọn createdAt giảm dần rồi id giảm dần. Latest không chứng minh đó là attempt của key đang phục hồi. Mất response phải replay `POST /payments` với đúng owner/key/body đã lưu, rồi đọc Order hiện tại; không gán paymentId/kết quả từ một attempt khác.
@@ -12,18 +11,15 @@ Bản nháp A2 v0.6 · 06/11/2026. Chi tiết hiện thực tham chiếu bộ th
 - Giữ hold 15 phút, startup catch-up/tick 60 giây/batch 50, hủy PAID trước PREPARING kèm hoàn mock/trả kho/thu hồi điểm. Đây là các phần vẫn trong phạm vi; cấu hình không thay bằng chứng chạy đạt.
 - A2 vẫn yêu cầu PaymentService là lifeline riêng **nội bộ NestJS**, class domain theo đề, PWA, CI/CD, health check và production. Không bỏ các đầu ra A2 vì giản lược API của Sprint 3.
 
-
-
 ## Giá và cấu hình demo
 
 UI preview dùng giá giỏ và một cấu hình DEMO10 tập trung (10%, tối thiểu 50.000đ, trần 20.000đ), ghi rõ chưa kiểm chứng active/window/min ở server. Với mã khác, chưa tự giảm hoặc coi mã hợp lệ. POST /orders backend kiểm tra lại; mã sai/giá thay đổi/expectedTotal lệch bị từ chối rõ, không âm thầm bỏ mã hay sửa body/key. Sau rejection đã xác nhận, khách cập nhật dữ liệu từ API catalog/detail hiện có rồi xác nhận yêu cầu mới. PENDING đã tạo phải được đọc lại để hiển thị tổng chính thức trước thanh toán.
 
 Mock outcome do backend cấu hình SUCCEEDED/FAILED, mặc định success; cấu hình sai phải báo lỗi khởi động. Demo FAIL rồi SUCCESS đổi cấu hình/restart backend; key cũ replay vẫn FAILED, khách xác nhận key mới trên cùng Order còn hạn để thử lần mới. Không nhận mode/amount/failpoint hoặc dữ liệu thẻ thật từ browser.
 
-
 ## Nền Sprint 2 đã chốt — không thiết kế lại khi thêm payment
 
-Mốc kế thừa là main `a1a0e4ae92de681deac538685e24407b3190866b` sau PR #24/#26/#28/#27, hồ sơ `docs/SPRINT2_CLOSEOUT.md`. PO đã chấp nhận phạm vi Sprint 2 đã kiểm tra; các giới hạn bằng chứng vẫn giữ. Không suy ra mọi AC S2 hoặc AC A2 đã PASS. Sprint 3 v1.3 đã đồng bộ nền này; v0.6 A2 dùng cùng mốc, không lấy v0.3/ảnh cũ làm nguồn hiện hành.
+Mốc kế thừa là main `a1a0e4ae92de681deac538685e24407b3190866b` sau PR #24/#26/#28/#27, hồ sơ `docs/SPRINT2_CLOSEOUT.md`. PO đã chấp nhận phạm vi Sprint 2 đã kiểm tra; các giới hạn bằng chứng vẫn giữ. Không suy ra mọi AC S2 hoặc AC A2 đã PASS. Sprint 3 đã đồng bộ nền này; A2 dùng cùng mốc, không lấy /ảnh cũ làm nguồn hiện hành.
 
 ### Phiên và logout A9
 
@@ -47,13 +43,13 @@ Sprint 2 dọn giỏ khi tạo PENDING 200/201 (ORDER-AC-08/P01, S2-ORDER-01/12)
 
 Theo đề A2, Task 5.2 cần **health endpoint** và Task 5.4 cần URL API/health. Việc A1/S3 dùng smoke endpoint hiện có không thay đầu ra này. Task 3 phải mô tả production thật, quản lý cấu hình/log/health/migration; Task 4–5 có CI/CD, PWA, test và minh chứng. Repo nền dùng frontend/backend; đề A2 yêu cầu apps/web và apps/api: phải đối chiếu và xử lý có kiểm soát trước nghiệm thu Task 4, không mặc định khác đường dẫn là đã đáp ứng. Không di chuyển source trong lượt cập nhật tài liệu này.
 
-## Hiệu chỉnh tài liệu A2 v0.6
+## Phạm vi use case trọng tâm
 
-Task 1.3 chọn duy nhất UC-09 Thanh toán không tiền mặt; UC-08 tạo đầu vào, hủy/expiry là ngữ cảnh hỗ trợ. Hình payment là sequence chính Task 2.2, activity vẫn end-to-end. Giữ nguyên lead/lịch mục tiêu và toàn bộ contract S3 v1.3; chưa xác nhận nhận việc hoặc code/test đạt.
+Task 1.3 chọn duy nhất UC-09 Thanh toán không tiền mặt; UC-08 tạo đầu vào, hủy/expiry là ngữ cảnh hỗ trợ. Hình payment là sequence chính Task 2.2, activity vẫn end-to-end. Giữ nguyên lead/lịch mục tiêu và toàn bộ contract S3; chưa xác nhận nhận việc hoặc code/test đạt.
 
 ### Quy tắc giá và identity v2
 
-Quy tắc demo được giữ từ bản phạm vi v1.2: khi DEMO10 hợp lệ và subtotal ≥ 50.000 VND, discount = min(floor(subtotal × 10 / 100), 20000), total = subtotal − discount. Tiền là số nguyên VND; total ≥ 1 và giữ các giới hạn số học của contract. Ví dụ subtotal 50.001 → discount 5.000 → total 45.001 VND. Điểm vẫn floor(total / 10000), không làm tròn lên. Đây là chính sách nhóm chọn, không phải con số đề bài ấn định.
+Quy tắc demo: khi DEMO10 hợp lệ và subtotal ≥ 50.000 VND, discount = min(floor(subtotal × 10 / 100), 20000), total = subtotal − discount. Tiền là số nguyên VND; total ≥ 1 và giữ các giới hạn số học của contract. Ví dụ subtotal 50.001 → discount 5.000 → total 45.001 VND. Điểm vẫn floor(total / 10000), không làm tròn lên. Đây là chính sách nhóm chọn, không phải con số đề bài ấn định.
 
 Chuẩn hóa promotionCode được định nghĩa tập trung ở contract Sprint 3 mục 1: trim, chuyển chữ ASCII thường thành hoa, rỗng thành null, rồi kiểm tra [A-Z0-9_-]{1,32}. Backend áp dụng cùng một hàm trước tra mã và xây canonical v2; field promotionCode trong canonical/hash là giá trị đã chuẩn hóa. Không chuẩn hóa ID opaque hoặc canonical v1 theo quy tắc này.
 

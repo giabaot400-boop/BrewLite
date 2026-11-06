@@ -3,19 +3,17 @@
 | Thông tin | Giá trị |
 |---|---|
 | Tạo phẩm | Task 1.2 — Yêu cầu chức năng và phi chức năng |
-| Phiên bản / ngày | 0.6 / 06/11/2026 |
+| Ngày cập nhật | 06/11/2026 |
 | Trạng thái | Nháp để nhóm review, chưa là baseline được phê duyệt |
-| Nền phạm vi | [context-and-scope.md](context-and-scope.md), bản 0.6 |
+| Nền phạm vi | [context-and-scope.md](context-and-scope.md) |
 | Master use case | [Nguồn PlantUML](../diagrams/master-use-case.puml) và [hình SVG](../diagrams/master-use-case.svg) |
 | Đường dẫn dự kiến | `docs/requirements/srs.md` |
 
+## Nền sử dụng và trạng thái
 
-## Mốc sử dụng bản 0.6
-
-Bản giao nhóm ngày 06/11/2026, đồng bộ **Sprint 3 v1.3** và nền Sprint 2 main `a1a0e4ae92de681deac538685e24407b3190866b`. PO đã chọn phương án Sprint 3 làm cơ sở thực hiện; chưa thay xác nhận review của từng thành viên hoặc minh chứng kiểm thử Assignment 2. Giữ nguyên 17 FR, 12 NFR, 59 AC, 14 mã UC và 10 lớp domain.
+Bản giao nhóm ngày 06/11/2026, đồng bộ **Sprint 3** và nền Sprint 2 main `a1a0e4ae92de681deac538685e24407b3190866b`. PO đã chọn phương án Sprint 3 làm cơ sở thực hiện; chưa thay xác nhận review của từng thành viên hoặc minh chứng kiểm thử Assignment 2. Giữ nguyên 17 FR, 12 NFR, 59 AC, 14 mã UC và 10 lớp domain.
 
 Chi tiết kế thừa nằm tại [contract dùng chung](../assignment2/CONTRACTS.md). Hạn cả hai assignment là **15/11/2026 theo thông tin PO cung cấp**; giờ nộp LMS cần PO xác nhận. Xem [kế hoạch giao nhóm](../assignment2/TEAM_PLAN.md); lịch là mục tiêu đề xuất, chưa ghi nhận các bạn đã nhận việc.
-
 
 ## 1. Mục đích và cách sử dụng
 
@@ -196,7 +194,7 @@ Backend tự ghi điểm khi thanh toán thành công, không có nút hoặc re
 Khách được hủy theo trạng thái hiện tại; backend xử lý hết hạn đơn chưa trả theo BR-02/04, độc lập với việc browser còn mở hay không.
 
 - **AC-FR-17-1:** Hủy PENDING/PAYMENT_FAILED an toàn giải phóng giữ kho; hủy PAID trước PREPARING bù trừ mock/kho/điểm toàn phần; từ PREPARING trở đi từ chối. Gọi hủy lặp không bù trừ thêm; race giữa hủy, payment và nhận pha chế chỉ cho kết quả hợp lệ.
-- **AC-FR-17-2:** Payment mới tại/sau deadline bị từ chối dù chưa quét hết hạn. Gọi bộ xử lý hết hạn cho đơn đủ điều kiện chuyển CANCELLED/release nguyên tử; có task backend và catch-up khi khởi động, GET chỉ đọc. Phương án v1.3: catch-up lúc khởi động, tick 60 giây, tối đa 50 ID mỗi batch; từng đơn có transaction/recheck riêng, lỗi rollback và xử lý lại. Tick 60 giây không là cam kết release trong 60 giây; đo độ trễ khi nghiệm thu, dữ liệu legacy chưa rõ không tự release.
+- **AC-FR-17-2:** Payment mới tại/sau deadline bị từ chối dù chưa quét hết hạn. Gọi bộ xử lý hết hạn cho đơn đủ điều kiện chuyển CANCELLED/release nguyên tử; có task backend và catch-up khi khởi động, GET chỉ đọc. Phương án: catch-up lúc khởi động, tick 60 giây, tối đa 50 ID mỗi batch; từng đơn có transaction/recheck riêng, lỗi rollback và xử lý lại. Tick 60 giây không là cam kết release trong 60 giây; đo độ trễ khi nghiệm thu, dữ liệu legacy chưa rõ không tự release.
 
 ## 4. Yêu cầu phi chức năng
 
@@ -325,7 +323,7 @@ Sơ đồ tổng quát thể hiện mục tiêu đã kế thừa; màu là nhóm
 - UC-10 là mục tiêu đọc độc lập; không dùng extend chỉ để nói xem xác nhận xảy ra sau thanh toán.
 - Đăng nhập là tiền điều kiện của thao tác bảo vệ, không include thao tác login cho mỗi lần đặt. Hủy/retry/expiry là luồng thay thế và quy tắc trong các UC liên quan.
 
-Đặc tả [Task 1.3 — UC-09 Thanh toán không tiền mặt](use-case-checkout.md) chỉ chọn UC-09 làm trọng tâm. UC-08 tạo đơn là đầu vào; các chi tiết tạo đơn/hủy/expiry được giữ trong [ngữ cảnh hỗ trợ](checkout-supporting-flows.md). Giữ master 14 mã UC, không thêm hoặc gộp mã. Bản nháp đã có trigger, tiền/hậu điều kiện, luồng chính/thay thế/ngoại lệ, diagram phạm vi và liên kết FR/AC; đã đồng bộ thiết kế v1.3; vẫn cần nhóm review và đưa lên repo.
+Đặc tả [Task 1.3 — UC-09 Thanh toán không tiền mặt](use-case-checkout.md) chỉ chọn UC-09 làm trọng tâm. UC-08 tạo đơn là đầu vào; các chi tiết tạo đơn/hủy/expiry được giữ trong [ngữ cảnh hỗ trợ](checkout-supporting-flows.md). Giữ master 14 mã UC, không thêm hoặc gộp mã. Bản nháp đã có trigger, tiền/hậu điều kiện, luồng chính/thay thế/ngoại lệ, diagram phạm vi và liên kết FR/AC; đã đồng bộ thiết kế; vẫn cần nhóm review và đưa lên repo.
 
 NFR áp dụng xuyên suốt, không nhất thiết tạo UC riêng. NFR-01/05/06/07/12 liên quan tương tác người dùng; NFR-02/03/04/11 bảo vệ các luồng dữ liệu; NFR-08/09/10 gắn kiến trúc, repository, kiểm thử và bàn giao.
 
@@ -335,7 +333,7 @@ NFR áp dụng xuyên suốt, không nhất thiết tạo UC riêng. NFR-01/05/0
 |---|---|---|
 | O-01 | Browser/version kiểm chứng PWA, manifest/app shell/offline tối thiểu và viewport mục tiêu | NFR-06/07; chưa được nghiệm thu PWA khi chưa có điều kiện đo |
 | O-02 | Môi trường, dữ liệu, endpoint và quy trình đo dưới 500 ms; review các ngưỡng mẫu đề xuất | NFR-01; mục tiêu chưa là kết quả benchmark |
-| O-03 | Kiểm chứng startup/tick 60 giây/batch 50 và đo độ trễ; CLI pha chế có cờ bật nội bộ theo v1.3 | FR-13/17; chưa có kết quả chạy, không mở endpoint pha chế public |
+| O-03 | Kiểm chứng startup/tick 60 giây/batch 50 và đo độ trễ; CLI pha chế có cờ bật nội bộ theo | FR-13/17; chưa có kết quả chạy, không mở endpoint pha chế public |
 | O-04 | Review BR-01…06, dữ liệu legacy, schema và rollout/storage trước triển khai | FR-03/07–10/14–17, NFR-11 |
 | O-05 | Chấp nhận ưu tiên Should của bàn phím, lịch/lead/reviewer và nền tảng production ở đúng task | NFR-09/12, kế hoạch Task 3–5 |
 
@@ -353,7 +351,7 @@ Những điểm mở không phải lý do tự phát sinh chức năng ngoài OU
 
 Bản này là đầu ra nháp Task 1.2, chưa tuyên bố Task 1 được nghiệm thu. Chưa sửa code, cấu trúc repo, migration, tài liệu lịch sử hoặc kết quả test từ việc soạn SRS.
 
-## 8. Nguồn và lịch sử
+## 8. Nguồn tham chiếu
 
 | Nguồn | Cách sử dụng |
 |---|---|
@@ -361,46 +359,16 @@ Bản này là đầu ra nháp Task 1.2, chưa tuyên bố Task 1 được nghi�
 | [context-and-scope.md](context-and-scope.md), 0.5 | IN-01…10, OUT-01…08, stakeholder, ràng buộc và chính sách đang review |
 | `BrewLite-CongNghePhanMem.pdf`, mục 4/8/9/12 | Chức năng nền, mục tiêu API, mock, state, idempotency, optimistic locking, ưu đãi/điểm |
 | `BrewLite_Sprint2_Phan_Tich_Thiet_Ke_v0.6(2).docx`, P01–P10 và master | Phiên/giỏ/owner, đăng xuất, canonical/replay v1, giới hạn chờ và mã UC kế thừa |
-| `BrewLite_Sprint3_Pham_Vi_v1.3.md`, ngày 06/11/2026; master Sprint 3 hiện hành | BR-01…06, xác nhận/giữ giỏ, payment/kho/điểm, cách dùng UC-10/13 và retry |
+| `docs/sprint3/DESIGN.md`, ngày 06/11/2026; master Sprint 3 hiện hành | BR-01…06, xác nhận/giữ giỏ, payment/kho/điểm, cách dùng UC-10/13 và retry |
 
-| Phiên bản | Ngày | Nội dung | Trạng thái |
-|---|---|---|---|
-| 0.1 | 02/11/2026 | Soạn 17 FR, 12 NFR, AC và mapping; kế thừa master 14 mã UC, đổi nhóm hiển thị theo chức năng | Nháp review; chưa là bằng chứng triển khai hoặc test đạt |
-| 0.2 | 02/11/2026 | Liên kết bản nháp Task 1.3 và cập nhật checklist tài liệu; giữ nguyên FR/NFR/AC, BR, ưu tiên và master của 0.1 | Nháp review; chưa đưa lên repo hoặc nghiệm thu Task 1 |
-
-
-## Cập nhật 0.3
-
-Đã đồng bộ Sprint 3 v1.1. Xem [contract dùng chung](../assignment2/CONTRACTS.md) và [bảng thay đổi](../assignment2/CHANGELOG.md). Các mục lịch sử 0.1/0.2 mô tả phiên bản trước; bản tại thời điểm đó là 0.3; bản hiện hành nay là 0.6; xem phần hiệu đính cuối tài liệu.
-
-| Phiên bản | Ngày | Nội dung |
-|---|---|---|
-| 0.3 | 04/11/2026 | Đồng bộ Sprint 3 v1.1: bỏ quote và đọc payment riêng, Product-only stock, giá chính thức trước payment, retry đúng state machine, owner/recovery và tham chiếu; giữ nguyên mã FR/NFR/UC. Nháp thiết kế, chưa nghiệm thu hoặc xác nhận test/code. |
-
-## Cập nhật 0.4 — bản trước
-
-| Phiên bản | Ngày | Nội dung |
-|---|---|---|
-| 0.4 | 04/11/2026 | Đồng bộ Sprint 3 v1.2/Sprint 2 a1a0e4a: session binding/logout A9, assert Order–ledger, bận khóa và lỗi v1, môi trường kế thừa; bổ sung kế hoạch tới hạn 15/11. Giữ mã FR/NFR/AC/UC và phạm vi; chưa xác nhận code/test/production đạt. |
-
-## Lịch sử cập nhật 0.5
-
-| Phiên bản | Ngày | Nội dung |
-|---|---|---|
-| 0.5 | 05/11/2026 | Chọn duy nhất UC-09 làm trọng tâm Task 1.3; tách ngữ cảnh UC-08/hủy/expiry, đồng bộ nguồn/hình và truy vết. Giữ nghiệp vụ S3 v1.2, mã FR/NFR/AC/UC; chưa xác nhận code/test đạt. |
-
-## Làm rõ BR-05 và canonical ở v0.6
+## Quy tắc giá và canonical
 
 ### Quy tắc giá và identity v2
 
-Quy tắc demo được giữ từ bản phạm vi v1.2: khi DEMO10 hợp lệ và subtotal ≥ 50.000 VND, discount = min(floor(subtotal × 10 / 100), 20000), total = subtotal − discount. Tiền là số nguyên VND; total ≥ 1 và giữ các giới hạn số học của contract. Ví dụ subtotal 50.001 → discount 5.000 → total 45.001 VND. Điểm vẫn floor(total / 10000), không làm tròn lên. Đây là chính sách nhóm chọn, không phải con số đề bài ấn định.
+Quy tắc demo: khi DEMO10 hợp lệ và subtotal ≥ 50.000 VND, discount = min(floor(subtotal × 10 / 100), 20000), total = subtotal − discount. Tiền là số nguyên VND; total ≥ 1 và giữ các giới hạn số học của contract. Ví dụ subtotal 50.001 → discount 5.000 → total 45.001 VND. Điểm vẫn floor(total / 10000), không làm tròn lên. Đây là chính sách nhóm chọn, không phải con số đề bài ấn định.
 
 Chuẩn hóa promotionCode được định nghĩa tập trung ở contract Sprint 3 mục 1: trim, chuyển chữ ASCII thường thành hoa, rỗng thành null, rồi kiểm tra [A-Z0-9_-]{1,32}. Backend áp dụng cùng một hàm trước tra mã và xây canonical v2; field promotionCode trong canonical/hash là giá trị đã chuẩn hóa. Không chuẩn hóa ID opaque hoặc canonical v1 theo quy tắc này.
 
 UI dùng quy tắc tương đương để preview và lập request mới; BFF chuyển nguyên body/key đã nhận, không tự sửa mã hay tính một hash khác. UI lưu body trước HTTP và retry nguyên body/key đã lưu, không chạy lại bước dựng payload từ giỏ hiện tại. Backend chuẩn hóa lại một cách xác định rồi lập canonical; tương đương mã không tạo conflict giả, còn thay đổi có ý nghĩa ở items/mã/tổng vẫn conflict với key cũ. Không sửa ledger/hash/pending v1 hoặc nâng identity một request v2 đã lưu.
 
 Fixture cần kiểm khi hiện thực: hai body mới giống nhau ngoài promotionCode=" demo10 " và "DEMO10" cho cùng canonical/hash sau chuẩn hóa; replay cùng key trả cùng kết quả nếu toàn bộ nội dung còn lại tương đương. Mã khác hoặc expectedTotal khác phải conflict. BFF không thay body; test riêng chứng minh retry dùng đúng bytes body đã lưu. Những fixture này cụ thể hóa AC hiện có, chưa phải kết quả PASS và không thêm AC mới.
-
-## Hiệu đính v0.6 ngày 06/11/2026
-
-Giữ các bản ghi 0.1–0.5 ở trên làm lịch sử. Bản hiện hành v0.6 đồng bộ Sprint 3 v1.3: làm rõ FR-13/D16, ngữ cảnh tạo đơn trong sequence chính, công thức/canonical và lịch A1/A2. Tập FR/NFR/AC/UC giữ nguyên; chưa chạy test ứng dụng.

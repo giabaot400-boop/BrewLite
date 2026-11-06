@@ -1,8 +1,8 @@
-# BrewLite — Ma trận truy vết Assignment 2 v0.6
+# BrewLite — Ma trận truy vết Assignment 2
 
-**Quy ước v0.6:** M-01…M-05 và A-/E- là nhánh của [UC-09](requirements/use-case-checkout.md); các mã C- thuộc [ngữ cảnh hỗ trợ](requirements/checkout-supporting-flows.md). Tạo đơn và hủy/expiry không là đặc tả trọng tâm thứ hai.
+**Quy ước:** M-01…M-05 và A-/E- là nhánh của [UC-09](requirements/use-case-checkout.md); các mã C- thuộc [ngữ cảnh hỗ trợ](requirements/checkout-supporting-flows.md). Tạo đơn và hủy/expiry không là đặc tả trọng tâm thứ hai.
 
-06/11/2026 · Sprint 3 v1.3 / S2 a1a0e4a. Đây là mapping thiết kế và đích tích hợp, **chưa phải kết quả kiểm thử**. Tài liệu mã nguồn/test/commit cụ thể chưa được rà trong lượt này nên để CHỜ; API ghi ở cột dưới là contract mục tiêu hoặc nền kế thừa, không chứng minh route S3 đã có trên main.
+06/11/2026 · Sprint 3 / S2 a1a0e4a. Đây là mapping thiết kế và đích tích hợp, **chưa phải kết quả kiểm thử**. Tài liệu mã nguồn/test/commit cụ thể chưa được rà trong lượt này nên để CHỜ; API ghi ở cột dưới là contract mục tiêu hoặc nền kế thừa, không chứng minh route S3 đã có trên main.
 
 Nguồn: [SRS](requirements/srs.md), [use case](requirements/use-case-checkout.md), [activity](diagrams/activity-checkout.md), [sequence](diagrams/sequence-checkout.md), [class](diagrams/class-domain.md), [contract](assignment2/CONTRACTS.md). Mỗi nhóm liệt kê toàn bộ AC đã định danh trong SRS; khi có evidence, lead điền path/PR/SHA/command/expected-actual thay CHỜ và tách dòng theo AC nếu kết quả khác nhau.
 
@@ -40,6 +40,6 @@ Nguồn: [SRS](requirements/srs.md), [use case](requirements/use-case-checkout.m
 
 ## Cách dùng khi nhận việc
 
-- Review Task 1–2 từ tài liệu v0.6, ghi commit nguồn được dùng. Các nhánh kiến trúc/production cần Task 3 tương ứng trước khi ghi hoàn thành truy vết.
+- Review Task 1–2 từ tài liệu, ghi commit nguồn được dùng. Các nhánh kiến trúc/production cần Task 3 tương ứng trước khi ghi hoàn thành truy vết.
 - Có thể dùng lại code/evidence A1/S2/S3 nếu đúng AC, phiên bản/môi trường và có link cụ thể; không đổi nhãn toàn bộ sang PASS từ một demo success.
 - Task4 cần test MVP và CI success/failure; Task5 cần unit/integration/E2E, URL production/health, log deploy/smoke và cách rollback. Sơ đồ không thay các bằng chứng đó.

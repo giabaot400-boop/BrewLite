@@ -1,5 +1,5 @@
 @startuml activity-sprint3-order
-title BrewLite Sprint 3 v1.3 06/11/2026\nD02A Xem giỏ và tạo đơn
+title BrewLite Sprint 3 06/11/2026\nD02A Xem giỏ và tạo đơn
 skinparam defaultFontName DejaVu Sans
 skinparam defaultFontSize 14
 skinparam shadowing false
@@ -80,7 +80,7 @@ endlegend
 @enduml
 
 @startuml activity-sprint3-payment
-title BrewLite Sprint 3 v1.3 06/11/2026\nD02B Thanh toán và phục hồi
+title BrewLite Sprint 3 06/11/2026\nD02B Thanh toán và phục hồi
 skinparam defaultFontName DejaVu Sans
 skinparam defaultFontSize 14
 skinparam shadowing false

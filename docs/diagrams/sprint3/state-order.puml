@@ -1,5 +1,5 @@
 @startuml state-order-sprint3
-title BrewLite Sprint 3 - D06\nVòng đời Order (v1.3, 04/11/2026)
+title BrewLite Sprint 3 - D06\nVòng đời Order (06/11/2026)
 top to bottom direction
 skinparam defaultFontName DejaVu Sans
 skinparam defaultFontSize 14

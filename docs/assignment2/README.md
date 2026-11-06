@@ -1,12 +1,12 @@
-# BrewLite Assignment 2 — Task 1–2 v0.6
+# BrewLite Assignment 2 — Task 1–2
 
-**Bản giao nhóm · 06/11/2026 · Đồng bộ Sprint 3 v1.3 / Sprint 2 a1a0e4a.** Dùng gói này thay Task 1–2 v0.5. Có thể dùng để chia việc ngay; chưa ghi nhận nhóm đã review/commit, code đã đạt AC hoặc production đã triển khai.
+**Bản giao nhóm · 06/11/2026 · Đồng bộ Sprint 3 / Sprint 2 a1a0e4a.** Có thể dùng để chia việc ngay; chưa ghi nhận nhóm đã review/commit, code đã đạt AC hoặc production đã triển khai.
 
 ## Đọc trước
 
 1. [Kế hoạch giao nhóm](TEAM_PLAN.md): một lead/reviewer mỗi mục, lịch mục tiêu tới 15/11 và cổng nghiệm thu Task 1→5.
 2. [Contract đồng bộ](CONTRACTS.md): năm API checkout, kế thừa session/logout, invariant Order–ledger, lỗi/retry v1 và môi trường nền.
-3. [Changelog v0.6 và lịch sử](CHANGELOG.md): v0.6 hiện hành ở đầu; giữ nguyên nội dung lịch sử v0.5/v0.3 bên dưới.
+3. [Ghi chú thiết kế](CHANGELOG.md): các quyết định và giới hạn hiện tại; lịch sử repo theo commit/PR.
 
 ## Tạo phẩm theo đề
 
@@ -20,7 +20,7 @@
 | 2.3 | [Domain class](../diagrams/class-domain.md) | [SVG](../diagrams/class-domain.svg) / [nguồn](../diagrams/class-domain.puml) |
 | Truy vết | [Ma trận FR/NFR→UC→thiết kế→API→test](../traceability-matrix.md) | Code/test chưa xác minh ghi CHỜ |
 
-Trong repo, đọc trực tiếp các liên kết bên dưới docs; mở SVG bằng trình duyệt và chỉnh qua nguồn PlantUML. Các tệp được bố trí theo đường dẫn tạo phẩm của đề, không commit gói ZIP. Bảy tài liệu nội dung (gồm ngữ cảnh hỗ trợ), năm nguồn và tám SVG cùng nhãn 0.6. Mục lịch sử 0.1–0.5 mô tả phiên bản cũ, không phải bản hiện hành.
+Trong repo, đọc trực tiếp các liên kết bên dưới docs; mở SVG bằng trình duyệt và chỉnh qua nguồn PlantUML. Các tệp được bố trí theo đường dẫn tạo phẩm của đề, không commit gói ZIP. Bảy tài liệu nội dung (gồm ngữ cảnh hỗ trợ), năm nguồn và tám SVG cùng nội dung thiết kế.
 
 ## Phạm vi và trạng thái
 
@@ -30,15 +30,15 @@ Task 1–2 đã có bản soạn đồng bộ để review/commit. Bước kế 
 
 Hạn **15/11/2026** do PO cung cấp; giờ LMS cần xác nhận. Lịch mục tiêu: 05/11 Task 1–2 trên repo, 06/11 Task 3, 07–08/11 cổng Task 4, 09–12/11 Task 5, 13–14/11 dự phòng/đóng gói. Lead và lịch là đề xuất nhận việc, chưa là capacity cam kết. Không chờ hoàn thành A1 mới chuẩn bị toàn bộ A2.
 
-Nguồn: Assignment2-BrewLite.pdf, hồ sơ S1/S2 lịch sử, Sprint 3 v1.3 và nền S2 a1a0e4a, hồ sơ docs/SPRINT2_CLOSEOUT.md sau PR #24/#26/#28/#27. Tái sử dụng evidence S2 cần đối chiếu đúng AC/môi trường/commit; không tự ghi toàn bộ S2 hoặc A2 PASS. Lượt này chỉnh tài liệu/render UML, chưa chạy test ứng dụng, tạo PR hoặc gửi tin cho nhóm.
+Nguồn: Assignment2-BrewLite.pdf, hồ sơ S1/S2 lịch sử, Sprint 3 và nền S2 a1a0e4a, hồ sơ docs/SPRINT2_CLOSEOUT.md sau PR #24/#26/#28/#27. Tái sử dụng evidence S2 cần đối chiếu đúng AC/môi trường/commit; không tự ghi toàn bộ S2 hoặc A2 PASS. Lượt này chỉnh tài liệu và sơ đồ UML, chưa chạy test ứng dụng, tạo PR hoặc gửi tin cho nhóm.
 
-## Hiệu chỉnh trọng tâm v0.6
+## Use case trọng tâm
 
-Task 1.3 chỉ chọn **UC-09 Thanh toán không tiền mặt**. UC-08 và các UC khác vẫn thuộc master/SRS; các bước tạo đơn, hủy và expiry chuyển sang [ngữ cảnh hỗ trợ](../requirements/checkout-supporting-flows.md), không bị bỏ khỏi sản phẩm. Activity Task 2.1 vẫn end-to-end. Hình sequence payment là hình chính Task 2.2 với đủ Customer/UI/API/Database/PaymentService, có ngữ cảnh tạo Order/transaction/CAS trước ranh giới UC-09; hình tạo đơn chi tiết hóa ngữ cảnh ấy; hình hủy/expiry bổ trợ cạnh tranh trạng thái. Không đổi nghiệp vụ S3 v1.3 hoặc yêu cầu Task 3–5.
+Task 1.3 chỉ chọn **UC-09 Thanh toán không tiền mặt**. UC-08 và các UC khác vẫn thuộc master/SRS; các bước tạo đơn, hủy và expiry chuyển sang [ngữ cảnh hỗ trợ](../requirements/checkout-supporting-flows.md), không bị bỏ khỏi sản phẩm. Activity Task 2.1 vẫn end-to-end. Hình sequence payment là hình chính Task 2.2 với đủ Customer/UI/API/Database/PaymentService, có ngữ cảnh tạo Order/transaction/CAS trước ranh giới UC-09; hình tạo đơn chi tiết hóa ngữ cảnh ấy; hình hủy/expiry bổ trợ cạnh tranh trạng thái. Không đổi nghiệp vụ S3 hoặc yêu cầu Task 3–5.
 
-## Kiểm tra gói v0.6
+## Kiểm tra tài liệu
 
-Đối chiếu tập 17 FR/12 NFR/59 AC và 14 mã UC với v0.5; kiểm tra liên kết, nguồn PlantUML và tám SVG. Khung ngữ cảnh trong sequence chính bổ sung nội dung tạo đơn/giữ kho, giữ UC-09 là trọng tâm. Đây là kiểm tra tài liệu, không phải test ứng dụng, PR review hoặc nghiệm thu Task 1–5.
+Đã kiểm tra tập 17 FR/12 NFR/59 AC và 14 mã UC; kiểm tra liên kết, nguồn PlantUML và tám SVG. Khung ngữ cảnh trong sequence chính bổ sung nội dung tạo đơn/giữ kho, giữ UC-09 là trọng tâm. Đây là kiểm tra tài liệu, không phải test ứng dụng, PR review hoặc nghiệm thu Task 1–5.
 
 ## Quan hệ A1 và A2
 

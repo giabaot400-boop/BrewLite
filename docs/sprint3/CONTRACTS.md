@@ -1,6 +1,6 @@
 # BrewLite Sprint 3 contract thực hiện
 
-Phiên bản 1.3 ngày 06/11/2026. Thiết kế phải hiện thực và test trên nền Sprint 2 main `a1a0e4ae92de681deac538685e24407b3190866b` đã chốt. Kế thừa các bản sửa auth/logout, bcrypt và đối chiếu Order/ledger trong PR #24/#26/#28; hồ sơ nghiệm thu tại PR #27. Các tên helper/script ở đây là giao diện mục tiêu, chưa khẳng định repo đã có. Nếu code nền thay đổi, lead ghi diff có ảnh hưởng trước khi tích hợp. File này được dẫn chiếu bởi bản phạm vi v1.3, không mở thêm tính năng.
+Cập nhật ngày 06/11/2026. Thiết kế phải hiện thực và test trên nền Sprint 2 main `a1a0e4ae92de681deac538685e24407b3190866b` đã chốt. Kế thừa các bản sửa auth/logout, bcrypt và đối chiếu Order/ledger trong PR #24/#26/#28; hồ sơ nghiệm thu tại PR #27. Các tên helper/script ở đây là giao diện mục tiêu, chưa khẳng định repo đã có. Nếu code nền thay đổi, lead ghi diff có ảnh hưởng trước khi tích hợp. File này được dẫn chiếu bởi bản phạm vi, không mở thêm tính năng.
 
 ## 1 Các miền dữ liệu
 
@@ -33,7 +33,7 @@ Payment canonical {version:1,orderId,method}, đúng thứ tự field đó, SHA-
 
 Luồng rút gọn: Khách xem giỏ và nhập mã → UI tính tổng dự kiến theo cấu hình DEMO10 → khách bấm Tạo và xem đơn → lưu pending v2 bền rồi POST /orders → backend tính/kiểm tra giá, mã và giữ kho Product → GET /orders/:id → hiển thị subtotal/discountTotal/total chính thức và trạng thái mã → khách chọn Ví/Thẻ, xác nhận số tiền → POST /payments. Không tự gửi payment ngay sau tạo đơn.
 
-Giữ DTO v2, expectedTotal và canonical/hash như v1.0; không đổi version của body đã có. UI chỉ tính preview từ giá giỏ và cấu hình cố định DEMO10 (10%, trần20.000, min50.000), ghi rõ là dự kiến, chưa xác nhận hiệu lực mã. Với mã khác, không tự coi là hợp lệ; preview chưa giảm và backend quyết định khi create. Backend vẫn kiểm active/window/min, giá và expectedTotal; sai trả rejection đã ledger, không tự sửa payload/key. Sau từ chối đã xác nhận, khách xem lại giá từ details hoặc catalog API hiện có rồi xác nhận request mới. Khi create thành công, UI GET Order hiển thị tổng chính thức trước nút Xác nhận thanh toán; không chỉ dựa vào preview. Không tạo API báo giá thay thế.
+Giữ DTO v2, expectedTotal và canonical/hash theo contract; không đổi version của body đã có. UI chỉ tính preview từ giá giỏ và cấu hình cố định DEMO10 (10%, trần20.000, min50.000), ghi rõ là dự kiến, chưa xác nhận hiệu lực mã. Với mã khác, không tự coi là hợp lệ; preview chưa giảm và backend quyết định khi create. Backend vẫn kiểm active/window/min, giá và expectedTotal; sai trả rejection đã ledger, không tự sửa payload/key. Sau từ chối đã xác nhận, khách xem lại giá từ details hoặc catalog API hiện có rồi xác nhận request mới. Khi create thành công, UI GET Order hiển thị tổng chính thức trước nút Xác nhận thanh toán; không chỉ dựa vào preview. Không tạo API báo giá thay thế.
 
 ## 2 Response chính xác
 
@@ -192,7 +192,7 @@ Indexes đọc: Order(userId,createdAt,id), Order(checkoutPolicyVersion,status,p
 
 Migration: backup/kiểm kê target trước; thêm enum/cột nullable/bảng/index; backfill Order subtotal=total, discountTotal=0/version=0/policy1, giữ deadline/promotion/loyalty null; sau đó đặt NOT NULL cho field có backfill, thêm CHECK legacy-aware và regenerate Prisma. Không sửa migration 20261030152601_sprint2_auth_orders. Dry-run trên DB sạch và bản sao fixture v1 gồm SUCCEEDED/REJECTED ledger, PENDING legacy; so rowcount,hash,responseJson trước/sau, FK/index và query. Nếu có tổng legacy ngoài miền kỳ vọng, báo lỗi/kiểm kê trước thêm constraint, không chữa dữ liệu âm thầm.
 
-Seed demo có guard môi trường riêng, upsert catalog/promotion; stock khởi tạo 10 mỗi Product chỉ khi fixture demo mới/explicit setup được xác nhận; seed chạy lại không reset stock/reserved của đơn đang có hoặc tạo thêm points. Không giả định con số đó là tồn thực ở DB cũ. Không seed password/token public vào git; .env.example chỉ placeholder. Tách database URL/profile browser demo; không mang pending khác môi trường vào DB demo.
+Seed demo có guard môi trường riêng, upsert catalog/promotion; stock khởi tạo 10 mỗi Product chỉ khi fixture demo mới/explicit setup được xác nhận; seed chạy lại không reset stock/reserved của đơn đang có hoặc tạo thêm points. Không giả định con số đó là tồn thực ở DB cũ. Không seed password/token public vào git;.env.example chỉ placeholder. Tách database URL/profile browser demo; không mang pending khác môi trường vào DB demo.
 
 Thiết kế 1.3 áp dụng từ nền S2 chưa triển khai S3. Nếu đã có migration/rows S3 khác ngoài snapshot nền, dừng rollout để kiểm kê; không tự drop field hoặc xóa reservation topping. Giữ Topping/giá/liên kết và snapshot đơn; không thêm field stock hoặc reservation cho Topping.
 
@@ -205,7 +205,6 @@ Crash sau create commit trước binding: replay cùng saved key/body rồi GET 
 ## 8 Chạy triển khai và demo
 
 Nền dùng Node 24, Prisma 7.10.1, PostgreSQL 17 và bcrypt native 6.0.0 cost 12. npm ci theo lockfile; bcryptjs còn ở devDependencies phục vụ fixture tương thích hash cũ, không đổi runtime auth về bcryptjs. Bằng chứng S2 không thay test S3 sau tích hợp.
-
 
 E thêm Compose ba service frontend/backend/db, pin PostgreSQL 17 theo README/nền Sprint 2 cho môi trường demo, named volume, DB healthcheck; backend chờ DB healthy, frontend gọi backend qua service URL nội bộ, browser chỉ /api. Đặt DATABASE_URL và BACKEND_URL đúng network; không dùng localhost của container để chỉ service khác. Build Prisma generate và Nest/Next theo lockfile; không đổi stack/version để làm Sprint 3. Migrations/seed chạy một lần rõ trong README trước app ready, không mỗi container tự migrate đồng thời. Không cần thêm endpoint public health: DB dùng pg_isready, backend smoke endpoint hiện có, FE HTTP check.
 
@@ -251,7 +250,7 @@ Test giao diện gồm loading/empty/error và các trình duyệt trong yêu c�
 
 ### Quy tắc giá và identity v2
 
-Quy tắc demo được giữ từ bản phạm vi v1.2: khi DEMO10 hợp lệ và subtotal ≥ 50.000 VND, discount = min(floor(subtotal × 10 / 100), 20000), total = subtotal − discount. Tiền là số nguyên VND; total ≥ 1 và giữ các giới hạn số học của contract. Ví dụ subtotal 50.001 → discount 5.000 → total 45.001 VND. Điểm vẫn floor(total / 10000), không làm tròn lên. Đây là chính sách nhóm chọn, không phải con số đề bài ấn định.
+Quy tắc demo: khi DEMO10 hợp lệ và subtotal ≥ 50.000 VND, discount = min(floor(subtotal × 10 / 100), 20000), total = subtotal − discount. Tiền là số nguyên VND; total ≥ 1 và giữ các giới hạn số học của contract. Ví dụ subtotal 50.001 → discount 5.000 → total 45.001 VND. Điểm vẫn floor(total / 10000), không làm tròn lên. Đây là chính sách nhóm chọn, không phải con số đề bài ấn định.
 
 Chuẩn hóa promotionCode được định nghĩa tập trung ở contract Sprint 3 mục 1: trim, chuyển chữ ASCII thường thành hoa, rỗng thành null, rồi kiểm tra [A-Z0-9_-]{1,32}. Backend áp dụng cùng một hàm trước tra mã và xây canonical v2; field promotionCode trong canonical/hash là giá trị đã chuẩn hóa. Không chuẩn hóa ID opaque hoặc canonical v1 theo quy tắc này.
 

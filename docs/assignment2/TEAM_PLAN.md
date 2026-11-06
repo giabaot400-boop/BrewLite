@@ -1,18 +1,18 @@
 # BrewLite — Kế hoạch giao nhóm Assignment 2
 
-**v0.6 · 06/11/2026 · Lịch và lead đề xuất để nhận việc; chưa ghi nhận capacity cam kết.**
+**06/11/2026 · Lịch và lead đề xuất để nhận việc; chưa ghi nhận capacity cam kết.**
 
-Hạn cả A1/A2 là **15/11/2026 theo PO cung cấp**; PO kiểm tra giờ LMS, mục tiêu sẵn sàng nộp ngày 14/11. Dùng Sprint 3 v1.3 cho A1 và gói A2 v0.6 này cho Task 1–2. Cùng một sản phẩm/repo: kế thừa menu/auth/giỏ/đơn, checkout S3; A2 bổ sung đúng yêu cầu, kiến trúc, PWA, CI/CD, production và bằng chứng.
+Hạn cả A1/A2 là **15/11/2026 theo PO cung cấp**; PO kiểm tra giờ LMS, mục tiêu sẵn sàng nộp ngày 14/11. Dùng Sprint 3 cho A1 và gói A2 này cho Task 1–2. Cùng một sản phẩm/repo: kế thừa menu/auth/giỏ/đơn, checkout S3; A2 bổ sung đúng yêu cầu, kiến trúc, PWA, CI/CD, production và bằng chứng.
 
 ## 1. Bắt đầu ngay
 
-A/B nhận tài liệu Task 1–2 để review và đưa lên repo; không vẽ lại bộ UML. C/D/E tiếp tục code S3 v1.3, từng lead cung cấp evidence phần mình. B giữ board/checklist, E khảo sát deployment, C chuẩn bị health/log/secrets, A xác định môi trường PWA. Không đợi A1 hoàn tất mới chuẩn bị A2.
+A/B nhận tài liệu Task 1–2 để review và đưa lên repo; không vẽ lại bộ UML. C/D/E tiếp tục code S3, từng lead cung cấp evidence phần mình. B giữ board/checklist, E khảo sát deployment, C chuẩn bị health/log/secrets, A xác định môi trường PWA. Không đợi A1 hoàn tất mới chuẩn bị A2.
 
 ## 2. Một lead cho mỗi nhóm đầu ra
 
 | Mã | Lead | Reviewer | Đầu ra cụ thể | Đầu vào |
 |---|---|---|---|---|
-| A2-REQ | A | B | Task 1.1–1.3/SRS/master và review/commit | Gói v0.6 và phản hồi lead nghiệp vụ |
+| A2-REQ | A | B | Task 1.1–1.3/SRS/master và review/commit | Gói và phản hồi lead nghiệp vụ |
 | A2-UML | B | D | Task 2 activity/sequence/class, source/SVG khớp | Baseline Task 1 |
 | A2-ARCH | D | E | Task 3.1 layered/module, migration/mock, trade-off và ADR | Task 1–2; A góp BFF/PWA, C góp security |
 | A2-DEPLOY-DESIGN | E | C | Task 3.2 deployment theo nền tảng thật, ranh giới local/CI/prod | Tài nguyên/tài khoản có thể dùng, kiến trúc |
@@ -29,9 +29,8 @@ A/B nhận tài liệu Task 1–2 để review và đưa lên repo; không vẽ 
 
 | Mốc (giờ Việt Nam) | Mục tiêu | Điều kiện ghi hoàn thành |
 |---|---|---|
-| 04–05/11 | Mốc phiên bản: v0.4 ngày 04/11, v0.5 ngày 05/11; chưa xác nhận review/commit từ gói | Giữ đúng ngày lịch sử, không ghi v0.5 đã sẵn sàng từ 04/11 |
 | 05/11 | A đưa Task 1 lên repo/review, sau đó B đưa Task 2 khớp baseline | G1 đủ Task 1.1–1.3/lịch sử/review; G2 đủ ba loại UML source/SVG |
-| 06/11 | Hiệu đính v0.6/S3 v1.3; đối chiếu tình trạng Task 1–3 thực tế | Có tệp cập nhật; trạng thái repo/review/capacity cần lead xác nhận |
+| 06/11 | Rà soát tài liệu S3/A2; đối chiếu tình trạng Task 1–3 thực tế | Có tệp cập nhật; trạng thái repo/review/capacity cần lead xác nhận |
 | 06/11 | Task 3.1/3.2: kiến trúc/ADR, layout và nền tảng production | G3 có trên repo, phản ánh hạ tầng thật, truy vết module/code |
 | 07–08/11 | Task 4: MVP menu kế thừa, quản lý docs/layout/backlog/DoD và CI | G4 lint/test/build lỗi chặn merge; evidence CI success/failure và test MVP |
 | 09–12/11 | Task 5: S3 tích hợp, PWA, integration/E2E, Compose, health/CD/HTTPS | G5 URL hoạt động, test/traceability/release/README/smoke/rollback |
@@ -50,7 +49,7 @@ Nếu 06/11 chưa có phương án production dùng được hoặc 08/11 chưa 
 | Browser/version PWA, môi trường/phép đo mẫu | A, C góp API/auth | 05/11 | Chọn browser hỗ trợ đang dùng, ghi version/máy/viewport trong SRS O-01/O-02 |
 | Nền tảng/tài khoản/chi phí/quyền deploy | E | 06/11 | Xác nhận tài nguyên thật, chưa tự mua; deployment diagram theo phương án đó |
 | apps/web–apps/api so với frontend–backend | B | 06/11 | Đề A2 nêu apps/web và apps/api. Lập PR di chuyển có kiểm soát, cập nhật workspace/import/CI/Docker/README; nếu muốn giữ layout cũ phải có xác nhận ngoại lệ của giảng viên trước nghiệm thu. Bảng ánh xạ không tự thay yêu cầu đề |
-| Demo/legacy/storage | D, A/C/E đối chiếu phần mình | Trước writer S3 | Dùng S3 v1.3/contract A2; chỉ mở lại khi có mismatch cụ thể với code |
+| Demo/legacy/storage | D, A/C/E đối chiếu phần mình | Trước writer S3 | Dùng S3 /contract A2; chỉ mở lại khi có mismatch cụ thể với code |
 
 ## 5. Theo dõi và DONE
 
@@ -58,9 +57,9 @@ Mỗi ngày từng lead cập nhật ba dòng: đã làm + PR/SHA/log; tiếp th
 
 DONE cần artifact đúng phiên bản, reviewer phản hồi, kiểm tra phù hợp và evidence. [Ma trận truy vết](../traceability-matrix.md) đã có mapping yêu cầu/thiết kế/API mục tiêu; code/test chưa xác minh ghi CHỜ. Đường găng là S3 tích hợp, CI/CD và production; tài liệu đồng bộ không tự hoàn thành Task 3–5 hoặc bảo đảm kịp hạn khi chưa có capacity thật.
 
-## Hiệu chỉnh tài liệu A2 v0.6
+## Phạm vi use case trọng tâm
 
-Task 1.3 chọn duy nhất UC-09 Thanh toán không tiền mặt; UC-08 tạo đầu vào, hủy/expiry là ngữ cảnh hỗ trợ. Hình payment là sequence chính Task 2.2, activity vẫn end-to-end. Giữ nguyên lead/lịch mục tiêu và toàn bộ contract S3 v1.3; chưa xác nhận nhận việc hoặc code/test đạt.
+Task 1.3 chọn duy nhất UC-09 Thanh toán không tiền mặt; UC-08 tạo đầu vào, hủy/expiry là ngữ cảnh hỗ trợ. Hình payment là sequence chính Task 2.2, activity vẫn end-to-end. Giữ nguyên lead/lịch mục tiêu và toàn bộ contract S3; chưa xác nhận nhận việc hoặc code/test đạt.
 
 ## Quan hệ A1 và A2
 

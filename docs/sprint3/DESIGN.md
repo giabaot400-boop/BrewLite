@@ -1,6 +1,6 @@
 # BrewLite Sprint 3 thiết kế triển khai
 
-Phiên bản 1.3 • 06/11/2026 • Đã đồng bộ nền Sprint 2 main a1a0e4a • Assignment 1 • Gửi nhóm A–E.
+Cập nhật • 06/11/2026 • Đã đồng bộ nền Sprint 2 main a1a0e4a • Assignment 1 • Gửi nhóm A–E.
 
 Bản 1.3 kế thừa ba thay đổi đã được PO đồng ý: bỏ API quote riêng, bỏ GET payment riêng, chỉ kiểm soát tồn Product. Nhóm dùng bản này làm cơ sở triển khai Task 8–10. Các lựa chọn nghiệp vụ đã được PO cho phép cụ thể hóa; mỗi lead có đầu ra và tiêu chí kiểm tra riêng trong TEAM_PLAN.md. Không cần chờ một cuộc họp để bắt đầu các việc không bị chặn. Contract và schema ở CONTRACTS.md, ca nghiệm thu ở TEST_MATRIX.md. Khi phát hiện code nền khác contract, ghi đúng chỗ khác trên PR trước khi thay đổi; không tự mở rộng phạm vi.
 
@@ -23,7 +23,7 @@ Giữ 13 model logic, 14 mã use case, 27 AC. Số model không phải quota c�
 
 ## 2 Quyết định thực hiện
 
-| Mã | Chọn trong phiên bản 1.3 |
+| Mã | Chọn trong Cập nhật |
 |---|---|
 | DEC-01 | Hủy PENDING/PAYMENT_FAILED giải phóng giữ hàng. PAID chỉ hủy trước PREPARING, hoàn giả lập toàn phần, trả kho và thu hồi đúng điểm đã cộng trong một transaction |
 | DEC-02 | Mock là hàm cục bộ trong NestJS, không I/O hay tiền thật. Chỉ lưu PaymentAttempt FAILED/SUCCEEDED, cùng transaction với Order/kho/điểm. WALLET/CARD là nhãn mô phỏng |
@@ -45,7 +45,7 @@ PaymentService mock nằm bên trong NestJS. Lifeline/mũi tên NestJS → mock 
 
 MOCK_PAYMENT_OUTCOME=SUCCEEDED|FAILED, mặc định SUCCEEDED, đọc từ backend lúc khởi động; giá trị sai làm startup fail. Browser không gửi mode/outcome/amount/card data. Mock không charge bên ngoài DB, không delay để giả lập network trong transaction. FAILED có failureCode PAYMENT_DECLINED; lỗi DB/network của app không được biến thành FAILED.
 
-Mất response chỉ là chưa rõ ở client. Không thêm UNKNOWN hoặc PROCESSING vào enum server, không thêm activePayment/activePaymentId hoặc worker. Đây là thu gọn rõ ràng từ các nhánh mở rộng còn sót trong v0.3; code Sprint 2 hiện không có PaymentAttempt cũ cần hỗ trợ các trạng thái ấy.
+Mất response chỉ là chưa rõ ở client. Không thêm UNKNOWN hoặc PROCESSING vào enum server, không thêm activePayment/activePaymentId hoặc worker. Theo phạm vi đã chọn, code Sprint 2 hiện không có PaymentAttempt cũ cần hỗ trợ các trạng thái ấy.
 
 ## 4 Vòng đời đơn và kho
 
@@ -91,7 +91,7 @@ Kế thừa seed thật: coffee-milk 35.000, americano 40.000, cappuccino 45.000
 
 Khách xem giỏ và nhập mã → UI tính tổng dự kiến theo cấu hình DEMO10 → khách bấm Tạo và xem đơn → lưu pending v2 bền rồi POST /orders → backend tính/kiểm tra giá, mã và giữ kho Product → GET /orders/:id → hiển thị subtotal/discountTotal/total chính thức và trạng thái mã → khách chọn Ví/Thẻ, xác nhận số tiền → POST /payments. Không tự gửi payment ngay sau tạo đơn.
 
-Giữ DTO v2, expectedTotal và canonical/hash như v1.0; không đổi version của body đã có. UI chỉ tính preview từ giá giỏ và cấu hình cố định DEMO10 (10%, trần20.000, min50.000), ghi rõ là dự kiến, chưa xác nhận hiệu lực mã. Với mã khác, không tự coi là hợp lệ; preview chưa giảm và backend quyết định khi create. Backend vẫn kiểm active/window/min, giá và expectedTotal; sai trả rejection đã ledger, không tự sửa payload/key. Sau từ chối đã xác nhận, khách xem lại giá từ details hoặc catalog API hiện có rồi xác nhận request mới. Khi create thành công, UI GET Order hiển thị tổng chính thức trước nút Xác nhận thanh toán; không chỉ dựa vào preview. Không tạo API báo giá thay thế.
+Giữ DTO v2, expectedTotal và canonical/hash theo contract; không đổi version của body đã có. UI chỉ tính preview từ giá giỏ và cấu hình cố định DEMO10 (10%, trần20.000, min50.000), ghi rõ là dự kiến, chưa xác nhận hiệu lực mã. Với mã khác, không tự coi là hợp lệ; preview chưa giảm và backend quyết định khi create. Backend vẫn kiểm active/window/min, giá và expectedTotal; sai trả rejection đã ledger, không tự sửa payload/key. Sau từ chối đã xác nhận, khách xem lại giá từ details hoặc catalog API hiện có rồi xác nhận request mới. Khi create thành công, UI GET Order hiển thị tổng chính thức trước nút Xác nhận thanh toán; không chỉ dựa vào preview. Không tạo API báo giá thay thế.
 
 DEMO10 áp khi active và startsAt ≤ DB now < endsAt, subtotal ≥ 50.000; discount=min(floor(subtotal×10/100),20000), total=subtotal−discount. Một mã, chuẩn hóa trim rồi ASCII uppercase, chuỗi rỗng thành null; mã khác định dạng [A-Z0-9_-]{1,32} bị 400. Mã hợp lệ nhưng không áp được trả PROMOTION_NOT_APPLICABLE, không âm thầm bỏ mã. Tổng và mọi phép nhân phải là số nguyên an toàn không vượt PostgreSQL Int 2.147.483.647, total ít nhất 1.
 
@@ -226,16 +226,16 @@ Mã AC rút gọn trong bảng trên đều có tiền tố S3-. UC-01…07 và 
 
 Definition of Done: build/typecheck/lint/tests phù hợp từng package đạt trên SHA ghi rõ; PR được người khác review; backend validate/permission, UI loading/error/recovery đủ; a/b/c và các AC có kết quả/log; migration sạch và fixture chuyển tiếp đạt; thành viên khác chạy Compose/README; demo, Review, Retro/backlog thật được lưu. Không ghi PASS cho việc chỉ xem hình hoặc kiểm tra cú pháp tài liệu. API <500 ms theo NFR cần đo endpoint/read workload mẫu, ghi dữ liệu/máy/số request và không loại bỏ số đo lỗi; timeout bảo vệ khác mục tiêu hiệu năng.
 
-Assignment 2 được chuẩn bị song song; gói Task 1–2 v0.6 đồng bộ cùng đợt. Khi thay đổi, đối chiếu SRS/AC, use case, activity, sequence và dữ liệu theo delta state/cart/owner; chưa đồng nghĩa A2 đã hoàn thành. Hồ sơ Sprint 1 v1.1 và Sprint 2 v0.6 lịch sử giữ nguyên.
+Assignment 2 được chuẩn bị song song; gói Task 1–2 đồng bộ cùng đợt. Khi thay đổi, đối chiếu SRS/AC, use case, activity, sequence và dữ liệu theo delta state/cart/owner; chưa đồng nghĩa A2 đã hoàn thành. Hồ sơ Sprint 1 v1.1 và Sprint 2 v0.6 lịch sử giữ nguyên.
 
 ## 13 Cách đọc và nguồn
 
 1. Word là hướng dẫn đọc và chia việc cho cả nhóm.
 2. TEAM_PLAN.md là ticket, lịch, phụ thuộc và bằng chứng nhận bàn giao.
 3. CONTRACTS.md là contract DTO/storage/schema/transaction; TEST_MATRIX.md là nghiệm thu.
-4. docs/diagrams/sprint3 gồm 5 nguồn và 9 SVG đồng bộ v1.3.
+4. docs/diagrams/sprint3 gồm 5 nguồn và 9 SVG đồng bộ.
 5. Tệp rà soát ghi lỗi tài liệu đã sửa và phần code chưa được kiểm chứng.
 
-Nguồn dự án: đề Assignment 1 10-BrewLite-CongNghePhanMem.pdf, nhất là Task 8–10 và sơ đồ 9.1; Sprint 1 Analysis Design v1.1; Sprint 2 Phân tích Thiết kế v0.6 và bộ diagram v0.6. Đã đối chiếu seed/schema/canonical/OrdersService/BFF tại commit nền được nêu đầu tài liệu. Nền bất biến: https://github.com/giabaot400-boop/BrewLite/tree/a1a0e4ae92de681deac538685e24407b3190866b . Hồ sơ chốt: docs/SPRINT2_CLOSEOUT.md; PR #26 (bcrypt native cost 12), #28 (đối chiếu Order/ledger) và #27 (nghiệm thu PO). Hiệu đính P04/P05: https://github.com/giabaot400-boop/BrewLite/pull/24#issuecomment-6622283966 .
+Nguồn dự án: đề Assignment 1 10-BrewLite-CongNghePhanMem.pdf, nhất là Task 8–10 và sơ đồ 9.1; Sprint 1 Analysis Design; Sprint 2 Phân tích Thiết kế và bộ diagram v0.6. Đã đối chiếu seed/schema/canonical/OrdersService/BFF tại commit nền được nêu đầu tài liệu. Nền bất biến: https://github.com/giabaot400-boop/BrewLite/tree/a1a0e4ae92de681deac538685e24407b3190866b. Hồ sơ chốt: docs/SPRINT2_CLOSEOUT.md; PR #26 (bcrypt native cost 12), #28 (đối chiếu Order/ledger) và #27 (nghiệm thu PO). Hiệu đính P04/P05: https://github.com/giabaot400-boop/BrewLite/pull/24#issuecomment-6622283966.
 
-Tài liệu kỹ thuật đối chiếu: Prisma ORM v7 Transactions https://www.prisma.io/docs/orm/v7/prisma-client/queries/transactions ; PostgreSQL Serialization Failure Handling https://www.postgresql.org/docs/15/mvcc-serialization-failure-handling.html ; PostgreSQL Date Time Functions https://www.postgresql.org/docs/current/functions-datetime.html . Các nguồn này hỗ trợ retry toàn transaction và chọn đồng hồ DB sau khóa; không chứng minh implementation của nhóm đã đạt.
+Tài liệu kỹ thuật đối chiếu: Prisma ORM v7 Transactions https://www.prisma.io/docs/orm/v7/prisma-client/queries/transactions; PostgreSQL Serialization Failure Handling https://www.postgresql.org/docs/15/mvcc-serialization-failure-handling.html; PostgreSQL Date Time Functions https://www.postgresql.org/docs/current/functions-datetime.html. Các nguồn này hỗ trợ retry toàn transaction và chọn đồng hồ DB sau khóa; không chứng minh implementation của nhóm đã đạt.

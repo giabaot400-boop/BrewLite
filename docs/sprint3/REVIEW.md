@@ -1,10 +1,10 @@
 # BrewLite Sprint 3 rà soát bản rút gọn
 
-Phiên bản 1.3 ngày 06/11/2026. Bản hiện hành áp dụng ba thay đổi PO đã đồng ý sau review v1.0. Lượt này đồng bộ tài liệu/thiết kế với main `a1a0e4ae92de681deac538685e24407b3190866b` đã chốt sau PR #24/#26/#28/#27; không sửa repo, chạy app, áp migration hoặc xác nhận kết quả kiểm thử S3. Đã đọc source/hồ sơ nền và diff từ fcb473a tới a1a0e4a. Các giới hạn bằng chứng S2 giữ theo SPRINT2_CLOSEOUT.md.
+Cập nhật ngày 06/11/2026. Bản hiện hành áp dụng ba thay đổi PO đã đồng ý sau review. Lượt này đồng bộ tài liệu/thiết kế với main `a1a0e4ae92de681deac538685e24407b3190866b` đã chốt sau PR #24/#26/#28/#27; không sửa repo, chạy app, áp migration hoặc xác nhận kết quả kiểm thử S3. Đã đọc source/hồ sơ nền và diff từ fcb473a tới a1a0e4a. Các giới hạn bằng chứng S2 giữ theo SPRINT2_CLOSEOUT.md.
 
 ## 1 Ba thay đổi đã áp dụng
 
-| Phần | Bản rút gọn 1.1 | Đồng bộ ở đâu |
+| Phần | Phạm vi đã chọn | Đồng bộ ở đâu |
 |---|---|---|
 | Quote riêng | Bỏ POST /orders/quote và các DTO/response/nhánh UI gọi quote. UI preview theo DEMO10 cố định; NestJS tính/kiểm tra lại khi create. GET Order hiện tổng chính thức trước khách xác nhận payment | Scope5/6, CONTRACTS1/2/UC12, D02A/D03, ticket A02, PRO01 |
 | Đọc payment riêng | Bỏ GET /payments/:id. GET /orders/:id giữ latestPayment đầy đủ; recovery từng attempt dùng replay POST /payments đúng key/body rồi đọc Order hiện tại | CONTRACTS2/7, D02B/D04, C02, PAY03/CART02 và test hai attempt |
@@ -24,7 +24,7 @@ Chưa cắt hold15phút/expiry backend, PAID-cancel trước PREPARING kèm hoà
 
 ## 4 Rollout và giới hạn kiểm chứng
 
-Schema1.3 được thiết kế trên nền Sprint2 chưa có S3. Nếu phát hiện schema/code S3 khác đã chạy ngoài snapshot, kiểm kê trước rollout, không tự drop cột/xóa reservation Topping hoặc sửa ledger. Đơn legacy/pending v1 bảo toàn theo contract; demo/testDB riêng không thay thế ca tương thích. Các migration đã áp và hồ sơ Sprint1–2 giữ nguyên. A2 v0.6 được đồng bộ cùng đợt và chuẩn bị song song; nghiệm thu A2 vẫn theo Task 1→5.
+Schema Sprint 3 được thiết kế trên nền Sprint2 chưa có S3. Nếu phát hiện schema/code S3 khác đã chạy ngoài snapshot, kiểm kê trước rollout, không tự drop cột/xóa reservation Topping hoặc sửa ledger. Đơn legacy/pending v1 bảo toàn theo contract; demo/testDB riêng không thay thế ca tương thích. Các migration đã áp và hồ sơ Sprint1–2 giữ nguyên. A2 được đồng bộ cùng đợt và chuẩn bị song song; nghiệm thu A2 vẫn theo Task 1→5.
 
 Auth/logout và invariant Order/ledger đã có sửa/evidence ở nền S2 chốt; DEP01…04 dùng để nhận bàn giao và hồi quy chịu ảnh hưởng. DEP05…07 cùng mọi AC S3 vẫn cần evidence thực. Không biến các mục S2 bằng chứng một phần thành PASS toàn bộ. Lịch mục tiêu trước hạn15/11 giữ nguyên; estimate mới50–70h tập trung chưa buffer/capacity, không hứa tiết kiệm đúng số giờ. D/E vẫn là đường găng, từng lead tự test phần mình. Việc chỉ xem tài liệu không nghiệm thu ứng dụng.
 
@@ -32,7 +32,7 @@ Auth/logout và invariant Order/ledger đã có sửa/evidence ở nền S2 ch�
 
 Đã đối chiếu năm endpoint; DTO/hash giữ fixture v2;27AC/mộtlead cùng nội dung giữa Word và Markdown;13model/14mãUC/haiextend/chíncạnhstate. Render và xem đầy đủ Word cùng chín hình; kiểm cấu trúc/CRC và byte tham chiếu haiZIP. Đây là kiểm tra tài liệu. Chưa chạy unit/integration/E2E, DB hoặc migration của ứng dụng.
 
-Nguồn: đề BrewLite-CongNghePhanMem Task8–10/sơ đồ9.1; Sprint1 v1.1, Sprint2 v0.6 và diagram v0.6; nền triển khai hiện hành https://github.com/giabaot400-boop/BrewLite/tree/a1a0e4ae92de681deac538685e24407b3190866b và docs/SPRINT2_CLOSEOUT.md; snapshot fcb473a là nguồn lịch sử trước khi chốt S2. Review/sửa v1.0 ở lịch sử phiên bản;1.1 thay phạm vi hiện hành theo ba lựa chọn của PO.
+Nguồn: đề BrewLite-CongNghePhanMem Task8–10/sơ đồ9.1; Sprint1 v1.1, Sprint2 v0.6 và diagram v0.6; nền triển khai hiện hành https://github.com/giabaot400-boop/BrewLite/tree/a1a0e4ae92de681deac538685e24407b3190866b và docs/SPRINT2_CLOSEOUT.md; snapshot fcb473a là nguồn lịch sử trước khi chốt S2. Các quyết định nghiệp vụ được trình bày trong DESIGN.md và CONTRACTS.md.
 
 ## 6 Đồng bộ nền Sprint 2 đã chốt ngày 04/11/2026
 

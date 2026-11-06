@@ -1,6 +1,6 @@
 @startuml activity-checkout-order
 !pragma useVerticalIf on
-title BrewLite — Task 2.1 — Activity 1/2\nChọn món, xác nhận giá và tạo đơn — nháp 0.6 — 06/11/2026
+title BrewLite — Task 2.1 — Activity 1/2\nChọn món, xác nhận giá và tạo đơn — 06/11/2026
 skinparam defaultFontName DejaVu Sans
 skinparam defaultFontSize 14
 skinparam shadowing false
@@ -94,13 +94,13 @@ legend bottom
   Xung đột hệ thống chưa kết luận thiếu hàng: rollback / lỗi theo contract.
   4xx / conflict / response sai không mặc nhiên là REJECTED đã lưu.
   Actor / UI / backend là swimlane trách nhiệm, không thêm dịch vụ mới.
-  Thiết kế mục tiêu theo Task 1.3; theo Sprint 3 v1.3; A2 cần review/commit.
+  Thiết kế mục tiêu theo Task 1.3; theo Sprint 3 ; A2 cần review/commit.
 endlegend
 @enduml
 
 @startuml activity-checkout-payment
 !pragma useVerticalIf on
-title BrewLite — Task 2.1 — Activity 2/2\nThanh toán mock, phục hồi và xác nhận — nháp 0.6 — 06/11/2026
+title BrewLite — Task 2.1 — Activity 2/2\nThanh toán mock, phục hồi và xác nhận — 06/11/2026
 skinparam defaultFontName DejaVu Sans
 skinparam defaultFontSize 14
 skinparam shadowing false

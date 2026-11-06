@@ -1,4 +1,4 @@
-# Đối chiếu sơ đồ 1.3
+# Đối chiếu sơ đồ
 
 - Master 14 mã UC: UC-01…13 + S2-UC-LOGOUT; UC12 extend UC08 có mã, UC13 extend UC09 success. Mock nội bộ không actor ngoài.
 - State đúng chín cạnh đề; retry qua PENDING trong cùng tx, replay không cạnh; COMPLETED/CANCELLED kết thúc.
@@ -11,4 +11,4 @@
 - Legacy policy1 không tự payment/cancel/expiry; new policy2 deadline15min; tick60s/batch50/startup recheck.
 - Hình/schema/API/test phải được kiểm tra khi hiện thực; hình không chứng minh runtime đạt.
 
-V1.1 bỏ API quote và GET payment riêng. GET Order có latestPayment đầy đủ; recovery chính key dùng POST payment cùng key/body, không suy identity từ latestPayment. Chỉ kho Product, không reservation hoặc field stock trên Topping. Giữ13model/14mãUC/27AC, hold15phút và expiry backend. UI hiện tổng chính thức từ Order trước khách xác nhận payment.
+ bỏ API quote và GET payment riêng. GET Order có latestPayment đầy đủ; recovery chính key dùng POST payment cùng key/body, không suy identity từ latestPayment. Chỉ kho Product, không reservation hoặc field stock trên Topping. Giữ13model/14mãUC/27AC, hold15phút và expiry backend. UI hiện tổng chính thức từ Order trước khách xác nhận payment.

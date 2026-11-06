@@ -19,7 +19,7 @@ skinparam activityDiamondBackgroundColor #FFF6DA
 skinparam activityDiamondBorderColor #80644F
 skinparam swimlaneBorderColor #C9B9A9
 top to bottom direction
-title BrewLite — Master Use Case\nAssignment 2 — SRS v0.6 — 06/11/2026 — bản nháp
+title BrewLite — Master Use Case\nAssignment 2 — SRS — 06/11/2026
 skinparam usecaseBackgroundColor #FFFFFF
 skinparam nodesep 22
 skinparam ranksep 28

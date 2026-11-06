@@ -1,10 +1,11 @@
-# Hiệu đính Sprint 3 v1.3
+# Ghi chú thiết kế Sprint 3
 
-06/11/2026 · kế thừa v1.2 ngày 04/11/2026 và nền S2 a1a0e4a.
+Cập nhật ngày 06/11/2026. Các thay đổi trên repository được truy vết bằng commit và pull request.
 
-1. Giữ 13 model, 14 UC, 27 AC và state machine chín cạnh; làm rõ FR-13/CLI trong phạm vi, Barista UI đầy đủ ngoài MVP theo D16. Không thêm actor, UC hoặc endpoint quầy.
-2. Đưa công thức giảm giá floor, ví dụ 50.001 VND và liên hệ chuẩn hóa mã → canonical/hash v2 vào contract chính. Giữ API/DTO/identity v1/v2, pending bất biến và backend là nơi tính giá chính thức.
-3. Bỏ cách diễn đạt phải chờ A1 hoàn tất mới chuẩn bị A2. A1/A2 chuẩn bị song song; A2 có cổng nghiệm thu Task 1→5 riêng, dùng chung repo/code là lựa chọn nhóm.
-4. Đồng bộ nhãn hiện hành 1.3, Word, Markdown và nguồn/SVG; mốc 04–05/11 trong lịch cũ vẫn là kế hoạch, không xác nhận đã thực hiện. Đổi giao diện hoặc yêu cầu chỉ khi có quyết định riêng.
+- Giữ state machine chín cạnh; quản lý trạng thái thuộc phạm vi, giao diện quầy đầy đủ ngoài MVP theo D16. CLI nội bộ gọi service và kiểm tra cạnh để phục vụ demo/test.
+- Không có API quote hoặc API đọc payment riêng; chỉ kiểm soát tồn Product. GET Order trả tổng chính thức và latestPayment; phục hồi payment bằng đúng key/body đã lưu.
+- Tạo PENDING chưa dọn giỏ; chỉ dọn theo trạng thái đã trả hiện tại và binding còn khớp. Retry không tự đổi chủ, key hoặc payload.
+- Quy tắc giảm giá làm tròn xuống; mã đã chuẩn hóa tham gia canonical/hash v2. Canonical v1, ledger cũ và các phiên bản kỹ thuật giữ nguyên.
+- A1/A2 chuẩn bị song song; A2 nghiệm thu Task 1→5 riêng. Dùng chung repo/code là phương án nhóm chọn.
 
-Gói này không sửa code hoặc tạo migration, không chạy test nghiệp vụ/HTTP/PostgreSQL. Tất cả 27 AC vẫn CHƯA CHẠY. A2 v0.6 đồng bộ cùng đợt; source lịch sử S1/S2 không bị sửa.
+Giữ 13 model, 14 UC và 27 AC. Tất cả AC Sprint 3 vẫn CHƯA CHẠY; ghi chú thiết kế không thay bằng chứng code/test hoặc review của nhóm. Hồ sơ Sprint 1–2 không bị sửa trong lượt hiệu đính này.

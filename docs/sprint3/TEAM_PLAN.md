@@ -1,6 +1,6 @@
 # BrewLite Sprint 3 kế hoạch bàn giao A đến E
 
-Phiên bản 1.3 ngày 06/11/2026. PO cho phép dùng phương án này làm cơ sở thực hiện, chưa thay lời xác nhận nhận việc của từng bạn. Không cần họp chung để bắt đầu. Mỗi lead nhận ticket của mình bằng một dòng trên board/PR; nếu vướng thì nêu đầu vào thiếu và người cung cấp, không để trống trạng thái.
+Cập nhật ngày 06/11/2026. PO cho phép dùng phương án này làm cơ sở thực hiện, chưa thay lời xác nhận nhận việc của từng bạn. Không cần họp chung để bắt đầu. Mỗi lead nhận ticket của mình bằng một dòng trên board/PR; nếu vướng thì nêu đầu vào thiếu và người cung cấp, không để trống trạng thái.
 
 ## 1 Gói công việc có đầu ra cụ thể
 
@@ -21,7 +21,7 @@ Phiên bản 1.3 ngày 06/11/2026. PO cho phép dùng phương án này làm cơ
 
 Tổng sơ bộ: A 9–13h, B 8–11h, C 8–11h, D 15–20h, E 10–15h; cả nhóm 50–70h tập trung, chưa có buffer lỗi nền. Đây là estimate thiết kế để phân tải, không là capacity đã cam kết hoặc số giờ đã làm. D/E là đường găng. B giữ tài liệu/QA UI để A không phải gánh cả điều phối; C sở hữu read API và toàn bộ pricing/points, E sở hữu tests kho/migration, A tự test cart/BFF. D chỉ tổng hợp và viết test workflow, không ôm mọi backend/QA. Nếu capacity không đủ, A/B đổi owner ticket trên board kèm bàn giao; một ticket vẫn chỉ một lead.
 
-Giảm ước lượng so v1.0 nhờ bỏ hai endpoint và kho Topping; đây vẫn chỉ là estimate, không hứa tiết kiệm đúng số giờ. Giữ hold15phút/expiry và các ca rollback/quyền/recovery.
+Ước lượng dựa trên phạm vi không có hai endpoint riêng và kho Topping; đây vẫn chỉ là estimate, không hứa tiết kiệm đúng số giờ. Giữ hold15phút/expiry và các ca rollback/quyền/recovery.
 
 ## 2 Phụ thuộc cần bằng chứng
 
@@ -57,7 +57,7 @@ Board: TODO / DOING / BLOCKED / REVIEW / DONE. DONE chỉ khi lead có artifact 
 
 Mẫu mỗi ticket: ticket/lead/reviewer; SHA + base SHA; contract/AC chịu ảnh hưởng; migration/env cần; command test; expected/actual; log/ảnh/video; limitation còn lại; kết quả reviewer. B ghi liên kết từng AC, không chuyển trạng thái hàng loạt dựa trên demo một đường success.
 
-Release chỉ khi build/typecheck/lint/tests phù hợp, a/b/c và 27 AC có evidence, không lỗi quyền/kho/nhân giao dịch, Compose chạy máy khác, README có env/migrate/seed/demo, PR review xong và Review/Retro/backlog thật. Các mục chưa đạt ghi rõ trạng thái và ảnh hưởng. A2 v0.6 được đồng bộ cùng đợt; tiếp tục Task 1→5 theo cổng nghiệm thu riêng, không chờ A1 xong mới chuẩn bị.
+Release chỉ khi build/typecheck/lint/tests phù hợp, a/b/c và 27 AC có evidence, không lỗi quyền/kho/nhân giao dịch, Compose chạy máy khác, README có env/migrate/seed/demo, PR review xong và Review/Retro/backlog thật. Các mục chưa đạt ghi rõ trạng thái và ảnh hưởng. A2 được đồng bộ cùng đợt; tiếp tục Task 1→5 theo cổng nghiệm thu riêng, không chờ A1 xong mới chuẩn bị.
 
 ## Phối hợp A1 và A2
 

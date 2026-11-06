@@ -1,5 +1,5 @@
 @startuml sequence-checkout-order
-title BrewLite Sprint 3 v1.3 06/11/2026\nD03 Tạo và xem đơn
+title BrewLite Sprint 3 06/11/2026\nD03 Tạo và xem đơn
 skinparam defaultFontName DejaVu Sans
 skinparam defaultFontSize 14
 skinparam shadowing false
@@ -70,7 +70,7 @@ endlegend
 @enduml
 
 @startuml sequence-checkout-payment
-title BrewLite Sprint 3 v1.3 06/11/2026\nD04 Payment replay và mất response
+title BrewLite Sprint 3 06/11/2026\nD04 Payment replay và mất response
 skinparam defaultFontName DejaVu Sans
 skinparam defaultFontSize 14
 skinparam shadowing false
@@ -144,7 +144,7 @@ legend bottom
 endlegend
 @enduml
 @startuml sequence-checkout-cancel-expiry
-title BrewLite Sprint 3 v1.3 06/11/2026\nD05 Hủy bù trừ và hết hạn
+title BrewLite Sprint 3 06/11/2026\nD05 Hủy bù trừ và hết hạn
 skinparam defaultFontName DejaVu Sans
 skinparam defaultFontSize 14
 skinparam shadowing false

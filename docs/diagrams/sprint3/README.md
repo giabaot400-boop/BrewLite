@@ -1,6 +1,6 @@
-# BrewLite Sprint 3 sơ đồ triển khai 1.3
+# BrewLite Sprint 3 sơ đồ triển khai
 
-Ngày 06/11/2026. Năm nguồn PlantUML sinh chín SVG; mở SVG bằng browser, giữ nguồn để sửa. Các hình đồng bộ thiết kế 1.3, chưa chứng minh code/test đã đạt.
+Ngày 06/11/2026. Năm nguồn PlantUML sinh chín SVG; mở SVG bằng browser, giữ nguồn để sửa. Các hình đồng bộ nội dung thiết kế, chưa chứng minh code/test đã đạt.
 
 | Mã | File SVG | Dùng để đọc |
 |---|---|---|
@@ -16,7 +16,6 @@ Ngày 06/11/2026. Năm nguồn PlantUML sinh chín SVG; mở SVG bằng browser,
 
 Types/nullable/default/mapping/indices/checks chi tiết ở docs/sprint3/CONTRACTS.md. State Order có PAYMENT_FAILED, trạng thái attempt là FAILED; client UNKNOWN không là enum server. Năm backend endpoint; không endpoint public pha chế/refund hay worker thứ tư. Hình master là sơ đồ tổng quan kế thừa, không phải backlog mới phải code thêm.
 
-V1.1 bỏ API quote và GET payment riêng. GET Order có latestPayment đầy đủ; recovery chính key dùng POST payment cùng key/body, không suy identity từ latestPayment. Chỉ kho Product, không reservation hoặc field stock trên Topping. Giữ13model/14mãUC/27AC, hold15phút và expiry backend. UI hiện tổng chính thức từ Order trước khách xác nhận payment.
-
+ bỏ API quote và GET payment riêng. GET Order có latestPayment đầy đủ; recovery chính key dùng POST payment cùng key/body, không suy identity từ latestPayment. Chỉ kho Product, không reservation hoặc field stock trên Topping. Giữ13model/14mãUC/27AC, hold15phút và expiry backend. UI hiện tổng chính thức từ Order trước khách xác nhận payment.
 
 Nền triển khai sau chốt Sprint 2: main `a1a0e4ae92de681deac538685e24407b3190866b`. Hiệu đính auth/logout và contract lỗi kế thừa đọc cùng CONTRACTS/TEAM_PLAN hiện hành. Nguồn PlantUML và chín SVG không thay đổi trong lượt đồng bộ nền này.

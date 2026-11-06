@@ -1,5 +1,5 @@
 @startuml class-domain
-title BrewLite — Assignment 2 — Task 2.3\nDomain class diagram — bản nháp 0.6 — 06/11/2026
+title BrewLite — Assignment 2 — Task 2.3\nDomain class diagram — 06/11/2026
 top to bottom direction
 skinparam defaultFontName DejaVu Sans
 skinparam defaultFontSize 14

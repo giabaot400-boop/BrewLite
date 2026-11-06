@@ -1,27 +1,25 @@
 # BrewLite Assignment 2 — Task 2.1: Activity checkout
 
-**Quy ước v0.6:** M-01…M-05 và A-/E- là nhánh của [UC-09](../requirements/use-case-checkout.md); các mã C- thuộc [ngữ cảnh hỗ trợ](../requirements/checkout-supporting-flows.md). Tạo đơn và hủy/expiry không là đặc tả trọng tâm thứ hai.
+**Quy ước:** M-01…M-05 và A-/E- là nhánh của [UC-09](../requirements/use-case-checkout.md); các mã C- thuộc [ngữ cảnh hỗ trợ](../requirements/checkout-supporting-flows.md). Tạo đơn và hủy/expiry không là đặc tả trọng tâm thứ hai.
 
 | Thông tin | Giá trị |
 |---|---|
-| Phiên bản / ngày | 0.6 / 06/11/2026 |
+| Ngày cập nhật | 06/11/2026 |
 | Trạng thái | Nháp review, chưa xác nhận code/test đạt |
-| Căn cứ | [Phạm vi 0.6](../requirements/context-and-scope.md), [SRS 0.6](../requirements/srs.md), [Task 1.3 — use case 0.6](../requirements/use-case-checkout.md) |
+| Căn cứ | [Phạm vi 0.6](../requirements/context-and-scope.md), [SRS](../requirements/srs.md), [Task 1.3 — use case 0.6](../requirements/use-case-checkout.md) |
 | UC trọng tâm Task 1.3 | Chỉ UC-09 Thanh toán không tiền mặt; activity vẫn bao quát UC-08 và toàn luồng end-to-end |
 | Nguồn | [activity-checkout.puml](activity-checkout.puml), chứa hai khối sơ đồ nối tiếp |
 | Hình kết xuất | [Tạo đơn](activity-checkout-order.svg) · [Thanh toán](activity-checkout-payment.svg) |
 
+## Nền sử dụng và trạng thái
 
-## Mốc sử dụng bản 0.6
-
-Bản giao nhóm ngày 06/11/2026, đồng bộ **Sprint 3 v1.3** và nền Sprint 2 main `a1a0e4ae92de681deac538685e24407b3190866b`. PO đã chọn phương án Sprint 3 làm cơ sở thực hiện; chưa thay xác nhận review của từng thành viên hoặc minh chứng kiểm thử Assignment 2. Giữ nguyên 17 FR, 12 NFR, 59 AC, 14 mã UC và 10 lớp domain.
+Bản giao nhóm ngày 06/11/2026, đồng bộ **Sprint 3** và nền Sprint 2 main `a1a0e4ae92de681deac538685e24407b3190866b`. PO đã chọn phương án Sprint 3 làm cơ sở thực hiện; chưa thay xác nhận review của từng thành viên hoặc minh chứng kiểm thử Assignment 2. Giữ nguyên 17 FR, 12 NFR, 59 AC, 14 mã UC và 10 lớp domain.
 
 Chi tiết kế thừa nằm tại [contract dùng chung](../assignment2/CONTRACTS.md). Hạn cả hai assignment là **15/11/2026 theo thông tin PO cung cấp**; giờ nộp LMS cần PO xác nhận. Xem [kế hoạch giao nhóm](../assignment2/TEAM_PLAN.md); lịch là mục tiêu đề xuất, chưa ghi nhận các bạn đã nhận việc.
 
-
 ## 1. Cách đọc và ranh giới
 
-Một luồng checkout được chia thành **hai hình** để đọc được ở kích thước bình thường. Hình 1 đi từ menu/chi tiết và giỏ tới Order PENDING; **điểm P** chuyển sang đầu hình 2 để đọc Order, thanh toán và xem xác nhận. Hình 2 cũng có thể bắt đầu khi khách mở lại đơn từ lịch sử. Hai hình không tạo hai use case mới hoặc thay master 14 mã UC.
+Một luồng checkout được chia thành **hai hình** để đọc được ở kích thước bình thường. Hình 1 đi từ menu/chi tiết và giỏ tới Order PENDING;**điểm P** chuyển sang đầu hình 2 để đọc Order, thanh toán và xem xác nhận. Hình 2 cũng có thể bắt đầu khi khách mở lại đơn từ lịch sử. Hai hình không tạo hai use case mới hoặc thay master 14 mã UC.
 
 Ba swimlane phân trách nhiệm: Khách hàng thực hiện lựa chọn/xác nhận; Next.js UI/BFF lưu/hiển thị/gửi yêu cầu; NestJS/PostgreSQL kiểm tra, phân xử và commit nghiệp vụ. NestJS/PostgreSQL dùng chung lane để giữ sơ đồ hoạt động gọn; sequence ở Task 2.2 sẽ tách lời gọi API/DB/mock. Mock PaymentService vẫn nằm trong NestJS.
 
@@ -31,9 +29,9 @@ Các diamond là điều kiện rẽ nhánh; `endif` hợp nhất các nhánh c�
 
 ![Activity tạo đơn](activity-checkout-order.svg)
 
-Hai đường tạo mới và thử lại cùng pending hợp nhất trước POST. **Tạo mới** hiển thị preview dự kiến rồi khách chọn Tạo và xem đơn; **retry chưa rõ** giữ nguyên owner/key/body v1/v2, không tính preview lại để sửa nội dung cũ. Không có API báo giá riêng. Việc lưu pending và kiểm tra lại revision/chủ diễn ra trước HTTP; Web Lock được nhả trước khi chờ network.
+Hai đường tạo mới và thử lại cùng pending hợp nhất trước POST. **Tạo mới** hiển thị preview dự kiến rồi khách chọn Tạo và xem đơn;**retry chưa rõ** giữ nguyên owner/key/body v1/v2, không tính preview lại để sửa nội dung cũ. Không có API báo giá riêng. Việc lưu pending và kiểm tra lại revision/chủ diễn ra trước HTTP; Web Lock được nhả trước khi chờ network.
 
-Backend tra kết quả đã lưu trước tính lại giá/mã/kho. Với request mới, giá thay đổi, mã không hợp lệ hoặc thiếu hàng dẫn đến từ chối phù hợp. Lỗi optimistic version/hệ thống không tự bị diễn đạt là chắc chắn thiếu hàng: rollback và xử lý theo contract. Không commit giữ kho từng phần; nhánh REJECTED có ledger chỉ commit khi đã bảo đảm không còn tác động dở dang. Theo v1.3, precheck toàn bộ Product trước stock write; chỉ ghi REJECTED khi chưa ghi kho. Bận advisory tạo đơn trả 409 ORDER_REQUEST_IN_PROGRESS, giữ identity; không đưa lỗi bận khóa vào retry kho. Giữ assertSucceededRequest đối chiếu Order/ledger trước commit. CAS conflict rollback cả transaction và retry snapshot mới, tối đa ba lượt tổng; không dùng savepoint hoặc retry lồng.
+Backend tra kết quả đã lưu trước tính lại giá/mã/kho. Với request mới, giá thay đổi, mã không hợp lệ hoặc thiếu hàng dẫn đến từ chối phù hợp. Lỗi optimistic version/hệ thống không tự bị diễn đạt là chắc chắn thiếu hàng: rollback và xử lý theo contract. Không commit giữ kho từng phần; nhánh REJECTED có ledger chỉ commit khi đã bảo đảm không còn tác động dở dang. Theo, precheck toàn bộ Product trước stock write; chỉ ghi REJECTED khi chưa ghi kho. Bận advisory tạo đơn trả 409 ORDER_REQUEST_IN_PROGRESS, giữ identity; không đưa lỗi bận khóa vào retry kho. Giữ assertSucceededRequest đối chiếu Order/ledger trước commit. CAS conflict rollback cả transaction và retry snapshot mới, tối đa ba lượt tổng; không dùng savepoint hoặc retry lồng.
 
 Tạo Order, snapshot, reservation, deadline và ledger thành công cùng transaction. UI nhận đúng kết quả thì gắn đơn với giỏ, **chưa dọn giỏ tại PENDING**; GET Order hiển thị tổng chính thức trước xác nhận thanh toán. Timeout/5xx/body sai/conflict không tự chứng minh chưa có đơn hoặc cho phép đổi key. Nhánh lỗi auth/DTO trước transaction chưa mặc nhiên có ledger REJECTED. Giữ classifier v1: VALIDATION_ERROR hợp lệ theo contract nền có thể kết thúc pending để sửa; lỗi không nhận diện được vẫn UNKNOWN, không giả có ledger. V2 dùng schema riêng đã định nghĩa; xem E-01 của UC-09 và C-E03 của ngữ cảnh hỗ trợ.
 
@@ -75,7 +73,7 @@ Kết quả FAILED cuối + còn canPay mới cho khách xác nhận payment key
 | Auth/DTO — E-01 | Backend luôn xác thực/validate trước mutation; yêu cầu bị từ chối không chạy nhánh ghi đơn/mock. Lỗi phiên do DB/mạng không tự thành logout |
 | Rollout/legacy — E-07 | Retry v1/v2 giữ nguyên body; dữ liệu thiếu policy/reservation hoặc attempt cũ chưa rõ chặn lần mới/release tự động, theo O-04 |
 
-Các BR trong SRS vẫn chờ review. Theo v1.3: startup catch-up/tick 60 giây/batch 50 và CLI pha chế có cờ bật nội bộ; O-03 yêu cầu kiểm chứng độ trễ và quyền, không coi cấu hình tick là SLA giải phóng kho. NFR UI 15 giây/BFF 10 giây là giới hạn chờ, không là thời điểm kết luận nghiệp vụ thất bại.
+Các BR trong SRS vẫn chờ review. Theo: startup catch-up/tick 60 giây/batch 50 và CLI pha chế có cờ bật nội bộ; O-03 yêu cầu kiểm chứng độ trễ và quyền, không coi cấu hình tick là SLA giải phóng kho. NFR UI 15 giây/BFF 10 giây là giới hạn chờ, không là thời điểm kết luận nghiệp vụ thất bại.
 
 ## 6. Kiểm tra bản nháp và bước tiếp theo
 
@@ -88,33 +86,3 @@ Các BR trong SRS vẫn chờ review. Theo v1.3: startup catch-up/tick 60 giây/
 - [ ] Nhóm review/chốt đủ Task 2; hai hình activity riêng lẻ chưa tự hoàn thành toàn bộ Task 2.
 
 Kiểm tra bản nháp chỉ xác nhận nội dung, nguồn/hình và tham chiếu tài liệu, không xác nhận các AC đã chạy đạt. Kế thừa luồng activity Sprint 3 hiện hành; không sửa hồ sơ Sprint 2, migration hoặc code.
-
-| Phiên bản | Ngày | Thay đổi |
-|---|---|---|
-| 0.1 | 02/11/2026 | Soạn activity hai phần từ Task 1.3/SRS, tách ba swimlane và bổ sung truy vết; nháp review |
-| 0.2 | 02/11/2026 | Nối bản nháp sequence/class và cập nhật checklist; giữ nguyên nguồn/hình activity 0.1 và các luồng/quy tắc |
-
-
-## Cập nhật 0.3
-
-Đã đồng bộ Sprint 3 v1.1. Xem [contract dùng chung](../assignment2/CONTRACTS.md) và [bảng thay đổi](../assignment2/CHANGELOG.md). Các mục lịch sử 0.1/0.2 mô tả phiên bản trước; bản tại thời điểm đó là 0.3; bản hiện hành nay là 0.6; xem phần hiệu đính cuối tài liệu.
-
-| Phiên bản | Ngày | Nội dung |
-|---|---|---|
-| 0.3 | 04/11/2026 | Đồng bộ Sprint 3 v1.1: bỏ quote và đọc payment riêng, Product-only stock, giá chính thức trước payment, retry đúng state machine, owner/recovery và tham chiếu; giữ nguyên mã FR/NFR/UC. Nháp thiết kế, chưa nghiệm thu hoặc xác nhận test/code. |
-
-## Cập nhật 0.4 — bản trước
-
-| Phiên bản | Ngày | Nội dung |
-|---|---|---|
-| 0.4 | 04/11/2026 | Đồng bộ Sprint 3 v1.2/Sprint 2 a1a0e4a: session binding/logout A9, assert Order–ledger, bận khóa và lỗi v1, môi trường kế thừa; bổ sung kế hoạch tới hạn 15/11. Giữ mã FR/NFR/AC/UC và phạm vi; chưa xác nhận code/test/production đạt. |
-
-## Lịch sử cập nhật 0.5
-
-| Phiên bản | Ngày | Nội dung |
-|---|---|---|
-| 0.5 | 05/11/2026 | Chọn duy nhất UC-09 làm trọng tâm Task 1.3; tách ngữ cảnh UC-08/hủy/expiry, đồng bộ nguồn/hình và truy vết. Giữ nghiệp vụ S3 v1.2, mã FR/NFR/AC/UC; chưa xác nhận code/test đạt. |
-
-## Hiệu đính v0.6 ngày 06/11/2026
-
-Giữ các bản ghi 0.1–0.5 ở trên làm lịch sử. Bản hiện hành v0.6 đồng bộ Sprint 3 v1.3: làm rõ FR-13/D16, ngữ cảnh tạo đơn trong sequence chính, công thức/canonical và lịch A1/A2. Tập FR/NFR/AC/UC giữ nguyên; chưa chạy test ứng dụng.

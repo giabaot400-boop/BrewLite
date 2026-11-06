@@ -1,22 +1,20 @@
 # BrewLite Assignment 2 — Task 2.2: Sequence checkout
 
-**Quy ước v0.6:** M-01…M-05 và A-/E- là nhánh của [UC-09](../requirements/use-case-checkout.md); các mã C- thuộc [ngữ cảnh hỗ trợ](../requirements/checkout-supporting-flows.md). Tạo đơn và hủy/expiry không là đặc tả trọng tâm thứ hai.
+**Quy ước:** M-01…M-05 và A-/E- là nhánh của [UC-09](../requirements/use-case-checkout.md); các mã C- thuộc [ngữ cảnh hỗ trợ](../requirements/checkout-supporting-flows.md). Tạo đơn và hủy/expiry không là đặc tả trọng tâm thứ hai.
 
 | Thông tin | Giá trị |
 |---|---|
-| Phiên bản / ngày | 0.6 / 06/11/2026 |
+| Ngày cập nhật | 06/11/2026 |
 | Trạng thái | Nháp review, mô tả thiết kế mục tiêu, chưa xác nhận code/test đạt |
-| Căn cứ | [SRS 0.6](../requirements/srs.md), [Use case Task 1.3 — 0.6](../requirements/use-case-checkout.md), [Activity Task 2.1 — 0.6](activity-checkout.md) |
+| Căn cứ | [SRS](../requirements/srs.md), [Use case Task 1.3](../requirements/use-case-checkout.md), [Activity Task 2.1](activity-checkout.md) |
 | Nguồn | [sequence-checkout.puml](sequence-checkout.puml), ba khối sơ đồ của cùng luồng checkout |
 | Hình | [1 — Tạo đơn](sequence-checkout-order.svg) · [2 — Thanh toán](sequence-checkout-payment.svg) · [3 — Hủy/hết hạn](sequence-checkout-cancel-expiry.svg) |
 
+## Nền sử dụng và trạng thái
 
-## Mốc sử dụng bản 0.6
-
-Bản giao nhóm ngày 06/11/2026, đồng bộ **Sprint 3 v1.3** và nền Sprint 2 main `a1a0e4ae92de681deac538685e24407b3190866b`. PO đã chọn phương án Sprint 3 làm cơ sở thực hiện; chưa thay xác nhận review của từng thành viên hoặc minh chứng kiểm thử Assignment 2. Giữ nguyên 17 FR, 12 NFR, 59 AC, 14 mã UC và 10 lớp domain.
+Bản giao nhóm ngày 06/11/2026, đồng bộ **Sprint 3** và nền Sprint 2 main `a1a0e4ae92de681deac538685e24407b3190866b`. PO đã chọn phương án Sprint 3 làm cơ sở thực hiện; chưa thay xác nhận review của từng thành viên hoặc minh chứng kiểm thử Assignment 2. Giữ nguyên 17 FR, 12 NFR, 59 AC, 14 mã UC và 10 lớp domain.
 
 Chi tiết kế thừa nằm tại [contract dùng chung](../assignment2/CONTRACTS.md). Hạn cả hai assignment là **15/11/2026 theo thông tin PO cung cấp**; giờ nộp LMS cần PO xác nhận. Xem [kế hoạch giao nhóm](../assignment2/TEAM_PLAN.md); lịch là mục tiêu đề xuất, chưa ghi nhận các bạn đã nhận việc.
-
 
 ## 1. Phạm vi và cách đọc
 
@@ -34,7 +32,7 @@ Hình 2 có đủ năm lifeline đề yêu cầu. Hình 1/3 không gọi mock pa
 
 Mũi tên liền là lời gọi, nét đứt là response. `alt/else` chọn nhánh theo điều kiện, `opt` chỉ chạy khi điều kiện xảy ra; `break` kết thúc lượt tương tác khi điều kiện trên khung đúng. `ref` ở nhánh retry áp lại handler với cùng key/body, không tạo worker hoặc dịch vụ mới. Không có transaction giữ qua lúc khách xem lại/chọn phương thức.
 
-Tên API/field trên hình kế thừa phương án Sprint 3 v1.3, là contract thiết kế cần nhóm đối chiếu code/schema khi tích hợp; không xác nhận route đã tồn tại trên main. Sơ đồ không thêm bảng/token quote hoặc API refund riêng.
+Tên API/field trên hình kế thừa phương án Sprint 3, là contract thiết kế cần nhóm đối chiếu code/schema khi tích hợp; không xác nhận route đã tồn tại trên main. Sơ đồ không thêm bảng/token quote hoặc API refund riêng.
 
 ## 2. Hình 1 bổ trợ — Giá dự kiến, xác nhận và tạo đơn
 
@@ -70,7 +68,7 @@ Khách yêu cầu hủy trên Order của mình. PENDING/PAYMENT_FAILED đủ đ
 
 Tick/catch-up expiry là nhánh backend độc lập lúc browser đã đóng, không phải POST tự động từ UI. Khóa và kiểm tra Order/deadline hiện tại; chưa trả/đến hạn/đủ dữ liệu thì release + CANCELLED nguyên tử. GET chỉ đọc. Hủy/expiry/payment/nhận PREPARING tranh cùng Order phải được phân xử; payment success thắng trước không có nghĩa mọi yêu cầu hủy sau đó đều bị từ chối, vì nhánh PAID trước PREPARING vẫn có thể hợp lệ.
 
-Lifeline API tự gọi tick thể hiện tác vụ trong backend; không thêm server/worker đối soát payment. Phương án v1.3: startup catch-up/tick 60 giây/batch 50, CLI pha chế có cờ bật nội bộ; O-03 còn việc kiểm chứng độ trễ và quyền. Legacy PROCESSING/UNKNOWN không được mặc nhiên coi FAILED để release hoặc nhận lần mới.
+Lifeline API tự gọi tick thể hiện tác vụ trong backend; không thêm server/worker đối soát payment. Phương án: startup catch-up/tick 60 giây/batch 50, CLI pha chế có cờ bật nội bộ; O-03 còn việc kiểm chứng độ trễ và quyền. Legacy PROCESSING/UNKNOWN không được mặc nhiên coi FAILED để release hoặc nhận lần mới.
 
 ## 5. Guard và giới hạn cần áp dụng xuyên suốt
 
@@ -100,40 +98,10 @@ Ma trận này là đối chiếu thiết kế, chưa là kết quả test. Các
 
 - [x] Có nguồn PlantUML và ba SVG cùng phiên bản; đã kết xuất và xem hình.
 - [x] Có đủ lifeline tối thiểu trong hình payment, request/response, guard/validate, transaction, alt và replay.
-- [x] Có liên kết với SRS, Task 1.3 và activity; đồng bộ chính sách v1.3, giữ master 14 UC.
+- [x] Có liên kết với SRS, Task 1.3 và activity; đồng bộ chính sách, giữ master 14 UC.
 - [ ] Nhóm review BR-01…06/O-01…05, lock/CAS/schema và rollout trước hiện thực.
 - [ ] Đưa tài liệu lên repo có lịch sử; kiểm chứng AC khi triển khai, nghiệm thu theo thứ tự đề.
 - [x] Có bản nháp [Task 2.3 — class diagram](class-domain.md) và đối chiếu mô hình dữ liệu.
 - [ ] Nhóm review/chốt đủ Task 2; sequence riêng lẻ chưa tự hoàn thành toàn bộ Task 2.
 
-Tài liệu chỉ hoàn thành phần soạn nháp Task 2.2. Chưa sửa code, migration, hồ sơ Sprint 2 hoặc xác nhận trạng thái repo từ việc soạn này. Nguồn/hình và tài liệu trong gói này ở 0.6, đã đồng bộ v1.3; lịch sử phiên bản trước được giữ ở bảng lịch sử. README ghi tiến độ gói hiện tại.
-
-| Phiên bản | Ngày | Nội dung |
-|---|---|---|
-| 0.1 | 02/11/2026 | Kế thừa sequence Sprint 3 ba phần, bổ sung khung Assignment 2, guard và đầu vào recovery; đối chiếu Task 1.3/activity, nháp review |
-| 0.2 | 02/11/2026 | Nối class và cập nhật checklist/liên kết activity; giữ nguyên nguồn/hình sequence 0.1 và các luồng/quy tắc |
-
-
-## Cập nhật 0.3
-
-Đã đồng bộ Sprint 3 v1.1. Xem [contract dùng chung](../assignment2/CONTRACTS.md) và [bảng thay đổi](../assignment2/CHANGELOG.md). Các mục lịch sử 0.1/0.2 mô tả phiên bản trước; bản tại thời điểm đó là 0.3; bản hiện hành nay là 0.6; xem phần hiệu đính cuối tài liệu.
-
-| Phiên bản | Ngày | Nội dung |
-|---|---|---|
-| 0.3 | 04/11/2026 | Đồng bộ Sprint 3 v1.1: bỏ quote và đọc payment riêng, Product-only stock, giá chính thức trước payment, retry đúng state machine, owner/recovery và tham chiếu; giữ nguyên mã FR/NFR/UC. Nháp thiết kế, chưa nghiệm thu hoặc xác nhận test/code. |
-
-## Cập nhật 0.4 — bản trước
-
-| Phiên bản | Ngày | Nội dung |
-|---|---|---|
-| 0.4 | 04/11/2026 | Đồng bộ Sprint 3 v1.2/Sprint 2 a1a0e4a: session binding/logout A9, assert Order–ledger, bận khóa và lỗi v1, môi trường kế thừa; bổ sung kế hoạch tới hạn 15/11. Giữ mã FR/NFR/AC/UC và phạm vi; chưa xác nhận code/test/production đạt. |
-
-## Lịch sử cập nhật 0.5
-
-| Phiên bản | Ngày | Nội dung |
-|---|---|---|
-| 0.5 | 05/11/2026 | Chọn duy nhất UC-09 làm trọng tâm Task 1.3; tách ngữ cảnh UC-08/hủy/expiry, đồng bộ nguồn/hình và truy vết. Giữ nghiệp vụ S3 v1.2, mã FR/NFR/AC/UC; chưa xác nhận code/test đạt. |
-
-## Hiệu đính v0.6 ngày 06/11/2026
-
-Giữ các bản ghi 0.1–0.5 ở trên làm lịch sử. Bản hiện hành v0.6 đồng bộ Sprint 3 v1.3: làm rõ FR-13/D16, ngữ cảnh tạo đơn trong sequence chính, công thức/canonical và lịch A1/A2. Tập FR/NFR/AC/UC giữ nguyên; chưa chạy test ứng dụng.
+Tài liệu chỉ hoàn thành phần soạn nháp Task 2.2. Chưa sửa code, migration, hồ sơ Sprint 2 hoặc xác nhận trạng thái repo từ việc soạn này. Nguồn sơ đồ và SVG được đối chiếu với nội dung thiết kế. Lịch sử thay đổi trên repo theo commit/PR.

@@ -1,5 +1,5 @@
 @startuml sequence-checkout-order
-title BrewLite Assignment 2 v0.6 — 06/11/2026\nBổ trợ Task 2.2 — Ngữ cảnh tạo và xem đơn
+title BrewLite Assignment 2 — 06/11/2026\nBổ trợ Task 2.2 — Ngữ cảnh tạo và xem đơn
 skinparam defaultFontName DejaVu Sans
 skinparam defaultFontSize 14
 skinparam shadowing false
@@ -80,7 +80,7 @@ endlegend
 @enduml
 
 @startuml sequence-checkout-payment
-title BrewLite Assignment 2 v0.6 — 06/11/2026\nTask 2.2 — HÌNH CHÍNH UC-09 và ngữ cảnh tạo đơn
+title BrewLite Assignment 2 — 06/11/2026\nTask 2.2 — HÌNH CHÍNH UC-09 và ngữ cảnh tạo đơn
 skinparam defaultFontName DejaVu Sans
 skinparam defaultFontSize 14
 skinparam shadowing false
@@ -220,7 +220,7 @@ legend bottom
 endlegend
 @enduml
 @startuml sequence-checkout-cancel-expiry
-title BrewLite Assignment 2 v0.6 — 06/11/2026\nBổ trợ Task 2.2 — Tác vụ hủy và hết hạn
+title BrewLite Assignment 2 — 06/11/2026\nBổ trợ Task 2.2 — Tác vụ hủy và hết hạn
 skinparam defaultFontName DejaVu Sans
 skinparam defaultFontSize 14
 skinparam shadowing false

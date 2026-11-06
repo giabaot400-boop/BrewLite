@@ -1,22 +1,20 @@
 # BrewLite Assignment 2 — Task 2.3: Domain class diagram
 
-**Quy ước v0.6:** M-01…M-05 và A-/E- là nhánh của [UC-09](../requirements/use-case-checkout.md); các mã C- thuộc [ngữ cảnh hỗ trợ](../requirements/checkout-supporting-flows.md). Tạo đơn và hủy/expiry không là đặc tả trọng tâm thứ hai.
+**Quy ước:** M-01…M-05 và A-/E- là nhánh của [UC-09](../requirements/use-case-checkout.md); các mã C- thuộc [ngữ cảnh hỗ trợ](../requirements/checkout-supporting-flows.md). Tạo đơn và hủy/expiry không là đặc tả trọng tâm thứ hai.
 
 | Thông tin | Giá trị |
 |---|---|
-| Phiên bản / ngày | 0.6 / 06/11/2026 |
+| Ngày cập nhật | 06/11/2026 |
 | Trạng thái | Nháp review; chưa là schema/migration hoặc xác nhận code/test đạt |
-| Căn cứ | [SRS 0.6](../requirements/srs.md), [Task 1.3 — 0.6](../requirements/use-case-checkout.md), [activity 0.6](activity-checkout.md), [sequence 0.6](sequence-checkout.md) |
-| Đối chiếu dữ liệu | ERD Sprint 3 hiện hành và `BrewLite_Sprint3_Pham_Vi_v1.3.md`, ngày 06/11/2026; kế thừa Sprint 2 v0.6 |
+| Căn cứ | [SRS](../requirements/srs.md), [Task 1.3](../requirements/use-case-checkout.md), [activity](activity-checkout.md), [sequence](sequence-checkout.md) |
+| Đối chiếu dữ liệu | ERD Sprint 3 hiện hành và `docs/sprint3/DESIGN.md`, ngày 06/11/2026; kế thừa Sprint 2 v0.6 |
 | Nguồn và hình | [class-domain.puml](class-domain.puml) · [class-domain.svg](class-domain.svg) |
 
+## Nền sử dụng và trạng thái
 
-## Mốc sử dụng bản 0.6
-
-Bản giao nhóm ngày 06/11/2026, đồng bộ **Sprint 3 v1.3** và nền Sprint 2 main `a1a0e4ae92de681deac538685e24407b3190866b`. PO đã chọn phương án Sprint 3 làm cơ sở thực hiện; chưa thay xác nhận review của từng thành viên hoặc minh chứng kiểm thử Assignment 2. Giữ nguyên 17 FR, 12 NFR, 59 AC, 14 mã UC và 10 lớp domain.
+Bản giao nhóm ngày 06/11/2026, đồng bộ **Sprint 3** và nền Sprint 2 main `a1a0e4ae92de681deac538685e24407b3190866b`. PO đã chọn phương án Sprint 3 làm cơ sở thực hiện; chưa thay xác nhận review của từng thành viên hoặc minh chứng kiểm thử Assignment 2. Giữ nguyên 17 FR, 12 NFR, 59 AC, 14 mã UC và 10 lớp domain.
 
 Chi tiết kế thừa nằm tại [contract dùng chung](../assignment2/CONTRACTS.md). Hạn cả hai assignment là **15/11/2026 theo thông tin PO cung cấp**; giờ nộp LMS cần PO xác nhận. Xem [kế hoạch giao nhóm](../assignment2/TEAM_PLAN.md); lịch là mục tiêu đề xuất, chưa ghi nhận các bạn đã nhận việc.
-
 
 ## 1. Mục tiêu và mức mô hình
 
@@ -143,32 +141,3 @@ Ràng buộc liên bảng và race không được coi đã bảo vệ chỉ vì
 Mình đã có **bản nháp tài liệu Task 2.1–2.3** trong gói tổng hợp. Điều này chưa tự nghiệm thu Task 2; còn review và lịch sử trên repo. Bước thiết kế kế tiếp là Task 3 kiến trúc/module/ADR và deployment, vẫn dựa trên phạm vi hiện tại.
 
 Không sửa ERD Sprint 3, tài liệu Sprint 2, schema/migration hoặc code trong thao tác vẽ class. Các phương án demo/snapshot/legacy vẫn ở trạng thái được SRS ghi rõ, chưa biến thành quyết định đã được cả nhóm chấp nhận.
-
-| Phiên bản | Ngày | Nội dung |
-|---|---|---|
-| 0.1 | 02/11/2026 | Soạn domain class từ ERD nháp hiện hành/SRS/use case; đủ lớp theo đề, mapping tên, multiplicity, enum và invariant; nháp review |
-
-
-## Cập nhật 0.3
-
-Đã đồng bộ Sprint 3 v1.1. Xem [contract dùng chung](../assignment2/CONTRACTS.md) và [bảng thay đổi](../assignment2/CHANGELOG.md). Các mục lịch sử 0.1/0.2 mô tả phiên bản trước; bản tại thời điểm đó là 0.3; bản hiện hành nay là 0.6; xem phần hiệu đính cuối tài liệu.
-
-| Phiên bản | Ngày | Nội dung |
-|---|---|---|
-| 0.3 | 04/11/2026 | Đồng bộ Sprint 3 v1.1: bỏ quote và đọc payment riêng, Product-only stock, giá chính thức trước payment, retry đúng state machine, owner/recovery và tham chiếu; giữ nguyên mã FR/NFR/UC. Nháp thiết kế, chưa nghiệm thu hoặc xác nhận test/code. |
-
-## Cập nhật 0.4 — bản trước
-
-| Phiên bản | Ngày | Nội dung |
-|---|---|---|
-| 0.4 | 04/11/2026 | Đồng bộ Sprint 3 v1.2/Sprint 2 a1a0e4a: session binding/logout A9, assert Order–ledger, bận khóa và lỗi v1, môi trường kế thừa; bổ sung kế hoạch tới hạn 15/11. Giữ mã FR/NFR/AC/UC và phạm vi; chưa xác nhận code/test/production đạt. |
-
-## Lịch sử cập nhật 0.5
-
-| Phiên bản | Ngày | Nội dung |
-|---|---|---|
-| 0.5 | 05/11/2026 | Chọn duy nhất UC-09 làm trọng tâm Task 1.3; tách ngữ cảnh UC-08/hủy/expiry, đồng bộ nguồn/hình và truy vết. Giữ nghiệp vụ S3 v1.2, mã FR/NFR/AC/UC; chưa xác nhận code/test đạt. |
-
-## Hiệu đính v0.6 ngày 06/11/2026
-
-Giữ các bản ghi 0.1–0.5 ở trên làm lịch sử. Bản hiện hành v0.6 đồng bộ Sprint 3 v1.3: làm rõ FR-13/D16, ngữ cảnh tạo đơn trong sequence chính, công thức/canonical và lịch A1/A2. Tập FR/NFR/AC/UC giữ nguyên; chưa chạy test ứng dụng.

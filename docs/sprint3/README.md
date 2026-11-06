@@ -1,6 +1,6 @@
 # BrewLite Sprint 3 gói triển khai rút gọn
 
-Phiên bản 1.3 ngày 06/11/2026, đã đồng bộ nền Sprint 2 main a1a0e4a. Dùng gói v1.3 này thay v1.2. Bản này giữ nghiệp vụ đã chọn, làm rõ FR-13/D16, giá/canonical và phối hợp A1/A2; xem [CHANGELOG.md](CHANGELOG.md). Đã áp dụng ba lựa chọn: bỏ API quote riêng, bỏ API đọc payment riêng, chỉ quản lý tồn Product. Topping vẫn chọn/tính giá; giỏ, thanh toán, mã/điểm và an toàn dữ liệu giữ theo contract. Đây là thiết kế giao nhóm, chưa nghiệm thu code hoặc ghi từng bạn đã nhận việc.
+Cập nhật ngày 06/11/2026. Thiết kế triển khai Task 8–10 của Assignment 1 trên nền Sprint 2 tại a1a0e4a. Bộ tài liệu xác định phạm vi, contract, phân công và kiểm thử dự kiến; chưa xác nhận code hoặc AC Sprint 3 đã đạt.
 
 ## Đọc và nhận việc
 
@@ -8,7 +8,7 @@ Phiên bản 1.3 ngày 06/11/2026, đã đồng bộ nền Sprint 2 main a1a0e4a
 2. `docs/sprint3/TEAM_PLAN.md` có 12 ticket A–E, đầu vào, reviewer và checklist bằng chứng.
 3. `docs/sprint3/CONTRACTS.md` có năm API, DTO/response/error, BFF, hash/storage, schema/transaction, demo và usecase09…13.
 4. `docs/sprint3/TEST_MATRIX.md` có fixture/thao tác/assertion cho 27 AC và ba test (a)(b)(c).
-5. `docs/diagrams/sprint3` có năm nguồn/chín SVG cùng 1.3; hai ERD là một mô hình 13 model.
+5. `docs/diagrams/sprint3` có năm nguồn/chín SVG cùng nội dung thiết kế; hai ERD là một mô hình 13 model.
 6. [Rà soát phạm vi](REVIEW.md) giữ kết quả đối chiếu và lịch sử thay đổi thiết kế.
 
 ## Luồng khách hàng
@@ -29,7 +29,7 @@ Tất cả 27 AC CHƯA CHẠY. Nền hiện hành đã đối chiếu là main `
 
 Giữ nguyên thiết kế nghiệp vụ, 13 model, 14 UC, 27 AC, năm API và chín hình. Các thay đổi lần này gồm mốc nền/nhận bàn giao, kế thừa logout A9, bảo toàn P07/assert và contract lỗi v1, Compose PostgreSQL 17. Bốn nhóm sửa được ghi trong [REVIEW.md](REVIEW.md). Không mở thêm tính năng hoặc sửa hồ sơ S1/S2.
 
-Bộ thiết kế cho phạm vi Assignment 1 đã chọn dùng các hồ sơ Sprint 1–2 lịch sử cùng bản Sprint 3 hiện hành này; báo cáo tổng hợp dùng thiết kế hiện hành và ghi delta. Chốt thiết kế không đồng nghĩa code/test/demo/DoD Assignment 1 đã hoàn thành. Gói A2 v0.6 được đồng bộ cùng đợt; Task 3–5 của A2 vẫn có đầu ra và cổng nghiệm thu riêng.
+Bộ thiết kế cho phạm vi Assignment 1 đã chọn dùng các hồ sơ Sprint 1–2 lịch sử cùng bản Sprint 3 hiện hành này; báo cáo tổng hợp dùng thiết kế hiện hành và ghi delta. Chốt thiết kế không đồng nghĩa code/test/demo/DoD Assignment 1 đã hoàn thành. Gói A2 được đồng bộ cùng đợt; Task 3–5 của A2 vẫn có đầu ra và cổng nghiệm thu riêng.
 
 ## Phối hợp A1 và A2
 
@@ -37,6 +37,6 @@ A2 tiếp tục sử dụng đề tài BrewLite của A1. Nhóm chọn dùng chu
 
 Các ngày 04–05/11 là mốc mục tiêu trong kế hoạch cũ, không phải xác nhận đã hoàn thành. Tại 06/11, lead cập nhật kết quả/PR/SHA hoặc blocker thực tế trên board; gói này không có đủ dữ liệu để tự ghi DONE hay đặt lại capacity.
 
-## Hiệu đính v1.3
+## Ghi chú thiết kế
 
 Xem [changelog](CHANGELOG.md). Giữ 13 model/14 UC/27 AC; làm rõ FR-13 và D16, công thức/canonical, kế hoạch A1/A2. Tất cả AC vẫn CHƯA CHẠY.

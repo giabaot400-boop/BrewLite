@@ -1,10 +1,10 @@
-# Ngữ cảnh hỗ trợ checkout — A2 v0.6
+# Ngữ cảnh hỗ trợ checkout — A2
 
-**06/11/2026 · Thiết kế kế thừa Sprint 3 v1.3.** Tài liệu hỗ trợ SRS và activity end-to-end, không phải đặc tả trọng tâm thứ hai của Task 1.3. [Đặc tả trọng tâm duy nhất: UC-09 Thanh toán không tiền mặt](use-case-checkout.md).
+**06/11/2026 · Thiết kế kế thừa Sprint 3.** Tài liệu hỗ trợ SRS và activity end-to-end, không phải đặc tả trọng tâm thứ hai của Task 1.3. [Đặc tả trọng tâm duy nhất: UC-09 Thanh toán không tiền mặt](use-case-checkout.md).
 
 ## 1. Tạo đơn làm đầu vào cho UC-09
 
-UC-08 vẫn là use case trong master; không gộp hoặc đánh lại mã. Các bước C-01…C-06 dưới đây giữ nội dung tạo đơn của v0.4, đổi tiền tố để không bị nhầm với luồng chính thanh toán. Khi bắt đầu UC-09, đơn phải đã tồn tại; không gọi POST /orders lần nữa để thử lại payment.
+UC-08 vẫn là use case trong master; không gộp hoặc đánh lại mã. Các bước C-01…C-06 dưới đây mô tả ngữ cảnh tạo đơn, tách khỏi luồng chính thanh toán. Khi bắt đầu UC-09, đơn phải đã tồn tại; không gọi POST /orders lần nữa để thử lại payment.
 
 | Bước ngữ cảnh | Khách hàng | Hệ thống và kết quả quan sát được | FR |
 |---|---|---|---|
@@ -37,4 +37,4 @@ Các mã C-Axx/C-Exx là mã nhánh hỗ trợ, không phải UC mới. Tham chi
 
 ## 3. Nguồn và truy vết
 
-FR-07/08/14/15: C-01…C-06, C-A02/03/04/07 và C-E03; FR-17/16: C-A08 và C-X01. Nguồn/hình bổ trợ ở [sequence tạo đơn và hủy/expiry](../diagrams/sequence-checkout.md); activity vẫn mô tả end-to-end. Các con số, API và helper tuân [contract S3 v1.3](../assignment2/CONTRACTS.md). Đây là thiết kế, chưa phải evidence code/test đã đạt.
+FR-07/08/14/15: C-01…C-06, C-A02/03/04/07 và C-E03; FR-17/16: C-A08 và C-X01. Nguồn/hình bổ trợ ở [sequence tạo đơn và hủy/expiry](../diagrams/sequence-checkout.md); activity vẫn mô tả end-to-end. Các con số, API và helper tuân [contract S3](../assignment2/CONTRACTS.md). Đây là thiết kế, chưa phải evidence code/test đã đạt.

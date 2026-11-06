@@ -3,7 +3,7 @@
 | Thông tin | Giá trị |
 |---|---|
 | Tạo phẩm | Task 1.3 — Đặc tả một use case trọng tâm |
-| Phiên bản / ngày | 0.6 / 06/11/2026 |
+| Ngày cập nhật | 06/11/2026 |
 | Trạng thái | Nháp để nhóm review; chưa xác nhận code/test hoặc nghiệm thu |
 | Use case trọng tâm duy nhất | UC-09 — Thanh toán không tiền mặt |
 | Actor chính | Khách hàng |
@@ -14,7 +14,7 @@
 
 ## 1. Mục tiêu và ranh giới
 
-Khách thanh toán Ví/Thẻ mô phỏng cho một Order đã tồn tại và nhận kết quả đáng tin cậy, kể cả khi gửi lại yêu cầu. **Task 1.3 chỉ đặc tả UC-09**; UC-08 không đồng trọng tâm. Giữ master 14 mã UC, 17 FR, 12 NFR, 59 AC và thiết kế Sprint 3 v1.3 trên nền Sprint 2 a1a0e4a.
+Khách thanh toán Ví/Thẻ mô phỏng cho một Order đã tồn tại và nhận kết quả đáng tin cậy, kể cả khi gửi lại yêu cầu. **Task 1.3 chỉ đặc tả UC-09**; UC-08 không đồng trọng tâm. Giữ master 14 mã UC, 17 FR, 12 NFR, 59 AC và thiết kế Sprint 3 trên nền Sprint 2 a1a0e4a.
 
 Tạo đơn, preview/ưu đãi và giữ hàng ban đầu nằm trước điểm bắt đầu UC-09; chi tiết được giữ tại [ngữ cảnh hỗ trợ](checkout-supporting-flows.md). Hủy/hoàn và expiry là luồng/tác vụ liên quan được tham chiếu khi chúng thay đổi trạng thái Order, không phải mục tiêu chính thứ hai. Không gọi tạo đơn lại khi thử lại payment.
 
@@ -87,7 +87,6 @@ Hai key đồng thời trên cùng Order không tạo hai success. Payment/expir
 
 Các con số/cấu hình demo này chưa được cả nhóm chốt. Chi tiết schema, API path và chiến lược migration thuộc thiết kế/tích hợp tiếp theo; không tự thêm endpoint hoặc bảng chỉ từ một dòng trong luồng.
 
-
 ## 7. Truy vết và kịch bản kiểm chứng
 
 | Kịch bản | Bước/nhánh | AC cần kiểm chứng |
@@ -110,8 +109,6 @@ FR-07/08/15 và phần reserve FR-14 thuộc ngữ cảnh tạo đơn, xem [C-01
 - [ ] Nhóm review BR-01…06/O-01…05, đưa đủ tạo phẩm lên repo với lịch sử thật.
 - [ ] Kiểm chứng code/schema và AC; tài liệu không thay nghiệm thu hoặc test.
 
-Bản v0.6 ngày 06/11/2026 kế thừa v0.5 ngày 05/11/2026; giữ UC-09 là trọng tâm và đồng bộ phần ngữ cảnh sequence, FR-13/D16, giá/canonical và lịch. Không đổi API/transaction/kho/giỏ; chưa sửa code hoặc hồ sơ S1/S2. [Kế hoạch A2](../assignment2/TEAM_PLAN.md) vẫn là lịch/lead đề xuất, chưa là capacity hay tiến độ thật.
-
-## Diễn giải sequence ở v0.6
+## Ranh giới của sequence chính
 
 Hình sequence chính Task 2.2 hiển thị khung chuẩn bị UC-08 trước ranh giới “Bắt đầu UC-09”, gồm transaction tạo Order và optimistic locking/giữ kho. Khung này đáp ứng nội dung mô hình hóa của đề, không thay tiền điều kiện Order đã tồn tại hoặc thêm bước tạo đơn vào M-01…M-05. Khi đã có Order, không tạo lại; retry payment dùng đúng Order và identity đã lưu.

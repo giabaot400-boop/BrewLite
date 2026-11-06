@@ -2,8 +2,8 @@
 
 ## Thiết kế đang dùng
 
-- [Sprint 3 v1.3](sprint3/README.md): phạm vi, contract, phân công và kế hoạch kiểm thử Task 8–10 của Assignment 1.
-- [Assignment 2 Task 1–2 v0.6](assignment2/README.md): phạm vi, SRS, use case, UML và ma trận truy vết.
+- [Sprint 3](sprint3/README.md): phạm vi, contract, phân công và kế hoạch kiểm thử Task 8–10 của Assignment 1.
+- [Assignment 2 Task 1–2](assignment2/README.md): phạm vi, SRS, use case, UML và ma trận truy vết.
 - [Quy trình Git](GIT_WORKFLOW.md): nhánh riêng, PR và review trước merge.
 
 Nền kế thừa là Sprint 2 tại a1a0e4ae92de681deac538685e24407b3190866b. Các hồ sơ Sprint 1–2 và sơ đồ lịch sử giữ nguyên; các gói mới là thiết kế/kế hoạch, không xác nhận code Sprint 3 hoặc mọi AC đã đạt.

@@ -1,6 +1,6 @@
 # BrewLite Sprint 3 ma trận kiểm thử
 
-Phiên bản 1.3 ngày 06/11/2026, nền Sprint 2 main a1a0e4a đã chốt. Có 27 AC, mỗi AC một lead. **Tất cả CHƯA CHẠY**; bảng là kế hoạch kiểm thử, không phải báo cáo PASS. Ca cạnh tranh và rollback chạy PostgreSQL test riêng, tối thiểu hai connection; unit mock không thay test DB. Không trỏ test/reset vào DB cũ. Test clock/failpoint chỉ trong test fixture, không public header/browser mode.
+Cập nhật ngày 06/11/2026, nền Sprint 2 main a1a0e4a đã chốt. Có 27 AC, mỗi AC một lead. **Tất cả CHƯA CHẠY**; bảng là kế hoạch kiểm thử, không phải báo cáo PASS. Ca cạnh tranh và rollback chạy PostgreSQL test riêng, tối thiểu hai connection; unit mock không thay test DB. Không trỏ test/reset vào DB cũ. Test clock/failpoint chỉ trong test fixture, không public header/browser mode.
 
 ## 1 Cách ghi bằng chứng
 
@@ -237,7 +237,7 @@ Lead E; 10 thuộc Task đề. Trạng thái CHƯA CHẠY.
 
 Lead E; 9 thuộc Task đề. Trạng thái CHƯA CHẠY.
 
-- Fixture: Máy/profile khác, PostgreSQL 17 theo nền S2, demo DB riêng và .env.example.
+- Fixture: Máy/profile khác, PostgreSQL 17 theo nền S2, demo DB riêng và.env.example.
 - Thao tác: Theo README Compose/migrate/seed và demo kịch bản CONTRACTS.
 - Kỳ vọng: Ba service hoạt động, FE→BFF→BE→DB, WALLET/CARD/fail/retry/recovery/history; seed lại không reset kho.
 - Bằng chứng cần: command/SHA, response và DB/local-storage assertions liên quan; ghi expected/actual và reviewer.
@@ -259,7 +259,7 @@ Hồi quy Sprint 1: menu/detail/size/topping/tính giá, chỉ cho topping gắn
 
 Build/check: dùng scripts thật trong package. Backend hiện có build/typecheck/db:validate, frontend build/lint/typecheck/test; D/E phải thêm backend integration harness/script trước khi ghi lệnh test ấy vào kết quả. Compose/migration/seed cần máy khác chạy thật. NFR <500ms đo endpoint mẫu sau warmup, ghi môi trường/dataset/percentile và tất cả failures; UI15s/BFF10s là timeout bảo vệ, không bằng đáp ứng hiệu năng.
 
-## 4 Làm rõ phạm vi và fixture v1.3
+## 4 Phạm vi và fixture bổ sung
 
 FR-13 và state machine chín cạnh thuộc phạm vi bắt buộc. Ba bước PAID → PREPARING → READY → COMPLETED được thực hiện qua CLI nội bộ gọi cùng service và assertTransition, chỉ bật khi DEMO_WORKFLOW_ENABLED=true; CLI phục vụ vận hành demo/test, không cấp quyền cho khách tự đổi trạng thái và không cập nhật status trực tiếp bằng SQL. D16 của baseline Sprint 1 chỉ đặt Barista UI/giao diện quầy đầy đủ ngoài MVP; không loại chức năng quản lý trạng thái khỏi phạm vi. Master giữ 14 UC; FR-13 được truy vết qua UC-08/09/11 và S3-ORD-01/02, không thêm actor/UC quầy trong lần hiệu đính này. Cơ chế này cần được hiện thực và kiểm thử; tài liệu chưa xác nhận đã chạy đạt.
 
