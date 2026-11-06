@@ -4,11 +4,11 @@
 |---|---|
 | Tạo phẩm | Task 1.3 — Đặc tả một use case trọng tâm |
 | Ngày cập nhật | 06/11/2026 |
-| Trạng thái | Nháp để nhóm review; chưa xác nhận code/test hoặc nghiệm thu |
+| Trạng thái | Đang review; chưa xác nhận code/test hoặc nghiệm thu |
 | Use case trọng tâm duy nhất | UC-09 — Thanh toán không tiền mặt |
 | Actor chính | Khách hàng |
 | Thành phần nội bộ | Next.js UI/BFF, NestJS API, PostgreSQL, PaymentService mock nội bộ NestJS |
-| Đầu vào / UC liên quan | UC-08 tạo Order trước khi bắt đầu; UC-10/11 đọc kết quả/lịch sử; UC-13 tích lũy điểm khi thành công |
+| Đầu vào / UC liên quan | UC-08 tạo Order trước khi bắt đầu; UC-10, UC-11 đọc kết quả/lịch sử; UC-13 tích lũy điểm khi thành công |
 | Sơ đồ phạm vi | [SVG](../diagrams/use-case-checkout.svg) · [PlantUML](../diagrams/use-case-checkout.puml) |
 | Căn cứ | [SRS](srs.md), [ngữ cảnh hỗ trợ](checkout-supporting-flows.md), [contract](../assignment2/CONTRACTS.md) |
 
@@ -36,7 +36,7 @@ PaymentService là thành phần nội bộ NestJS, không là actor/cổng ngo�
 
 ![UC-09 trọng tâm và các UC liên quan](../diagrams/use-case-checkout.svg)
 
-Chỉ UC-09 ở nhóm trọng tâm; UC-08/05/10/11/12/13 là ngữ cảnh. Liên kết actor–UC không thể hiện thứ tự. Không thêm include UC-09 vào UC-08: tạo đơn kết thúc PENDING, khách xác nhận payment riêng. UC-13 extend UC-09 tại xử lý SUCCEEDED trước COMMIT; UC-12 extend UC-08 được giữ trong vùng ngữ cảnh của master.
+Chỉ UC-09 ở nhóm trọng tâm; UC-08, UC-05, UC-10, UC-11, UC-12, UC-13 là ngữ cảnh. Liên kết actor–UC không thể hiện thứ tự. Không thêm include UC-09 vào UC-08: tạo đơn kết thúc PENDING, khách xác nhận payment riêng. UC-13 extend UC-09 tại xử lý SUCCEEDED trước COMMIT; UC-12 extend UC-08 được giữ trong vùng ngữ cảnh của master.
 
 **M-01 — Chuẩn bị thanh toán:** khách mở Order; UI GET /orders/:id bằng phiên hiện tại, kiểm owner/phiên/version và hiển thị subtotal/discountTotal/total chính thức cùng hành động được phép. Có recovery chưa rõ thì đi A-07/E-04 trước canPay lần mới. Trường hợp không cho trả đi A-09/A-10/E-07. M-01 không tạo Order hoặc giữ thêm kho.
 

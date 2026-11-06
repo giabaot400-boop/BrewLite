@@ -5,7 +5,7 @@
 | Thông tin | Giá trị |
 |---|---|
 | Ngày cập nhật | 06/11/2026 |
-| Trạng thái | Nháp review, mô tả thiết kế mục tiêu, chưa xác nhận code/test đạt |
+| Trạng thái | Đang review, mô tả thiết kế mục tiêu, chưa xác nhận code/test đạt |
 | Căn cứ | [SRS](../requirements/srs.md), [Use case Task 1.3](../requirements/use-case-checkout.md), [Activity Task 2.1](activity-checkout.md) |
 | Nguồn | [sequence-checkout.puml](sequence-checkout.puml), ba khối sơ đồ của cùng luồng checkout |
 | Hình | [1 — Tạo đơn](sequence-checkout-order.svg) · [2 — Thanh toán](sequence-checkout-payment.svg) · [3 — Hủy/hết hạn](sequence-checkout-cancel-expiry.svg) |
@@ -100,8 +100,8 @@ Ma trận này là đối chiếu thiết kế, chưa là kết quả test. Các
 - [x] Có đủ lifeline tối thiểu trong hình payment, request/response, guard/validate, transaction, alt và replay.
 - [x] Có liên kết với SRS, Task 1.3 và activity; đồng bộ chính sách, giữ master 14 UC.
 - [ ] Nhóm review BR-01…06/O-01…05, lock/CAS/schema và rollout trước hiện thực.
-- [ ] Đưa tài liệu lên repo có lịch sử; kiểm chứng AC khi triển khai, nghiệm thu theo thứ tự đề.
-- [x] Có bản nháp [Task 2.3 — class diagram](class-domain.md) và đối chiếu mô hình dữ liệu.
+- [ ] Chốt tài liệu qua review/merge trên repo; kiểm chứng AC khi triển khai, nghiệm thu theo thứ tự đề.
+- [x] Có tài liệu [Task 2.3 — class diagram](class-domain.md) và đối chiếu mô hình dữ liệu.
 - [ ] Nhóm review/chốt đủ Task 2; sequence riêng lẻ chưa tự hoàn thành toàn bộ Task 2.
 
-Tài liệu chỉ hoàn thành phần soạn nháp Task 2.2. Chưa sửa code, migration, hồ sơ Sprint 2 hoặc xác nhận trạng thái repo từ việc soạn này. Nguồn sơ đồ và SVG được đối chiếu với nội dung thiết kế. Lịch sử thay đổi trên repo theo commit/PR.
+Tài liệu mô tả thiết kế Task 2.2 trên nhánh PR #29; chưa xác nhận Task 2 đã được nghiệm thu. Thay đổi chỉ có tài liệu, không sửa code, migration hoặc hồ sơ Sprint 2. Nguồn sơ đồ và SVG được đối chiếu với nội dung thiết kế. Lịch sử thay đổi trên repo theo commit/PR.

@@ -6,7 +6,7 @@ Hạn cả A1/A2 là **15/11/2026 theo PO cung cấp**; PO kiểm tra giờ LMS,
 
 ## 1. Bắt đầu ngay
 
-A/B nhận tài liệu Task 1–2 để review và đưa lên repo; không vẽ lại bộ UML. C/D/E tiếp tục code S3, từng lead cung cấp evidence phần mình. B giữ board/checklist, E khảo sát deployment, C chuẩn bị health/log/secrets, A xác định môi trường PWA. Không đợi A1 hoàn tất mới chuẩn bị A2.
+A/B phối hợp review tài liệu Task 1–2 trên PR #29; không vẽ lại bộ UML. C/D/E tiếp tục code S3, từng lead cung cấp evidence phần mình. B giữ board/checklist, E khảo sát deployment, C chuẩn bị health/log/secrets, A xác định môi trường PWA. Không đợi A1 hoàn tất mới chuẩn bị A2.
 
 ## 2. Một lead cho mỗi nhóm đầu ra
 

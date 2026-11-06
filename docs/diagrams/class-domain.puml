@@ -178,6 +178,6 @@ legend bottom
   Snapshot giữ lịch sử; quan hệ composition không cho phép xóa đơn/lịch sử tùy ý.
   Dấu ? là nullable; Id / Snapshot là ký hiệu kiểu logic, không thêm lớp/bảng.
   Trường requestKey/hash tạo đơn, AuthSession và OrderRequest được dẫn trong tài liệu.
-  Hình là nháp review; không phải schema/migration hoặc bằng chứng code/test đã đạt.
+  Hình là thiết kế để review; không phải schema/migration hoặc bằng chứng code/test đã đạt.
 endlegend
 @enduml

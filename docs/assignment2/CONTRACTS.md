@@ -1,6 +1,6 @@
 # Contract kế thừa Sprint 3
 
-Bản nháp A2 · 06/11/2026. Chi tiết hiện thực tham chiếu bộ thiết kế Sprint 3; nội dung dưới dùng thống nhất cho các tài liệu, không tạo thêm FR/UC.
+Ngày cập nhật: 06/11/2026. Chi tiết hiện thực tham chiếu bộ thiết kế Sprint 3; nội dung dưới dùng thống nhất cho các tài liệu, không tạo thêm FR/UC.
 
 - Chỉ năm API nghiệp vụ đơn/thanh toán: `POST /orders`, `GET /orders/:id`, `GET /orders/me`, `POST /payments`, `POST /orders/:id/cancel`. API catalog/auth kế thừa vẫn dùng; không tạo API báo giá hoặc đọc payment riêng.
 - `GET /orders/:id` trả `latestPayment` gồm id, version, orderId, method, amount, status, failureCode, createdAt, resolvedAt, refundedAmount, refundedAt hoặc null, chọn createdAt giảm dần rồi id giảm dần. Latest không chứng minh đó là attempt của key đang phục hồi. Mất response phải replay `POST /payments` với đúng owner/key/body đã lưu, rồi đọc Order hiện tại; không gán paymentId/kết quả từ một attempt khác.
@@ -19,7 +19,7 @@ Mock outcome do backend cấu hình SUCCEEDED/FAILED, mặc định success; c�
 
 ## Nền Sprint 2 đã chốt — không thiết kế lại khi thêm payment
 
-Mốc kế thừa là main `a1a0e4ae92de681deac538685e24407b3190866b` sau PR #24/#26/#28/#27, hồ sơ `docs/SPRINT2_CLOSEOUT.md`. PO đã chấp nhận phạm vi Sprint 2 đã kiểm tra; các giới hạn bằng chứng vẫn giữ. Không suy ra mọi AC S2 hoặc AC A2 đã PASS. Sprint 3 đã đồng bộ nền này; A2 dùng cùng mốc, không lấy /ảnh cũ làm nguồn hiện hành.
+Mốc kế thừa là main `a1a0e4ae92de681deac538685e24407b3190866b` sau PR #24/#26/#28/#27, hồ sơ `docs/SPRINT2_CLOSEOUT.md`. PO đã chấp nhận phạm vi Sprint 2 đã kiểm tra; các giới hạn bằng chứng vẫn giữ. Không suy ra mọi AC S2 hoặc AC A2 đã PASS. Sprint 3 đã đồng bộ nền này; A2 dùng cùng mốc, không dùng tài liệu hoặc ảnh cũ làm nguồn hiện hành.
 
 ### Phiên và logout A9
 
@@ -59,7 +59,7 @@ Fixture cần kiểm khi hiện thực: hai body mới giống nhau ngoài promo
 
 ## Quản lý trạng thái và phạm vi quầy
 
-FR-13 và state machine chín cạnh thuộc phạm vi bắt buộc. Ba bước PAID → PREPARING → READY → COMPLETED được thực hiện qua CLI nội bộ gọi cùng service và assertTransition, chỉ bật khi DEMO_WORKFLOW_ENABLED=true; CLI phục vụ vận hành demo/test, không cấp quyền cho khách tự đổi trạng thái và không cập nhật status trực tiếp bằng SQL. D16 của baseline Sprint 1 chỉ đặt Barista UI/giao diện quầy đầy đủ ngoài MVP; không loại chức năng quản lý trạng thái khỏi phạm vi. Master giữ 14 UC; FR-13 được truy vết qua UC-08/09/11 và S3-ORD-01/02, không thêm actor/UC quầy trong lần hiệu đính này. Cơ chế này cần được hiện thực và kiểm thử; tài liệu chưa xác nhận đã chạy đạt.
+FR-13 và state machine chín cạnh thuộc phạm vi bắt buộc. Ba bước PAID → PREPARING → READY → COMPLETED được thực hiện qua CLI nội bộ gọi cùng service và assertTransition, chỉ bật khi DEMO_WORKFLOW_ENABLED=true; CLI phục vụ vận hành demo/test, không cấp quyền cho khách tự đổi trạng thái và không cập nhật status trực tiếp bằng SQL. D16 của baseline Sprint 1 chỉ đặt Barista UI/giao diện quầy đầy đủ ngoài MVP; không loại chức năng quản lý trạng thái khỏi phạm vi. Master giữ 14 UC; FR-13 được truy vết qua UC-08, UC-09, UC-11 và S3-ORD-01/02, không thêm actor/UC quầy trong lần hiệu đính này. Cơ chế này cần được hiện thực và kiểm thử; tài liệu chưa xác nhận đã chạy đạt.
 
 ## Quan hệ A1 và A2
 

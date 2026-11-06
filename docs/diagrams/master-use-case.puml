@@ -80,7 +80,7 @@ UC12 -[hidden]down-> UC13
 
 legend bottom
   Giữ UC-01 đến UC-13 và S2-UC-LOGOUT: 14 mã, không thêm mục tiêu mới.
-  Màu chia nhóm chức năng; đây là bản nháp, chưa là bằng chứng triển khai.
+  Màu chia nhóm chức năng; đây là thiết kế, chưa là bằng chứng triển khai.
   UC-08 tạo PENDING; UC-09 thanh toán đơn đã có, hai thao tác riêng.
   Login là tiền điều kiện, không include thao tác đăng nhập cho mỗi lần đặt.
   UC-12 mở rộng UC-08 khi có mã, tại: Kiểm tra ưu đãi khi tạo đơn.

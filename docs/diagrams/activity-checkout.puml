@@ -198,6 +198,6 @@ legend bottom
   Legacy PROCESSING/UNKNOWN chặn lần mới / release chưa xác minh.
   Mock PaymentService thuộc NestJS, không có actor gateway bên ngoài.
   UI 15 giây / BFF 10 giây là giới hạn chờ, không chứng minh FAILED.
-  Nháp review; không là bằng chứng code / test đã đạt.
+  Đang review; không là bằng chứng code / test đã đạt.
 endlegend
 @enduml

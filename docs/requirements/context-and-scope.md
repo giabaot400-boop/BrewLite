@@ -3,14 +3,14 @@
 | Thông tin | Giá trị |
 |---|---|
 | Tạo phẩm | Task 1.1 — Bối cảnh, stakeholder và phạm vi |
-| Đường dẫn dự kiến trên repository | `docs/requirements/context-and-scope.md` |
+| Đường dẫn trên repository | `docs/requirements/context-and-scope.md` |
 | Ngày cập nhật | 06/11/2026 |
-| Trạng thái | Bản nháp để nhóm review; chưa là baseline yêu cầu được phê duyệt |
+| Trạng thái | Đang review trên PR #29; chưa là baseline yêu cầu được phê duyệt |
 | Phạm vi của tệp | Bối cảnh và ranh giới sản phẩm; làm đầu vào cho SRS và đặc tả use case |
 
 BrewLite giúp khách hàng chọn đồ uống, đặt đơn, thanh toán không tiền mặt mô phỏng và theo dõi đơn để nhận đồ tại quầy. Assignment 2 tiếp tục phát triển cùng sản phẩm của Assignment 1, đồng thời yêu cầu quản lý tài liệu, mô hình, kiến trúc, kiểm thử, CI/CD và bàn giao một phiên bản production truy cập được.
 
-Tài liệu này xác định phạm vi mục tiêu, không ghi nhận các chức năng đã triển khai hoặc kiểm thử đạt. Các chính sách chi tiết kế thừa từ bản nháp Sprint 3 được tách riêng tại mục 6 để nhóm review trước khi đưa thành yêu cầu chính thức. Việc soạn xong Task 1.1 chưa đồng nghĩa hoàn thành toàn bộ Task 1 hoặc đã đưa tài liệu lên repository.
+Tài liệu này xác định phạm vi mục tiêu, không ghi nhận các chức năng đã triển khai hoặc kiểm thử đạt. Các chính sách chi tiết kế thừa từ thiết kế Sprint 3 được tách riêng tại mục 6 để nhóm review trước khi đưa thành yêu cầu chính thức. Tài liệu hiện có trên nhánh PR #29; việc soạn xong Task 1.1 chưa đồng nghĩa toàn bộ Task 1 đã được nghiệm thu.
 
 ## Nền sử dụng và trạng thái
 
@@ -109,9 +109,9 @@ Một nội dung ngoài phạm vi chỉ được đưa vào backlog thực hiệ
 
 ## 6. Chính sách kế thừa đang đề xuất để review
 
-Các chính sách sau đã được cụ thể hóa trong bản nháp Sprint 3 của Assignment 1 để làm cơ sở tiếp tục thiết kế. Chưa mặc định cả nhóm phê duyệt hoặc code/test đã đáp ứng. Nhóm cần review trước khi chốt thành baseline SRS của Assignment 2.
+Các chính sách sau đã được cụ thể hóa trong thiết kế Sprint 3 của Assignment 1 để làm cơ sở tiếp tục thiết kế. Chưa mặc định cả nhóm phê duyệt hoặc code/test đã đáp ứng. Nhóm cần review trước khi chốt thành baseline SRS của Assignment 2.
 
-| Tham chiếu | Chính sách trong bản nháp hiện tại | Việc cần chốt |
+| Tham chiếu | Chính sách trong thiết kế hiện tại | Việc cần chốt |
 |---|---|---|
 | DEC-06 | Tạo PENDING chưa dọn giỏ; FAILED/chưa rõ vẫn giữ và khóa phần checkout; chỉ dọn đúng giỏ sau trạng thái thanh toán thành công hiện tại | Vòng đời giỏ, khôi phục yêu cầu, bảo vệ chủ/revision và tương thích storage Sprint 2 |
 | Giữ hàng / DEC-09 | Hạn thanh toán 15 phút từ khi tạo đơn; chỉ Product tính theo ly; Topping không giữ/trừ kho; retry không gia hạn | Tồn kho seed, giữ/trừ/trả kho, task hết hạn và ca tranh chấp đồng thời |
@@ -139,7 +139,7 @@ Không cần đưa tên bảng, trường vật lý, toàn bộ mã lỗi hoặc
 |---|---|---|
 | C-01 | Dùng Next.js, NestJS và PostgreSQL; Docker phục vụ đóng gói/chạy theo yêu cầu bài | Assignment 2 mục 1.1, 6–7; không thay ba thành phần bắt buộc |
 | C-02 | Frontend theo hướng mobile-first/PWA | Assignment 2 mục 1.1; phải làm rõ tiêu chí PWA trong SRS và kiểm chứng khi triển khai |
-| C-03 | Năm task được hoàn thành theo thứ tự; task sau chỉ được nghiệm thu khi tạo phẩm bắt buộc task trước đã có trên repo, có lịch sử thay đổi | Assignment 2 mục 1, 6.2 và 8; bản nháp hiện tại chưa đáp ứng điều kiện nghiệm thu Task 1 |
+| C-03 | Năm task được hoàn thành theo thứ tự; task sau chỉ được nghiệm thu khi tạo phẩm bắt buộc task trước đã có trên repo, có lịch sử thay đổi | Assignment 2 mục 1, 6.2 và 8; tài liệu hiện tại chưa xác nhận Task 1 đã được nghiệm thu |
 | C-04 | Giữ nguyên hồ sơ lịch sử và migration đã áp dụng; thay đổi tiếp theo dùng phiên bản/commit mới và có lý do | Kế thừa Sprint 1–2 và yêu cầu quản lý tài liệu của Assignment 2; kiểm chứng chuyển đổi dữ liệu trước khi tích hợp |
 | C-05 | Xác thực, validate và quyền sở hữu được kiểm tra ở backend; mật khẩu được băm, JWT không đưa cho JavaScript theo contract BFF kế thừa; không đưa secret vào repo/log | Assignment 1 mục 4/Task 7 và Sprint 2 P04/P05; Assignment 2 mục 7.4 |
 | C-06 | Kế thừa mục tiêu API dưới 500 ms với dữ liệu mẫu từ Assignment 1; môi trường, phép đo và ngưỡng của từng NFR phải được đặc tả tiếp | Chưa có kết quả đo Assignment 2. Timeout UI/BFF là giới hạn dừng chờ, không thay bằng chứng đạt hiệu năng |
@@ -179,9 +179,9 @@ Không bổ sung chức năng chỉ để trả lời các câu hỏi trên; n�
 - [x] Có bảng giả định, ràng buộc và rủi ro ban đầu.
 - [x] Có nguồn kế thừa và phân biệt chính sách đang đề xuất với yêu cầu đã được chốt.
 - [ ] Nhóm review và ghi nhận điểm đồng ý/chưa đồng ý.
-- [ ] Đưa phiên bản đã review vào `docs/requirements/context-and-scope.md` trên repository, kèm commit/PR và lý do thay đổi.
+- [ ] Chốt phiên bản sau review và merge PR #29 theo quy trình nhóm; giữ lịch sử commit/PR và lý do thay đổi.
 
-Gói hiện tại đã có bản nháp Task 1.2 (SRS/FR/NFR/MoSCoW/AC/master) và Task 1.3 (đặc tả duy nhất UC-09 Thanh toán không tiền mặt), cùng các mô hình Task 2. Chỉ nghiệm thu toàn bộ Task 1 khi đủ các tạo phẩm bắt buộc và lịch sử trên repo. Task 2 phải truy vết từ baseline yêu cầu đó; không coi bộ sơ đồ Assignment 1 là tự động hoàn thành Task 2.
+Nhánh PR #29 đã có tài liệu Task 1.2 (SRS/FR/NFR/MoSCoW/AC/master) và Task 1.3 (đặc tả duy nhất UC-09 Thanh toán không tiền mặt), cùng các mô hình Task 2. Chỉ nghiệm thu toàn bộ Task 1 khi đủ các tạo phẩm bắt buộc và lịch sử trên repo. Task 2 phải truy vết từ baseline yêu cầu đó; không coi bộ sơ đồ Assignment 1 là tự động hoàn thành Task 2.
 
 ## 12. Nguồn tham chiếu
 
@@ -195,7 +195,7 @@ Gói hiện tại đã có bản nháp Task 1.2 (SRS/FR/NFR/MoSCoW/AC/master) v�
 
 ## Phạm vi quản lý trạng thái đơn
 
-FR-13 và state machine chín cạnh thuộc phạm vi bắt buộc. Ba bước PAID → PREPARING → READY → COMPLETED được thực hiện qua CLI nội bộ gọi cùng service và assertTransition, chỉ bật khi DEMO_WORKFLOW_ENABLED=true; CLI phục vụ vận hành demo/test, không cấp quyền cho khách tự đổi trạng thái và không cập nhật status trực tiếp bằng SQL. D16 của baseline Sprint 1 chỉ đặt Barista UI/giao diện quầy đầy đủ ngoài MVP; không loại chức năng quản lý trạng thái khỏi phạm vi. Master giữ 14 UC; FR-13 được truy vết qua UC-08/09/11 và S3-ORD-01/02, không thêm actor/UC quầy trong lần hiệu đính này. Cơ chế này cần được hiện thực và kiểm thử; tài liệu chưa xác nhận đã chạy đạt.
+FR-13 và state machine chín cạnh thuộc phạm vi bắt buộc. Ba bước PAID → PREPARING → READY → COMPLETED được thực hiện qua CLI nội bộ gọi cùng service và assertTransition, chỉ bật khi DEMO_WORKFLOW_ENABLED=true; CLI phục vụ vận hành demo/test, không cấp quyền cho khách tự đổi trạng thái và không cập nhật status trực tiếp bằng SQL. D16 của baseline Sprint 1 chỉ đặt Barista UI/giao diện quầy đầy đủ ngoài MVP; không loại chức năng quản lý trạng thái khỏi phạm vi. Master giữ 14 UC; FR-13 được truy vết qua UC-08, UC-09, UC-11 và S3-ORD-01/02, không thêm actor/UC quầy trong lần hiệu đính này. Cơ chế này cần được hiện thực và kiểm thử; tài liệu chưa xác nhận đã chạy đạt.
 
 ## Quan hệ A1 và A2
 

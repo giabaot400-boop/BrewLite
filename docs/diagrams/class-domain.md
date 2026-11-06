@@ -5,7 +5,7 @@
 | Thông tin | Giá trị |
 |---|---|
 | Ngày cập nhật | 06/11/2026 |
-| Trạng thái | Nháp review; chưa là schema/migration hoặc xác nhận code/test đạt |
+| Trạng thái | Đang review; chưa là schema/migration hoặc xác nhận code/test đạt |
 | Căn cứ | [SRS](../requirements/srs.md), [Task 1.3](../requirements/use-case-checkout.md), [activity](activity-checkout.md), [sequence](sequence-checkout.md) |
 | Đối chiếu dữ liệu | ERD Sprint 3 hiện hành và `docs/sprint3/DESIGN.md`, ngày 06/11/2026; kế thừa Sprint 2 v0.6 |
 | Nguồn và hình | [class-domain.puml](class-domain.puml) · [class-domain.svg](class-domain.svg) |
@@ -32,7 +32,7 @@ Màu nhóm trách nhiệm, không chỉ Sprint hay trạng thái đã hoàn thà
 
 ## 3. Ánh xạ với mô hình dữ liệu hiện có
 
-| Lớp trên hình | Model ERD nháp hiện tại | Trách nhiệm / ý nghĩa |
+| Lớp trên hình | Model ERD thiết kế hiện tại | Trách nhiệm / ý nghĩa |
 |---|---|---|
 | User | User | Tài khoản, chủ đơn và số dư điểm |
 | Product | Product | Danh mục đồ uống, giá hiện tại, stock/reservedStock/stockVersion |
@@ -119,8 +119,8 @@ Ràng buộc liên bảng và race không được coi đã bảo vệ chỉ vì
 | Lớp / nhóm | FR chính | Use case / sequence | Tiêu chí SRS tiêu biểu |
 |---|---|---|---|
 | Product có kho; Topping chỉ cấu hình/giá | FR-01/02/14 | UC-01…04; sequence tạo đơn | AC-FR-02-1, AC-FR-02-2, AC-FR-14-1 |
-| User | FR-04/05/12/16 | UC-06/07/11/13; guard và ownership xuyên suốt | AC-NFR-02-1, AC-NFR-03-1 |
-| Order/OrderItem/OrderItemTopping | FR-07/08/11/12/13/15 | UC-08/10/11/12; sequence tạo đơn, đọc xác nhận | AC-FR-07-1, AC-FR-08-1, AC-FR-11-2, AC-FR-13-1 |
+| User | FR-04/05/12/16 | UC-06, UC-07, UC-11, UC-13; guard và ownership xuyên suốt | AC-NFR-02-1, AC-NFR-03-1 |
+| Order/OrderItem/OrderItemTopping | FR-07/08/11/12/13/15 | UC-08, UC-10, UC-11, UC-12; sequence tạo đơn, đọc xác nhận | AC-FR-07-1, AC-FR-08-1, AC-FR-11-2, AC-FR-13-1 |
 | Payment | FR-09/10/17 | UC-09; sequence payment và hủy | AC-FR-09-1, AC-FR-10-1, AC-FR-10-2, AC-FR-17-1 |
 | StockReservation | FR-14/17 | Tạo đơn/payment/hủy/expiry, C-A04/C-A08/A-09 | AC-FR-14-2, AC-FR-17-2, AC-NFR-04-2 |
 | Promotion | FR-15 | UC-12 mở rộng UC-08; snapshot tại tạo đơn | AC-FR-15-1, AC-FR-15-2 |
@@ -135,9 +135,9 @@ Ràng buộc liên bảng và race không được coi đã bảo vệ chỉ vì
 - [x] Có nguồn PlantUML/SVG cùng phiên bản, đã kết xuất và xem hình.
 - [x] Có mapping Payment/PaymentAttempt, LoyaltyTransaction/LoyaltyEntry, FK/lớp không vẽ và các invariant ngoài multiplicity.
 - [ ] Nhóm review BR/O trong SRS, tên model/schema thực, ràng buộc, dữ liệu legacy và rollout.
-- [ ] Đưa đủ tài liệu Task 1–2 lên repo có lịch sử, review theo thứ tự nghiệm thu của đề.
+- [ ] Chốt đủ tài liệu Task 1–2 qua review/merge trên repo, theo thứ tự nghiệm thu của đề.
 - [ ] Hiện thực và chạy các test AC có bằng chứng; chưa được ghi đạt từ đợt soạn này.
 
-Mình đã có **bản nháp tài liệu Task 2.1–2.3** trong gói tổng hợp. Điều này chưa tự nghiệm thu Task 2; còn review và lịch sử trên repo. Bước thiết kế kế tiếp là Task 3 kiến trúc/module/ADR và deployment, vẫn dựa trên phạm vi hiện tại.
+Tài liệu **Task 2.1–2.3** đã có trên nhánh PR #29. Việc có tài liệu trên repo chưa tự xác nhận Task 2 đã được nghiệm thu; kết quả review và quyết định chốt được ghi trên PR. Bước thiết kế kế tiếp là Task 3 kiến trúc/module/ADR và deployment, vẫn dựa trên phạm vi hiện tại.
 
 Không sửa ERD Sprint 3, tài liệu Sprint 2, schema/migration hoặc code trong thao tác vẽ class. Các phương án demo/snapshot/legacy vẫn ở trạng thái được SRS ghi rõ, chưa biến thành quyết định đã được cả nhóm chấp nhận.

@@ -4,7 +4,7 @@
 |---|---|
 | Tạo phẩm | Task 1.2 — Yêu cầu chức năng và phi chức năng |
 | Ngày cập nhật | 06/11/2026 |
-| Trạng thái | Nháp để nhóm review, chưa là baseline được phê duyệt |
+| Trạng thái | Đang review, chưa là baseline được phê duyệt |
 | Nền phạm vi | [context-and-scope.md](context-and-scope.md) |
 | Master use case | [Nguồn PlantUML](../diagrams/master-use-case.puml) và [hình SVG](../diagrams/master-use-case.svg) |
 | Đường dẫn dự kiến | `docs/requirements/srs.md` |
@@ -19,9 +19,9 @@ Chi tiết kế thừa nằm tại [contract dùng chung](../assignment2/CONTRAC
 
 BrewLite phục vụ khách chọn đồ uống, đặt đơn, thanh toán Ví/Thẻ mô phỏng và theo dõi đơn để nhận đồ tại quầy. Tài liệu này chuyển phạm vi Task 1.1 thành yêu cầu có mã và tiêu chí chấp nhận để dùng khi đặc tả use case, thiết kế và viết test.
 
-Các yêu cầu mô tả hành vi mục tiêu, không xác nhận code hoặc test đã đạt. Mọi tiêu chí trong bản này có trạng thái **CHƯA KIỂM CHỨNG theo SRS Assignment 2**; có thể tái sử dụng bằng chứng cũ nếu đối chiếu đúng yêu cầu, phiên bản và điều kiện chạy. Chưa tạo ticket, giao việc mới hoặc đưa các tệp này lên repository.
+Các yêu cầu mô tả hành vi mục tiêu, không xác nhận code hoặc test đã đạt. Mọi tiêu chí trong bản này có trạng thái **CHƯA KIỂM CHỨNG theo SRS Assignment 2**; có thể tái sử dụng bằng chứng cũ nếu đối chiếu đúng yêu cầu, phiên bản và điều kiện chạy. Tài liệu được quản lý trên nhánh PR #29; việc đưa tài liệu lên repo không tự xác nhận đã tạo ticket hoặc giao việc mới.
 
-Task 1.3 đã có [bản nháp đặc tả UC-09 Thanh toán không tiền mặt](use-case-checkout.md), kèm sơ đồ phạm vi. Activity/sequence/class thuộc Task 2; kiến trúc/ADR/deployment thuộc Task 3; CI/CD, test chạy thật và production thuộc Task 4–5. Việc có tài liệu nháp không tự hoàn thành hoặc nghiệm thu các task đó.
+Task 1.3 đã có [đặc tả UC-09 Thanh toán không tiền mặt](use-case-checkout.md), kèm sơ đồ phạm vi. Activity/sequence/class thuộc Task 2; kiến trúc/ADR/deployment thuộc Task 3; CI/CD, test chạy thật và production thuộc Task 4–5. Việc có tài liệu không tự xác nhận các task đó đã hoàn thành hoặc được nghiệm thu.
 
 ### 1.1. Ký hiệu
 
@@ -29,7 +29,7 @@ Task 1.3 đã có [bản nháp đặc tả UC-09 Thanh toán không tiền mặt
 - **NFR-xx:** yêu cầu chất lượng hoặc ràng buộc có thể kiểm chứng.
 - **AC-FR-xx-y / AC-NFR-xx-y:** mã tiêu chí chấp nhận, chưa phải mã test đã chạy.
 - **UC-01…UC-13 và S2-UC-LOGOUT:** giữ mã kế thừa từ Assignment 1, tổng 14 mã. Không đánh lại UC theo thứ tự FR.
-- **BR-01…BR-06:** chính sách nháp từ Sprint 3, cần nhóm review trước khi chốt baseline. AC tham chiếu BR được đánh giá theo đúng phiên bản chính sách đã chấp nhận.
+- **BR-01…BR-06:** chính sách đề xuất từ Sprint 3, cần nhóm review trước khi chốt baseline. AC tham chiếu BR được đánh giá theo đúng phiên bản chính sách đã chấp nhận.
 
 ### 1.2. Ưu tiên MoSCoW
 
@@ -163,7 +163,7 @@ Khách xem danh sách đơn của mình, mở chi tiết và tiếp tục hành 
 
 Backend chỉ cho phép chuyển trạng thái theo sự kiện và điều kiện hợp lệ; COMPLETED và CANCELLED là trạng thái kết thúc.
 
-FR-13 và state machine chín cạnh thuộc phạm vi bắt buộc. Ba bước PAID → PREPARING → READY → COMPLETED được thực hiện qua CLI nội bộ gọi cùng service và assertTransition, chỉ bật khi DEMO_WORKFLOW_ENABLED=true; CLI phục vụ vận hành demo/test, không cấp quyền cho khách tự đổi trạng thái và không cập nhật status trực tiếp bằng SQL. D16 của baseline Sprint 1 chỉ đặt Barista UI/giao diện quầy đầy đủ ngoài MVP; không loại chức năng quản lý trạng thái khỏi phạm vi. Master giữ 14 UC; FR-13 được truy vết qua UC-08/09/11 và S3-ORD-01/02, không thêm actor/UC quầy trong lần hiệu đính này. Cơ chế này cần được hiện thực và kiểm thử; tài liệu chưa xác nhận đã chạy đạt.
+FR-13 và state machine chín cạnh thuộc phạm vi bắt buộc. Ba bước PAID → PREPARING → READY → COMPLETED được thực hiện qua CLI nội bộ gọi cùng service và assertTransition, chỉ bật khi DEMO_WORKFLOW_ENABLED=true; CLI phục vụ vận hành demo/test, không cấp quyền cho khách tự đổi trạng thái và không cập nhật status trực tiếp bằng SQL. D16 của baseline Sprint 1 chỉ đặt Barista UI/giao diện quầy đầy đủ ngoài MVP; không loại chức năng quản lý trạng thái khỏi phạm vi. Master giữ 14 UC; FR-13 được truy vết qua UC-08, UC-09, UC-11 và S3-ORD-01/02, không thêm actor/UC quầy trong lần hiệu đính này. Cơ chế này cần được hiện thực và kiểm thử; tài liệu chưa xác nhận đã chạy đạt.
 
 - **AC-FR-13-1:** Kiểm thử luồng PENDING → PAID → PREPARING → READY → COMPLETED; thất bại thanh toán sang PAYMENT_FAILED. Lần mới hợp lệ phải đi PAYMENT_FAILED → PENDING, rồi PENDING → PAID hoặc PAYMENT_FAILED trong cùng transaction, không commit PENDING trung gian; replay không tạo cạnh mới. Các cạnh hủy theo BR-04 được kiểm tra riêng.
 - **AC-FR-13-2:** Thử chuyển PENDING thẳng READY, COMPLETED về PAID, hoặc khách tự cập nhật bước pha chế đều bị chặn và dữ liệu không đổi. Replay hoặc timeout không tự tạo chuyển trạng thái mới.
@@ -281,7 +281,7 @@ API có mục tiêu phản hồi dưới 500 ms với dữ liệu mẫu theo Ass
 
 ## 5. Chính sách nghiệp vụ đang đề xuất
 
-| Mã | Chính sách cụ thể của bản nháp | Nguồn |
+| Mã | Chính sách thiết kế đề xuất | Nguồn |
 |---|---|---|
 | BR-01 | Giữ giỏ sau PENDING; FAILED/chưa rõ giữ và khóa phần checkout. Dọn đúng binding sau trạng thái thanh toán thành công hiện tại; CANCELLED chỉ mở khóa phần giỏ còn tồn tại và khớp | Task 1.1 mục 6; S3 DEC-06 |
 | BR-02 | Giữ hàng 15 phút từ lúc tạo đơn; retry không gia hạn. Chỉ Product theo ly; gộp qty theo productId, không có kho Topping. Payment mới nhận trước deadline có thể commit sau mốc đó; backend quét/catch-up đơn hết hạn | Task 1.1 mục 6; S3 DEC-09 và mục 3.3 |
@@ -323,7 +323,7 @@ Sơ đồ tổng quát thể hiện mục tiêu đã kế thừa; màu là nhóm
 - UC-10 là mục tiêu đọc độc lập; không dùng extend chỉ để nói xem xác nhận xảy ra sau thanh toán.
 - Đăng nhập là tiền điều kiện của thao tác bảo vệ, không include thao tác login cho mỗi lần đặt. Hủy/retry/expiry là luồng thay thế và quy tắc trong các UC liên quan.
 
-Đặc tả [Task 1.3 — UC-09 Thanh toán không tiền mặt](use-case-checkout.md) chỉ chọn UC-09 làm trọng tâm. UC-08 tạo đơn là đầu vào; các chi tiết tạo đơn/hủy/expiry được giữ trong [ngữ cảnh hỗ trợ](checkout-supporting-flows.md). Giữ master 14 mã UC, không thêm hoặc gộp mã. Bản nháp đã có trigger, tiền/hậu điều kiện, luồng chính/thay thế/ngoại lệ, diagram phạm vi và liên kết FR/AC; đã đồng bộ thiết kế; vẫn cần nhóm review và đưa lên repo.
+Đặc tả [Task 1.3 — UC-09 Thanh toán không tiền mặt](use-case-checkout.md) chỉ chọn UC-09 làm trọng tâm. UC-08 tạo đơn là đầu vào; các chi tiết tạo đơn/hủy/expiry được giữ trong [ngữ cảnh hỗ trợ](checkout-supporting-flows.md). Giữ master 14 mã UC, không thêm hoặc gộp mã. Đặc tả đã có trigger, tiền/hậu điều kiện, luồng chính/thay thế/ngoại lệ, diagram phạm vi và liên kết FR/AC. Nội dung đã đồng bộ thiết kế và có trên nhánh PR #29; việc chốt baseline vẫn cần kết quả review theo quy trình nhóm.
 
 NFR áp dụng xuyên suốt, không nhất thiết tạo UC riêng. NFR-01/05/06/07/12 liên quan tương tác người dùng; NFR-02/03/04/11 bảo vệ các luồng dữ liệu; NFR-08/09/10 gắn kiến trúc, repository, kiểm thử và bàn giao.
 
@@ -339,27 +339,27 @@ NFR áp dụng xuyên suốt, không nhất thiết tạo UC riêng. NFR-01/05/0
 
 Những điểm mở không phải lý do tự phát sinh chức năng ngoài OUT-01…08. Nếu phương án thay đổi, cập nhật cùng SRS, source/hình và đặc tả UC; không sửa hồ sơ Sprint 2 để giả thành trạng thái mới.
 
-### 7.1. Kiểm tra nội dung bản nháp
+### 7.1. Kiểm tra nội dung tài liệu
 
 - [x] Có mã FR/NFR, ưu tiên MoSCoW và AC cho từng yêu cầu.
 - [x] Có đủ nhóm yêu cầu tối thiểu của Task 1.2 và master use case toàn hệ thống.
 - [x] Có nguồn và SVG, giữ 14 mã UC và mapping FR–UC/phạm vi.
 - [x] Có phân biệt chính sách demo, tiêu chí đề xuất, kết quả chưa kiểm chứng và phạm vi không làm.
 - [ ] Nhóm review/chốt phạm vi, chính sách, ưu tiên và điểm mở ảnh hưởng baseline.
-- [x] Có bản nháp Task 1.3 và sơ đồ phạm vi liên kết với SRS.
+- [x] Có tài liệu Task 1.3 và sơ đồ phạm vi liên kết với SRS.
 - [ ] Có đầy đủ tạo phẩm Task 1 trên repo với lịch sử commit/PR và review theo đề.
 
-Bản này là đầu ra nháp Task 1.2, chưa tuyên bố Task 1 được nghiệm thu. Chưa sửa code, cấu trúc repo, migration, tài liệu lịch sử hoặc kết quả test từ việc soạn SRS.
+Bản này là tài liệu Task 1.2 đang review, chưa tuyên bố Task 1 được nghiệm thu. Chưa sửa code, cấu trúc repo, migration, tài liệu lịch sử hoặc kết quả test từ việc soạn SRS.
 
 ## 8. Nguồn tham chiếu
 
 | Nguồn | Cách sử dụng |
 |---|---|
 | `Assignment2-BrewLite.pdf`, mục 1, 3.2, 3.3, 4, 6–9 | FR/NFR, MoSCoW, AC, master, thứ tự task, mô hình và kiểm chứng/bàn giao |
-| [context-and-scope.md](context-and-scope.md), 0.5 | IN-01…10, OUT-01…08, stakeholder, ràng buộc và chính sách đang review |
+| [context-and-scope.md](context-and-scope.md) | IN-01…10, OUT-01…08, stakeholder, ràng buộc và chính sách đang review |
 | `BrewLite-CongNghePhanMem.pdf`, mục 4/8/9/12 | Chức năng nền, mục tiêu API, mock, state, idempotency, optimistic locking, ưu đãi/điểm |
 | `BrewLite_Sprint2_Phan_Tich_Thiet_Ke_v0.6(2).docx`, P01–P10 và master | Phiên/giỏ/owner, đăng xuất, canonical/replay v1, giới hạn chờ và mã UC kế thừa |
-| `docs/sprint3/DESIGN.md`, ngày 06/11/2026; master Sprint 3 hiện hành | BR-01…06, xác nhận/giữ giỏ, payment/kho/điểm, cách dùng UC-10/13 và retry |
+| `docs/sprint3/DESIGN.md`, ngày 06/11/2026; master Sprint 3 hiện hành | BR-01…06, xác nhận/giữ giỏ, payment/kho/điểm, cách dùng UC-10, UC-13 và retry |
 
 ## Quy tắc giá và canonical
 
