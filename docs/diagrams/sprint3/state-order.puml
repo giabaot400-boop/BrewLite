@@ -1,0 +1,42 @@
+@startuml state-order-sprint3
+title BrewLite Sprint 3 - D06\nVòng đời Order (06/11/2026)
+top to bottom direction
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #5B4636
+skinparam stateBackgroundColor #F6EEE4
+skinparam stateBorderColor #80644F
+skinparam noteBackgroundColor #FFF6DA
+skinparam noteBorderColor #B89551
+[*] --> PENDING : Tạo đơn + giữ kho cùng tx
+PENDING --> PAYMENT_FAILED : Attempt FAILED cuối
+PENDING --> PAID : Attempt SUCCEEDED và commit
+PAYMENT_FAILED --> PENDING : Nhận lần thử mới hợp lệ\n(trước hạn, key mới)
+PENDING --> CANCELLED : Hủy / expiry\nrelease an toàn
+PAYMENT_FAILED --> CANCELLED : Hủy / expiry\nrelease an toàn
+PAID --> CANCELLED : Trước PREPARING\nbù trừ mock/kho/điểm
+PAID --> PREPARING : Nhận pha chế
+PREPARING --> READY : Pha xong
+READY --> COMPLETED : Giao khách
+COMPLETED --> [*]
+CANCELLED --> [*]
+legend bottom
+  PAID commit cùng attempt SUCCEEDED, consume kho/reservation và cộng điểm.
+  Hủy trước PAID: ACTIVE -> RELEASED, reserved giảm, stock không tăng.
+  Hủy PAID: refund mock + CONSUMED -> RETURNED + reversal điểm cùng tx; giữ lịch sử gốc.
+  Hủy PAID trả stock, reserved không tăng; cancel lặp không bù trừ thêm.
+  Thời hạn 15 phút kiểm tra tại điểm phân xử trong DB; attempt nhận trước hạn có thể commit sau hạn.
+  Mọi mutation cùng Order phân xử cùng hàng; optimistic locking vẫn áp trên Product.
+  Cancel tranh với PREPARING: chỉ một cạnh thắng; từ PREPARING trở đi không cho cancel.
+  COMPLETED/CANCELLED kết thúc; mọi cạnh ngoài hình bị chặn.
+  Timeout browser không tạo trạng thái mới; Order không có UNKNOWN/refund status.
+  Retry hợp lệ: PAYMENT_FAILED -> PENDING, rồi PENDING -> PAID/PAYMENT_FAILED trong cùng tx.
+  Replay không tạo cạnh; không commit PENDING riêng để chờ cổng.
+  Mock cục bộ chỉ commit attempt FAILED/SUCCEEDED; đây là state Order, không phải attempt.
+  Expiry chỉ policy 2 ở PENDING/PAYMENT_FAILED; policy 1 không tự chuyển tiếp.
+  Khách không tự chuyển pha chế; CLI nội bộ qua service, bật DEMO_WORKFLOW_ENABLED.
+  Hình mô tả thiết kế; contract và các ca nghiệm thu trong docs/sprint3.
+endlegend
+@enduml
