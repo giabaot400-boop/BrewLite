@@ -10,11 +10,11 @@ import { execFileSync } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
 
 const root = process.cwd();
-const require = createRequire(path.join(root, 'backend/package.json'));
+const require = createRequire(path.join(root, 'apps/api/package.json'));
 const DB = 'brewlite_s2_a_auth_test';
 const run = crypto.randomUUID();
 const report = { dateUtc: new Date().toISOString(), database: DB,
-  method: 'Actual OrdersService from backend/dist; actual Prisma/PostgreSQL. Fault injection changes writes inside the real transaction. Two Prisma clients plus one pg control connection hold a private advisory gate before try-lock evaluation; no mocked database errors and no increased transaction timeout. No HTTP/browser or API performance conclusion.',
+  method: 'Actual OrdersService from apps/api/dist; actual Prisma/PostgreSQL. Fault injection changes writes inside the real transaction. Two Prisma clients plus one pg control connection hold a private advisory gate before try-lock evaluation; no mocked database errors and no increased transaction timeout. No HTTP/browser or API performance conclusion.',
   checks: [], fixture: { users: [], product: 's2-orders-closeout-' + run, topping: 's2-orders-closeout-topping-' + run },
   races: [], environment: { platform: os.platform(), node: process.version, cpu: os.cpus()[0]?.model } };
 let a, b, control;
@@ -41,18 +41,18 @@ async function outcome(action) {
   }
 }
 async function main() {
-  const config = require('dotenv').parse(fs.readFileSync(path.join(root, 'backend/.env.test')));
+  const config = require('dotenv').parse(fs.readFileSync(path.join(root, 'apps/api/.env.test')));
   const u = new URL(config.DATABASE_URL);
   assert.equal(u.pathname, '/' + DB, 'Unexpected test database');
   assert.ok(['localhost', '127.0.0.1', '[::1]'].includes(u.hostname), 'Test database must be local');
   process.env.DATABASE_URL = config.DATABASE_URL;
-  const compiled = fs.readFileSync(path.join(root, 'backend/dist/orders/orders.service.js'));
+  const compiled = fs.readFileSync(path.join(root, 'apps/api/dist/orders/orders.service.js'));
   assert.ok(compiled.includes(Buffer.from('ORDER_REQUEST_INVARIANT_VIOLATION')), 'Apply fix and rebuild backend first');
   report.ordersDistSha256 = crypto.createHash('sha256').update(compiled).digest('hex');
-  report.ordersSourceSha256 = crypto.createHash('sha256').update(fs.readFileSync(path.join(root, 'backend/src/orders/orders.service.ts'))).digest('hex');
+  report.ordersSourceSha256 = crypto.createHash('sha256').update(fs.readFileSync(path.join(root, 'apps/api/src/orders/orders.service.ts'))).digest('hex');
   try { report.sourceHead = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8', stdio: ['ignore','pipe','ignore'] }).trim(); } catch {}
   await import(pathToFileURL(require.resolve('reflect-metadata')).href);
-  const load = relative => import(pathToFileURL(path.join(root, 'backend/dist', relative)).href);
+  const load = relative => import(pathToFileURL(path.join(root, 'apps/api/dist', relative)).href);
   const { PrismaService } = await load('database/prisma.service.js');
   const { Prisma } = await load('generated/prisma/client.js');
   const { OrdersService } = await load('orders/orders.service.js');

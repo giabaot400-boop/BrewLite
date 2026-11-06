@@ -7,10 +7,13 @@ coverage/
 .env.*
 !.env.example
 !.env.local.example
+apps/api/src/generated/
+# Ignored local artifacts may remain at the old paths after applying the move.
 backend/src/generated/
 *.log
 .DS_Store
 Thumbs.db
+apps/web/next-env.d.ts
 frontend/next-env.d.ts
 
 /db-backups/

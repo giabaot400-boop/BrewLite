@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service.js';
 
-// Dữ liệu demo chỉ dùng khi backend/.env có DEMO_MODE=true.
+// Dữ liệu demo chỉ dùng khi apps/api/.env có DEMO_MODE=true.
 // Khi PostgreSQL của nhóm sẵn sàng, đặt DEMO_MODE=false để dùng Prisma.
 const DEMO_PRODUCTS = [
   {
