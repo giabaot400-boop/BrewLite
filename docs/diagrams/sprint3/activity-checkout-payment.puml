@@ -1,0 +1,148 @@
+@startuml activity-sprint3-order
+title BrewLite Sprint 3 v1.3 06/11/2026\nD02A Xem giỏ và tạo đơn
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #5B4636
+skinparam noteBackgroundColor #FFF6DA
+skinparam noteBorderColor #B89551
+skinparam activityBackgroundColor #F6EEE4
+skinparam activityBorderColor #80644F
+|Khách và Next.js|
+start
+:Đọc phiên và storage dưới Web Lock;
+if (Phiên/storage/owner hợp lệ?) then (Không)
+ :Báo lỗi hoặc login; không tự POST sau login;
+ stop
+endif
+if (Giỏ đã gắn checkout chưa kết thúc?) then (Có)
+ :GET Order hiện tại; tiếp tục payment, không đặt thêm;
+ stop
+endif
+if (Có pending chưa rõ đúng chủ?) then (Có)
+ :Khách chủ động replay nguyên key/body v1 hoặc v2;
+else (Không)
+ :Chọn món/mã; preview theo cấu hình DEMO10;
+ :Khách bấm Tạo và xem đơn;
+ :Dưới Web Lock kiểm tra owner/revision/món/mã;
+ :Lưu pending v2/key/body bền;
+endif
+if (Lưu pending thành công?) then (Không)
+ :Giữ bytes; chưa gửi;
+ stop
+endif
+:Nhả Web Lock; POST /api/orders\nkey/body bất biến và expected-owner header;
+|Next.js BFF|
+:P04; capture token một lần; /auth/me cùng token;
+if (Owner khớp expected owner?) then (Không)
+ :403 hoặc auth lỗi; không upstream POST;
+ stop
+endif
+:Chuyển POST bằng token đã đối chiếu;
+|NestJS và PostgreSQL|
+:Auth/DTO/canonical; tx advisory user/key;\nlookup ledger trước giá/mã/kho;
+if (Ledger đã có?) then (Có)
+ :Cùng version/hash replay; khác trả conflict;
+else (Không)
+ :Tính giá/mã chính thức, so expectedTotal;\nprecheck tất cả Product theo qty gộp;
+ if (Lỗi nghiệp vụ/thiếu hàng đã xác nhận?) then (Có)
+  :Chưa stock write; ghi REJECTED, COMMIT;
+ else (Không)
+  :Order/snapshot, CAS Product theo ID,\nACTIVE reservation và ledger cùng transaction;
+  if (Mọi ghi hợp lệ?) then (Có)
+   :COMMIT, trả201;
+  else (Không)
+   :ROLLBACK toàn tx, retry đúng loại snapshot mới;\nmax3 toàn operation, hết lượt503;
+  endif
+ endif
+endif
+|Khách và Next.js|
+if (Success hợp lệ đúng owner/key/pending?) then (Có)
+ :Ghi binding, giữ cart/khóa sửa; GET current Order;
+ if (Đọc current Order hợp lệ?) then (Có)
+  :Hiện subtotal/discount/total chính thức;\nkhách chọn Ví/Thẻ và xác nhận riêng ở D02B;
+ else (Không)
+  :Giữ giỏ/binding, chưa payment;
+ endif
+elseif (REJECTED đúng schema/key?) then (Có)
+ :Giữ lựa chọn; xem lại giá/mã;\nxác nhận request mới mới key mới;
+else (Chưa rõ)
+ :Giữ owner/key/body; không tự đặt lại;
+endif
+stop
+legend bottom
+  Không quote endpoint. UI preview không xác nhận hiệu lực mã; server quyết định khi create.
+  Giữ v2/expectedTotal/canonical cũ. Pending chưa rõ không thay payload theo preview mới.
+  Chỉ kho Product theo ly; Topping vẫn chọn/tính giá/snapshot, không giữ/trừ kho.
+  Không auto payment sau create/login; lỗi GET giữ cart. UI15s/BFF10s, không auto retry POST.
+endlegend
+@enduml
+
+@startuml activity-sprint3-payment
+title BrewLite Sprint 3 v1.3 06/11/2026\nD02B Thanh toán và phục hồi
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #5B4636
+skinparam noteBackgroundColor #FFF6DA
+skinparam noteBorderColor #B89551
+skinparam activityBackgroundColor #F6EEE4
+skinparam activityBorderColor #80644F
+|Khách và Next.js|
+start
+:Đọc current Order đúng owner/version; hiện tổng chính thức;
+if (Có payment UNRESOLVED?) then (Có)
+ :Khách chủ động replay đúng key/body;\nlatestPayment không xác định attempt của key;
+else (Không)
+ if (canPay và khách xác nhận WALLET/CARD?) then (Không)
+  :Hiện trạng thái/lỗi, chưa POST;
+  stop
+ endif
+ :Lưu owner/key/body payment bền;
+endif
+:POST /api/payments; BFF P04 + expected owner\nbằng cùng captured token cho /me và POST;
+|NestJS và PostgreSQL|
+:Auth/DTO; tx advisory user/key;\nlookup attempt trước điều kiện nhận mới;
+if (Key đã có?) then (Có)
+ :Cùng hash replay; khác hash conflict;
+else (Không)
+ :Lock Order, owner/policy/state/reservation;\nDB clock_timestamp sau lock kiểm tra deadline;
+ if (Có thể nhận mới?) then (Không)
+  :Lỗi đúng contract; không tạo attempt giả;
+ else (Có)
+  :Nếu PAYMENT_FAILED, áp cạnh về PENDING logic;\nmock nội bộ trả kết quả, không I/O;
+  if (Mock SUCCEEDED?) then (Có)
+   :Attempt success + PAID; consume kho/CAS;\ncộng điểm/entry cùng tx;
+  else (FAILED)
+   :Attempt failed + PAYMENT_FAILED;\ngiữ ACTIVE, không stock thực/điểm;
+  endif
+  if (Mọi ghi hợp lệ?) then (Có)
+   :COMMIT kết quả cuối; HTTP200;
+  else (Không)
+   :ROLLBACK toàn bộ, retry đúng loại hữu hạn;\nlỗi hệ thống không là payment FAILED;
+  endif
+ endif
+endif
+|Khách và Next.js|
+if (Response cuối hợp lệ và GET current Order thành công?) then (Có)
+ :Chỉ nhận đúng owner/phiên/version; resolve recovery;
+ if (PAID/PREPARING/READY/COMPLETED?) then (Có)
+  :Dọn đúng owner/order/revision/snapshot;
+ elseif (CANCELLED?) then (Có)
+  :Mở khóa phần giỏ còn khớp; không tự dựng lại;
+ else (Chưa trả)
+  :Giữ giỏ; FAILED còn hạn cho khách thử mới\ncùng orderId, key mới sau confirm;
+ endif
+else (Chưa rõ)
+ :Giữ recovery/key/body và giỏ;\nkhông key mới, không gán FAILED phía server;
+endif
+stop
+legend bottom
+  Retry mới sau FAILED qua PENDING logic trong cùng tx; replay không tạo cạnh.
+  Không có PROCESSING/UNKNOWN/activePayment server; UNKNOWN chỉ là trạng thái client.
+  Deadline/hold không tăng. GET chỉ đọc; mất response sau commit replay không áp lại.
+  canPay là gợi ý UI, backend luôn recheck; mock không nhận amount/outcome từ browser.
+endlegend
+@enduml
