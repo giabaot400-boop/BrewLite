@@ -1,0 +1,282 @@
+@startuml sequence-checkout-order
+title BrewLite Assignment 2 v0.6 — 06/11/2026\nBổ trợ Task 2.2 — Ngữ cảnh tạo và xem đơn
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #5B4636
+skinparam noteBackgroundColor #FFF6DA
+skinparam noteBorderColor #B89551
+hide footbox
+skinparam sequenceParticipantBackgroundColor #F6EEE4
+skinparam sequenceParticipantBorderColor #80644F
+skinparam maxMessageSize 300
+skinparam ParticipantPadding 14
+actor Khách as K
+participant "Next.js UI / BFF" as UI
+participant NestJS as API
+database PostgreSQL as DB
+K -> UI : Chọn món/mã, xem preview dự kiến
+K -> UI : Tạo và xem đơn
+UI -> UI : Web Lock kiểm owner/revision/món/mã\nlưu pending v2/key/body, nhả lock trước HTTP
+note over UI
+ Nếu đã có pending chưa rõ: khách chủ động replay nguyên v1/v2,
+ không sửa key/body theo preview mới. Không API quote.
+end note
+UI -> UI : Browser gửi BFF key/body + expected owner
+UI -> UI : BFF P04; capture token T một lần
+UI -> API : GET /auth/me Bearer T
+API --> UI : Owner đã xác thực
+break Header/owner không khớp hoặc auth lỗi
+ UI -> UI : Lỗi; không upstream POST; giữ key/body
+end
+UI -> API : POST /orders chính token T và key/body
+API -> API : Xác minh JWT / AuthSession; validate DTO/key
+API -> DB : BEGIN RR; try advisory user/key
+break Advisory tạo đơn đang bận
+ API -> DB : Kết thúc tx; không mutation
+ API --> UI : 409 ORDER_REQUEST_IN_PROGRESS; giữ key/body
+end
+API -> DB : Tra ledger trước giá/mã/kho
+alt Ledger đã có
+ DB --> API : Kết quả gốc/version/hash
+ API -> DB : Kết thúc đọc, không giữ kho thêm
+ API --> UI : Replay hoặc conflict qua BFF
+else Key mới
+ API -> DB : Catalog/promo snapshot; tính tiền và so expected*\nprecheck Product qty gộp/version
+ alt Business error hoặc thiếu đã xác nhận
+  API -> DB : REJECTED trước stock write; COMMIT
+  API --> UI : Lỗi đã ledger qua BFF
+ else Hợp lệ
+  API -> DB : Order/snapshot; CAS các Product theo ID\nACTIVE reservation + ledger SUCCEEDED cùng tx
+  API -> DB : assertSucceededRequest đọc lại Order/ledger\nđối chiếu owner/key/hash/orderId trước commit
+  alt Mọi ghi và invariant đều hợp lệ
+   API -> DB : COMMIT
+   API --> UI : 201 {id,status:PENDING,total} qua BFF
+  else Lỗi ghi/invariant/CAS conflict
+   API -> DB : ROLLBACK whole tx; snapshot mới tra ledger lại\nretry CAS/serialization/deadlock/unique whitelist max3\nlệch invariant là lỗi phải sửa, không retry bừa
+   API --> UI : Kết quả / lỗi hệ thống đúng contract qua BFF
+  end
+ end
+end
+alt Success tạo/replay hợp lệ đúng identity
+ UI -> UI : Ghi binding, GIỮ cart, khóa sửa
+ UI -> UI : Browser yêu cầu BFF đọc Order hiện tại
+ UI -> API : GET /orders/:id bằng phiên hiện tại
+ API -> DB : Snapshot Order/items/promo/latestPayment đúng chủ
+ DB --> API : OrderDetail snapshot
+ API --> UI : OrderDetail hiện tại qua BFF
+ UI --> K : Hiện subtotal/discount/total CHÍNH THỨC\nkhách chọn Ví/Thẻ và xác nhận riêng
+else Rejection đã xác nhận hoặc chưa rõ
+ UI -> UI : Rejection: giữ lựa chọn, chờ review/request mới\nChưa rõ: giữ key/body, không bind/đặt thêm
+end
+legend bottom
+  UI preview theo DEMO10 là ước tính; NestJS kiểm hiệu lực/giá/tổng trước tạo PENDING.
+  Giữ DTO/canonical v1/v2; không API báo giá riêng. Không tự POST payment sau create/login.
+  Chỉ kho Product; Topping vẫn validate/giá/snapshot. Giữ rollback/CAS/hold15min/expiry.
+  Các helper dùng cùng TransactionClient; không commit/HTTP/retry riêng.
+  Guard lỗi auth/DTO/hệ thống dừng trước mutation; chưa chứng minh code/test đã đạt.
+endlegend
+@enduml
+
+@startuml sequence-checkout-payment
+title BrewLite Assignment 2 v0.6 — 06/11/2026\nTask 2.2 — HÌNH CHÍNH UC-09 và ngữ cảnh tạo đơn
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #5B4636
+skinparam noteBackgroundColor #FFF6DA
+skinparam noteBorderColor #B89551
+hide footbox
+skinparam sequenceParticipantBackgroundColor #F6EEE4
+skinparam sequenceParticipantBorderColor #80644F
+skinparam maxMessageSize 300
+skinparam ParticipantPadding 14
+actor Khách as K
+participant "Next.js UI / BFF" as UI
+participant "NestJS" as API
+database PostgreSQL as DB
+participant "PaymentService\nmock nội bộ NestJS" as Mock
+group Ngữ cảnh UC-08 trước UC-09 — chỉ khi cần tạo Order
+ alt Chưa có Order, khách chủ động tạo và xem đơn
+  K -> UI : Xem preview, xác nhận tạo đơn
+  UI -> UI : Lưu pending owner/key/body trước HTTP\nnhả Web Lock; BFF capture T, /me đối chiếu owner
+  UI -> API : POST /orders bằng đúng T, key/body đã lưu
+  API -> API : Guard JWT/AuthSession; validate DTO/key\ncanonical v1/v2; amount do backend tính
+  API -> DB : BEGIN RR; advisory user/key; tra ledger trước catalog
+  alt Ledger SUCCEEDED cùng nội dung
+   DB --> API : Kết quả tạo Order gốc; không giữ thêm kho
+   API -> DB : Kết thúc tx đọc
+   API --> UI : 200 replay cùng Order qua BFF
+  else Key mới, dữ liệu/giá/mã hợp lệ
+   API -> DB : Precheck Product; CAS stockVersion theo ID\nOrder PENDING + snapshot + ACTIVE reservation + ledger
+   alt Mọi ghi và assertSucceededRequest đều hợp lệ
+    API -> DB : COMMIT toàn bộ Order/ledger/giữ kho
+    API --> UI : 201 {id,status:PENDING,total} qua BFF
+   else Thiếu kho / lỗi ghi / CAS hoặc invariant sai
+    API -> DB : Thiếu thật: REJECTED trước stock write\nlỗi ghi/CAS: ROLLBACK whole tx; retry đúng loại max3
+    API --> UI : Kết quả đã commit hoặc lỗi sau retry hữu hạn\nkhông có đơn/giữ kho một phần
+   end
+  else Conflict / bận key / dữ liệu bị từ chối
+   API -> DB : Kết thúc theo contract, không tạo thêm Order
+   API --> UI : Lỗi đúng contract, giữ identity khi chưa rõ
+  end
+  break Chưa có Order được xác nhận đúng identity
+   UI --> K : Giữ pending khi chưa rõ; chưa bắt đầu payment
+  end
+  UI -> UI : Gắn checkout binding; GIỮ giỏ
+ else Đã có Order hoặc mở lại từ lịch sử
+  UI -> UI : Dùng Order hiện có; không POST tạo lại khi retry payment
+ end
+ ref over UI, DB
+ Chi tiết UC-08: sequence-checkout-order.svg;
+ ngữ cảnh chuẩn bị không thuộc các bước M-01…M-05 của UC-09.
+ end ref
+end
+== Bắt đầu UC-09 — Order đã tồn tại ==
+K -> UI : Tiếp tục đơn hoặc mở lại từ lịch sử
+UI -> API : GET /orders/:id bằng phiên hiện tại
+API -> DB : Guard JWT/AuthSession; snapshot đúng chủ
+DB --> API : OrderDetail / latestPayment hoặc không tìm thấy
+API --> UI : OrderDetail hoặc lỗi
+break GET lỗi / sai chủ / response cũ
+ UI --> K : Hiện lỗi, giữ binding/recovery, chưa POST hoặc dọn giỏ
+end
+alt Có recovery chưa rõ đúng chủ
+ K -> UI : Chủ động thử lại yêu cầu đã lưu
+ UI -> UI : Giữ nguyên owner/key/body; không kiểm như lần mới
+else Chưa có recovery
+ break Không canPay hiện tại hoặc chưa lưu an toàn
+  UI --> K : Dừng; không tạo payment key mới
+ end
+ K -> UI : Xem tổng chính thức, xác nhận WALLET/CARD
+ UI -> UI : Kiểm owner/binding; lưu recovery key/body trước HTTP
+ break Lưu lỗi hoặc owner đã đổi
+  UI --> K : Giữ dữ liệu; chưa POST
+ end
+end
+UI -> UI : Browser gửi BFF payment/key + expected owner
+UI -> UI : BFF P04; capture token T một lần
+UI -> API : GET /auth/me Bearer T
+API --> UI : Owner
+break Mismatch/header/auth lỗi
+ UI -> UI : Lỗi, không upstream POST
+end
+UI -> API : POST /payments Bearer T, cùng key/body
+API -> API : Xác minh JWT / AuthSession; validate DTO/key
+API -> DB : BEGIN RR; advisory key; tra attempt trước state/deadline
+alt Cùng key đã commit
+ DB --> API : Current PaymentView hoặc hash conflict
+ API -> DB : Kết thúc đọc, không gọi mock
+ API --> UI : Replay200/conflict409 qua BFF
+else Key mới
+ API -> DB : Lock Order; kiểm tra chủ/policy/state/ACTIVE\nclock_timestamp sau lock so deadline
+ alt Không hợp lệ
+  API -> DB : ROLLBACK; không attempt giả
+  API --> UI : Lỗi đúng contract qua BFF
+ else Nhận mới hợp lệ
+  API -> API : PAYMENT_FAILED -> PENDING logic nếu retry\nkhông COMMIT trung gian
+  API -> Mock : evaluate(outcome backend, Order snapshot, method)
+  Mock --> API : SUCCEEDED hoặc FAILED; không I/O / tiền thật
+  alt SUCCEEDED
+   API -> DB : Attempt success + PAID/version/paidAt\nconsume kho/CAS + entry/User points cùng tx
+  else FAILED cuối
+   API -> DB : Attempt FAILED/PAYMENT_DECLINED\nOrder PAYMENT_FAILED/version; ACTIVE giữ
+  end
+  alt Mọi ghi hợp lệ
+   API -> DB : COMMIT
+   API --> UI : 200 PaymentView qua BFF
+  else Lỗi ghi
+   API -> DB : ROLLBACK toàn bộ; retry đúng loại max3
+   API --> UI : Kết quả hoặc lỗi hệ thống, không giả FAILED
+  end
+ end
+end
+opt Mất response sau commit hoặc body sai
+ UI -> UI : Giữ recovery/key/body, chưa key mới
+ K -> UI : Chủ động kiểm tra/thử lại
+ UI -> UI : BFF nhận replay cùng request; guard owner lại
+ UI -> API : Cùng key/body bằng token đã đối chiếu
+ ref over API, Mock
+ Cùng handler: guard/validate; đã commit thì replay;
+ rollback trước đó thì xử lý cùng key an toàn.
+end ref
+ API --> UI : Kết quả qua BFF
+end
+UI -> UI : Browser yêu cầu BFF đọc Order hiện tại
+UI -> API : GET /orders/:id
+API -> DB : Snapshot đúng chủ
+DB --> API : OrderDetail snapshot
+API --> UI : Order hiện tại qua BFF
+UI -> UI : Đối chiếu owner/phiên/version/binding\nPAID/PREPARING/READY/COMPLETED: dọn đúng cart\nCANCELLED: chỉ mở khóa phần còn khớp\nGET lỗi giữ UNRESOLVED
+UI --> K : Hiển thị kết quả Order hiện tại: đã trả / thất bại / đã hủy\nGET lỗi: báo chưa xác minh được, giữ recovery
+legend bottom
+  PaymentService là lifeline nội bộ NestJS, không thêm server/gateway/worker ngoài.
+  Một success/order; failed key replay vẫn failed dù đổi config/restart.
+  Key mới sau FAILED: cùng đơn, còn hạn, confirm mới; không gia hạn hoặc giữ thêm.
+  Không server PROCESSING/UNKNOWN; timeout chỉ là chưa rõ phía client.
+  latestPayment chỉ gần nhất; recovery attempt cụ thể dùng POST đúng key/body, không GET payment.
+endlegend
+@enduml
+@startuml sequence-checkout-cancel-expiry
+title BrewLite Assignment 2 v0.6 — 06/11/2026\nBổ trợ Task 2.2 — Tác vụ hủy và hết hạn
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #5B4636
+skinparam noteBackgroundColor #FFF6DA
+skinparam noteBorderColor #B89551
+hide footbox
+skinparam sequenceParticipantBackgroundColor #F6EEE4
+skinparam sequenceParticipantBorderColor #80644F
+skinparam maxMessageSize 300
+skinparam ParticipantPadding 14
+actor Khách as K
+participant "Next.js UI/BFF" as UI
+participant NestJS as API
+database PostgreSQL as DB
+K -> UI : Hủy đơn
+UI -> UI : BFF P04; expected owner bằng captured token\n/me và POST dùng cùng token
+UI -> API : POST /orders/:id/cancel {}
+API -> API : Xác minh JWT / AuthSession; validate cancel DTO
+API -> DB : BEGIN; lock Order; check owner/policy
+alt CANCELLED
+ API -> DB : Không ghi lại/bù trừ
+else PENDING/PAYMENT_FAILED policy2
+ API -> DB : ACTIVE -> RELEASED; reserved giảm/CAS\nCANCELLED/reason/version cùng tx
+else PAID trước PREPARING
+ API -> DB : Verify success/CONSUMED/entry đúng chủ\nrefund full metadata, stock return/CAS\nentry reversedAt/User points trừ, CANCELLED cùng tx
+else PREPARING trở đi hoặc legacy
+ API -> DB : ROLLBACK; lỗi contract, không bù trừ
+end
+note over API,DB
+ Chỉ COMMIT khi mọi ghi hợp lệ; lỗi rollback toàn bộ.
+ Cancel lặp giữ reason/refund/version, không thêm tác động.
+ CLI advance pha chế cũng lock Order, không SQL đổi status riêng.
+end note
+API --> UI : Current OrderDetail hoặc lỗi
+UI -> UI : Đúng owner/phiên/version mới mở khóa cart còn khớp\nkhông tự dựng lại cart đã dọn
+opt Response cancel mất
+ K -> UI : Kiểm tra kết quả
+ UI -> API : GET Order, không tự hủy từ GET
+ API -> DB : Guard JWT/AuthSession; đọc snapshot đúng chủ
+ DB --> API : OrderDetail snapshot
+ API --> UI : Current Order hoặc lỗi; lỗi giữ binding
+end
+== Expiry độc lập browser ==
+API -> API : Startup catch-up; tick60s, batch50\nguard vòng chạy chồng nhau
+API -> DB : Mỗi Order một tx; lock/recheck policy2/status/deadline
+alt Chưa trả và DB now >= deadline
+ API -> DB : Release ACTIVE/CAS + CANCELLED/PAYMENT_WINDOW_EXPIRED\nCOMMIT cùng tx nếu mọi ghi hợp lệ
+else Đã trả/hủy/chưa hạn/legacy
+ API -> DB : Không đổi
+end
+legend bottom
+  Payment/expiry/cancel/PREPARING cùng row lock: chỉ kết quả tuần tự hợp lệ thắng.
+  Expiry lỗi rollback/log rồi xử lý lại; không cam kết tick60s là SLA release60s.
+  Refund là metadata mock trong DB; không tiền thật/endpoint refund/bảng mới.
+  Test race/rollback và CLI enabled guard cần bằng chứng thực khi hiện thực.
+endlegend
+@enduml

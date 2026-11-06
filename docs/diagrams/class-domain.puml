@@ -1,0 +1,183 @@
+@startuml class-domain
+title BrewLite — Assignment 2 — Task 2.3\nDomain class diagram — bản nháp 0.6 — 06/11/2026
+top to bottom direction
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #5B4636
+skinparam classBorderColor #80644F
+skinparam classBackgroundColor #F9F2E9
+skinparam packageStyle rectangle
+skinparam nodesep 55
+skinparam ranksep 65
+hide circle
+hide methods
+
+class User #EAF4EB {
+  id: Id
+  email: String
+  passwordHash: String
+  loyaltyPoints: Integer
+  createdAt: DateTime
+}
+
+class Order #E8EEF9 {
+  id: Id
+  userId: Id
+  status: OrderStatus
+  version: Integer
+  subtotal: Integer
+  discountTotal: Integer
+  total: Integer
+  checkoutPolicyVersion: Integer
+  paymentDeadline: DateTime?
+  paidAt: DateTime?
+  cancelReason: String?
+  promotionId: Id?
+  promotionSnapshot: Snapshot?
+  promotionEvaluatedAt: DateTime?
+  loyaltyPolicySnapshot: Snapshot?
+  loyaltyPointsExpected: Integer?
+  createdAt: DateTime
+}
+
+class OrderItem <<snapshot>> #FFF3D6 {
+  id: Id
+  productId: Id
+  productName: String
+  size: String
+  basePrice: Integer
+  sizeExtraPrice: Integer
+  unitPrice: Integer
+  qty: Integer
+  lineTotal: Integer
+}
+
+class OrderItemTopping <<snapshot>> #FFF3D6 {
+  toppingId: Id
+  name: String
+  price: Integer
+}
+
+class Product #EAF4EB {
+  id: Id
+  name: String
+  price: Integer
+  stock: Integer
+  reservedStock: Integer
+  stockVersion: Integer
+}
+
+class Topping #EAF4EB {
+  id: Id
+  name: String
+  price: Integer
+}
+
+class Payment <<maps PaymentAttempt>> #E8EEF9 {
+  id: Id
+  userId: Id
+  requestKey: String
+  requestHash: String
+  canonicalVersion: Integer
+  gatewayKey: String
+  method: PaymentMethod
+  amount: Integer
+  status: PaymentStatus
+  version: Integer
+  failureCode: String?
+  refundedAmount: Integer
+  refundedAt: DateTime?
+  createdAt: DateTime
+  resolvedAt: DateTime
+}
+
+class Promotion #DDF3EE {
+  id: Id
+  code: String
+  active: Boolean
+  startsAt: DateTime
+  endsAt: DateTime
+  minimumSubtotal: Integer
+  type: String
+  value: Integer
+  maxDiscountAmount: Integer?
+}
+
+class LoyaltyTransaction <<maps LoyaltyEntry>> #DDF3EE {
+  id: Id
+  userId: Id
+  points: Integer
+  createdAt: DateTime
+  reversedAt: DateTime?
+}
+
+class StockReservation #DDF3EE {
+  id: Id
+  productId: Id
+  qty: Integer
+  state: ReservationState
+  createdAt: DateTime
+  resolvedAt: DateTime?
+}
+
+User "1" -down- "0..*" Order : đặt
+Order "1" *-down- "1..*" OrderItem : chứa
+OrderItem "1" *-down- "0..*" OrderItemTopping : snapshot topping
+Product "1" -- "0..*" OrderItem : tham chiếu
+Topping "1" -- "0..*" OrderItemTopping : tham chiếu
+Product "0..*" -- "0..*" Topping : cho phép (ProductTopping)
+Order "1" -- "0..*" Payment : các lần thử
+Order "0..*" -- "0..1" Promotion : áp dụng
+Order "1" -- "0..1" LoyaltyTransaction : ghi điểm
+User "1" -- "0..*" LoyaltyTransaction : nhận điểm
+Order "1" *-- "0..*" StockReservation : giữ hàng
+Product "1" -- "0..*" StockReservation : nguồn Product
+
+package "Kiểu trạng thái và phương thức — không phải bảng mới" #F4F4F4 {
+  enum OrderStatus {
+    PENDING
+    PAYMENT_FAILED
+    PAID
+    PREPARING
+    READY
+    COMPLETED
+    CANCELLED
+  }
+  enum PaymentStatus {
+    SUCCEEDED
+    FAILED
+  }
+  enum ReservationState {
+    ACTIVE
+    CONSUMED
+    RELEASED
+    RETURNED
+  }
+  enum PaymentMethod {
+    WALLET
+    CARD
+  }
+  OrderStatus -[hidden]right-> PaymentStatus
+  PaymentStatus -[hidden]right-> ReservationState
+  ReservationState -[hidden]right-> PaymentMethod
+}
+OrderItemTopping -[hidden]down-> OrderStatus
+
+legend bottom
+  Domain/snapshot: 10 lớp từ mô hình đang có; giữ nguyên master 14 UC.
+  Payment tương ứng PaymentAttempt; LoyaltyTransaction tương ứng LoyaltyEntry.
+  Tên lớp theo đề không buộc đổi schema hoặc thêm bảng; enum không là bảng mới.
+  Một Order có nhiều attempt FAILED nhưng tối đa một SUCCEEDED, kể cả sau hoàn.
+  Payment / LoyaltyTransaction phải cùng userId với Order; amount = Order.total.
+  Một reservation trỏ đúng một Product; unique(orderId,productId), qty > 0.
+  Topping chỉ danh mục/giá/snapshot; không có kho hoặc reservation topping.
+  Policy 2 có giữ hàng; 0..* cho phép mô tả dữ liệu legacy chưa có reservation.
+  Điểm dự kiến khác điểm đã ghi; PAID ghi entry một lần, hủy dùng reversedAt.
+  Snapshot giữ lịch sử; quan hệ composition không cho phép xóa đơn/lịch sử tùy ý.
+  Dấu ? là nullable; Id / Snapshot là ký hiệu kiểu logic, không thêm lớp/bảng.
+  Trường requestKey/hash tạo đơn, AuthSession và OrderRequest được dẫn trong tài liệu.
+  Hình là nháp review; không phải schema/migration hoặc bằng chứng code/test đã đạt.
+endlegend
+@enduml
