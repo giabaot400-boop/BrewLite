@@ -31,15 +31,15 @@ npm run setup
 
 Lệnh setup tạo các file sau nếu chúng chưa tồn tại:
 
-- backend/.env
-- frontend/.env.local
+- apps/api/.env
+- apps/web/.env.local
 
 Lệnh không ghi đè cấu hình đã có. Không commit các file môi trường thật.
 
 ## Cấu hình database và API thật
 
 1. Tạo tài khoản PostgreSQL và database local tên brewlite.
-2. Điền DATABASE_URL trong backend/.env bằng thông tin của máy mình.
+2. Điền DATABASE_URL trong apps/api/.env bằng thông tin của máy mình.
 3. Kiểm tra cấu hình backend:
 
 ```dotenv
@@ -52,7 +52,7 @@ Giữ DATABASE_URL đã cấu hình. Nếu mật khẩu có ký tự đặc bi�
 phần mật khẩu khi đưa vào URL; ví dụ ký tự @ được viết thành %40.
 Mật khẩu dùng khi đăng nhập psql vẫn giữ nguyên.
 
-4. Trong frontend/.env.local, đặt:
+4. Trong apps/web/.env.local, đặt:
 
 ```dotenv
 NEXT_PUBLIC_API_URL=http://localhost:3001
@@ -67,7 +67,7 @@ chủ động chuyển sang api, kể cả khi đã chạy setup trước đó.
 ```sh
 npm run db:generate
 npm run db:validate
-npm exec --workspace backend -- prisma migrate deploy
+npm exec --workspace apps/api -- prisma migrate deploy
 npm run db:seed
 ```
 
@@ -158,13 +158,48 @@ chỉ áp dụng khi khởi tạo repository mới.
 
 | Đường dẫn | Nội dung |
 |---|---|
-| frontend/ | Ứng dụng Next.js, giao diện và phần gọi API |
-| backend/ | Ứng dụng NestJS, Product API và kết nối Prisma |
-| backend/prisma/ | Schema, migration và seed PostgreSQL |
+| apps/web/ | Ứng dụng Next.js, giao diện và phần gọi API |
+| apps/api/ | Ứng dụng NestJS, Product API và kết nối Prisma |
+| apps/api/prisma/ | Schema, migration và seed PostgreSQL |
 | docs/ | API contract, workflow, checklist và kết quả kiểm tra |
 | scripts/ | Script hỗ trợ thiết lập môi trường |
 | package.json | Workspace và các lệnh chạy chung |
 | package-lock.json | Khóa phiên bản dependency dùng chung |
+
+### Chuyển từ frontend/backend sang apps/web và apps/api
+
+Hai ứng dụng được chuyển đường dẫn để dùng cấu trúc Assignment 2 trong cùng
+repository A1/A2. Tên package `@brewlite/frontend`, `@brewlite/backend` và các
+lệnh gốc `dev:frontend`, `dev:backend` được giữ để hạn chế đổi cách chạy.
+Khi dùng đường dẫn workspace trực tiếp, thay `--workspace frontend` bằng
+`--workspace apps/web`, và `--workspace backend` bằng `--workspace apps/api`.
+
+Dừng các tiến trình dev trước khi cập nhật nhánh hoặc áp dụng patch. Sau khi
+chuyển các file được Git quản lý, chạy từ thư mục gốc:
+
+```sh
+npm run setup
+npm ci
+```
+
+Setup chuyển các file cấu hình local `.env`, `.env.local`, `.env.test` và các
+file `.env.*` khác từ hai thư mục cũ sang thư mục mới tương ứng, rồi chỉ tạo
+cấu hình mẫu còn thiếu. Nội dung file được giữ nguyên, không in secret.
+Nếu một đích đã tồn tại, setup dừng trước khi chuyển bất kỳ file cấu hình nào;
+giữ cả hai bản để đối chiếu, không ghi đè. Không commit file môi trường thật.
+
+Các thư mục cache/dependency cũ có thể còn trên máy sau khi áp dụng patch;
+workspace mới không chạy từ các thư mục đó. Không chuyển `.next`, `dist`,
+`node_modules` hoặc Prisma Client đã sinh; `npm ci` và build/generate tạo lại
+chúng ở vị trí phù hợp. Lần chuyển này không đổi schema, migration, seed,
+API, cổng hoặc dữ liệu PostgreSQL; không cần reset hay chạy lại migration
+chỉ vì đổi đường dẫn.
+
+Các hồ sơ Sprint 1–2 trong `docs/` giữ nguyên lệnh/đường dẫn tại thời điểm
+kiểm tra. Khi chạy lại hiện nay, đổi tiền tố `frontend/` thành `apps/web/`,
+`backend/` thành `apps/api/`; không sửa kết quả kiểm thử lịch sử.
+Các script kiểm thử nằm ngoài repo cũng cần đổi đường dẫn nếu ghi cứng
+hai thư mục cũ. Việc đổi layout chưa xác nhận Task 3–5 A2 đã nghiệm thu.
 
 ## Sơ đồ thiết kế
 
