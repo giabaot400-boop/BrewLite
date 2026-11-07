@@ -1,12 +1,12 @@
 # Kiến trúc frontend, BFF và PWA
 
-Ngày cập nhật: 06/11/2026. Đây là phần đóng góp của A cho Task 3.1 Assignment 2,
+Ngày cập nhật: 07/11/2026. Đây là phần đóng góp của A cho Task 3.1 Assignment 2,
 đang chờ review; chưa xác nhận hoàn tất Task 3 hoặc đã triển khai PWA.
 
-Nền tài liệu: main `0e0eef9` sau PR #29. Code đối chiếu: PR #30 tại `86a8f30`,
-đang review việc chuyển `frontend` → `apps/web`, `backend` → `apps/api`.
-Các đường dẫn `apps/*` dưới đây thuộc PR #30; khi đọc main trước khi merge PR đó,
-dùng đường dẫn cũ tương ứng. Không lấy việc có tài liệu này làm bằng chứng code đã đạt AC.
+Nền tài liệu và layout: main `82c7675` sau khi merge PR #29 và #30.
+PR #30 chốt tại `694b49f`, đã chuyển `frontend` → `apps/web`, `backend` → `apps/api`.
+Các đường dẫn `apps/*` dưới đây là đường dẫn hiện hành; hồ sơ Sprint 1–2 giữ
+đường dẫn lịch sử. Việc có tài liệu này không chứng minh code PWA đã đạt AC.
 
 ## 1. Ranh giới thành phần
 
