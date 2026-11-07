@@ -4,10 +4,12 @@ import { SkipLink } from "@/components/layout/skip-link";
 import { ToastProvider } from "@/components/ui/toast";
 import { AuthProvider } from "@/features/auth/auth-provider";
 import { CartProvider } from "@/features/cart/cart-provider";
+import { PwaSupport } from "@/features/pwa/pwa-support";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "BrewLite",
+  applicationName: "BrewLite",
   description: "Chọn đồ uống, kích cỡ và topping yêu thích.",
 };
 
@@ -22,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="vi">
       <body>
         <SkipLink />
+        <PwaSupport />
         <ToastProvider>
           <AuthProvider>
             <CartProvider>
