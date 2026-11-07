@@ -132,6 +132,14 @@ không thay thế kiểm thử frontend với Product API và PostgreSQL thật.
 Backend có DEMO_MODE, nhưng chế độ này vẫn khởi tạo Prisma và cần database;
 không coi đây là chế độ chạy backend độc lập khi chưa có PostgreSQL.
 
+## PWA
+
+Bản production bổ sung manifest, icon và trang offline chung. Service worker chỉ
+cache tài nguyên công khai đã chọn; dữ liệu API, phiên và giao dịch không được
+cache hoặc tự gửi lại. Xem [hướng dẫn kiểm tra PWA](docs/assignment2/PWA.md)
+để build/start đúng môi trường, kiểm tra cài đặt và thử mất mạng. Các AC PWA cần
+bằng chứng browser/production riêng, không suy ra từ build thành công.
+
 ## Nhánh và review
 
 Repository chung: https://github.com/giabaot400-boop/BrewLite
