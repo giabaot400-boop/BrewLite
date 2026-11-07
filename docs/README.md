@@ -8,7 +8,7 @@
 
 Nền kế thừa là Sprint 2 tại a1a0e4ae92de681deac538685e24407b3190866b. Các hồ sơ Sprint 1–2 và sơ đồ lịch sử giữ nguyên; tài liệu Sprint 3 và Assignment 2 là thiết kế/kế hoạch, không xác nhận code Sprint 3 hoặc mọi AC đã đạt.
 
-Repo giữ nguồn Markdown, PlantUML và SVG để review trực tiếp. Việc dùng chung code A1/A2 là phương án nhóm chọn; A2 nghiệm thu Task 1→5 theo tạo phẩm và lịch sử thật. Cấu trúc code frontend/backend chưa được chuyển trong thay đổi tài liệu này; phương án apps/web–apps/api thuộc quyết định kiến trúc và PR tích hợp riêng trước nghiệm thu Task 4.
+Repo giữ nguồn Markdown, PlantUML và SVG để review trực tiếp. Việc dùng chung code A1/A2 là phương án nhóm chọn; A2 nghiệm thu Task 1→5 theo tạo phẩm và lịch sử thật. Hai ứng dụng dùng đường dẫn `apps/web` và `apps/api` theo PR #30; xem [README chạy dự án](../README.md) để thiết lập và chuyển cấu hình local. Đổi layout không tự xác nhận hoàn tất kiến trúc, CI/CD hoặc nghiệm thu Task 4. Đường dẫn trong hồ sơ Sprint 1–2 được giữ theo thời điểm ghi nhận.
 
 ## Phân biệt các bộ sơ đồ
 

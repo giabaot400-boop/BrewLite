@@ -17,7 +17,8 @@ for (const [legacy, current] of [["frontend", "apps/web"], ["backend", "apps/api
     const source = new URL(entry.name, directory);
     const target = new URL(`../${current}/${entry.name}`, import.meta.url);
     if (!entry.isFile() || existsSync(target)) {
-      throw new Error(`Không chuyển ${legacy}/${entry.name}: nguồn không phải file thường hoặc ${current}/${entry.name} đã tồn tại. Giữ cấu hình để kiểm tra thủ công.`);
+      console.error(`Không chuyển ${legacy}/${entry.name}: nguồn không phải file thường hoặc ${current}/${entry.name} đã tồn tại. Giữ cấu hình để kiểm tra thủ công.`);
+      process.exit(1);
     }
     moves.push({ source, target, label: `${legacy}/${entry.name} -> ${current}/${entry.name}` });
   }

@@ -1,7 +1,7 @@
 # UI dùng chung (phần B)
 
 Tài liệu để A và B chốt props trước khi review chéo (hồ sơ v1.1, mục 6.5).
-Code nằm trong `frontend/src/components/`. A giữ `features/products`.
+Code hiện nằm trong `apps/web/src/components/`. A giữ `apps/web/src/features/products`.
 
 ## Component
 
