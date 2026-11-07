@@ -2,6 +2,7 @@ import { cartReducer } from "./cart-reducer.ts";
 import { CartStorageError, decodeCartEnvelope, encodeCartEnvelope, pendingForOwner } from "./cart-envelope.ts";
 import { applyCartLifecycle } from "./cart-lifecycle.ts";
 import { settleCartOrder } from "./cart-order-settlement.ts";
+import { planCartEnvelopeV2Migration } from "./cart-envelope-v2.ts";
 import type { CartEnvelope } from "./cart-envelope";
 import type { CartLifecycleCommand, CartLifecycleResult } from "./cart-lifecycle";
 import type { OrderSettlementCommand, OrderSettlementResult } from "./cart-order-settlement";
@@ -74,6 +75,23 @@ export function createCartStorage(environment?: CartStorageEnvironment) {
     read(): Promise<CartEnvelope> {
       // Missing data gives an in-memory empty cart; hydration never writes it back.
       return underLock(readStored);
+    },
+
+    /** Explicit integration step; current UI keeps using v1 until backend S3 is ready. */
+    migrateToV2() {
+      return underLock((storage) => {
+        let raw: string | null;
+        try { raw = storage.getItem(CART_STORAGE_KEY); } catch {
+          throw new CartStorageError("STORAGE_UNAVAILABLE", "Không đọc được giỏ đã lưu.");
+        }
+        const migration = planCartEnvelopeV2Migration(raw);
+        if (migration.rawToWrite !== null) {
+          try { storage.setItem(CART_STORAGE_KEY, migration.rawToWrite); } catch {
+            throw new CartStorageError("STORAGE_UNAVAILABLE", "Không lưu được giỏ. Giữ bản lưu để thử lại.");
+          }
+        }
+        return migration.envelope;
+      });
     },
 
     applyLifecycle(command: CartLifecycleCommand, isCurrent?: () => boolean): Promise<CartLifecycleResult> {
