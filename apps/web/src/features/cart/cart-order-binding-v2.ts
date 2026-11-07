@@ -43,7 +43,7 @@ function timestamp(value: unknown): value is string {
   return Number.isFinite(date.getTime()) && date.toISOString() === value;
 }
 
-function requireOrder(order: CartCurrentOrder): void {
+export function requireCurrentCartOrder(order: CartCurrentOrder): void {
   if (!order || !text(order.id) || !integer(order.version) || !statuses.has(order.status) || !integer(order.total)
     || !timestamp(order.serverTime) || !(order.paymentDeadline === null || timestamp(order.paymentDeadline))
     || !(order.paidAt === null || timestamp(order.paidAt)) || typeof order.canPay !== "boolean" || typeof order.canCancel !== "boolean"
@@ -92,7 +92,7 @@ function current(value: CartEnvelopeV2, ownerId: string, expected: CheckoutBindi
     || bound.cartRevision !== expected.cartRevision || bound.boundAt !== expected.boundAt
     || !sameCart(bound.cartSnapshot, expected.cartSnapshot)
     || expected.orderVersion > bound.orderVersion || own(value.pendingRequests, ownerId)) return checked(value, "IGNORED");
-  requireOrder(order);
+  requireCurrentCartOrder(order);
   if (order.id !== bound.orderId || order.version < bound.orderVersion) return checked(value, "IGNORED");
   if (order.paymentDeadline === null) return checked(value, "READ_ONLY", order.id);
 
@@ -145,7 +145,7 @@ export function applyCartOrderBindingV2(value: CartEnvelopeV2, command: CartOrde
   }
 
   if (command.type !== "BIND_CREATED_ORDER") throw new CartStorageError("INVALID_DATA", "Thao tác kết quả đơn không được hỗ trợ.");
-  requireOrder(command.order);
+  requireCurrentCartOrder(command.order);
   if (!timestamp(command.receivedAt)) throw new CartStorageError("INVALID_DATA", "Thời điểm nhận đơn không hợp lệ.");
   const order = command.order, confirmed = value.lastOrderResult;
   if (!confirmed || confirmed.ownerId !== pending.ownerId || confirmed.requestKey !== pending.requestKey

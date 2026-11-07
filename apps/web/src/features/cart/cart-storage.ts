@@ -8,6 +8,7 @@ import { applyCartMutationV2, applyCartOwnerLifecycleV2 } from "./cart-writer-v2
 import { applyCartCheckoutV2 } from "./cart-checkout-v2.ts";
 import { applyCartOrderBindingV2 } from "./cart-order-binding-v2.ts";
 import { settleCartRejectionV2 } from "./cart-order-rejection-v2.ts";
+import { applyCartPaymentV2 } from "./cart-payment-recovery-v2.ts";
 import type { CartEnvelope } from "./cart-envelope";
 import type { CartLifecycleCommand, CartLifecycleResult } from "./cart-lifecycle";
 import type { OrderSettlementCommand, OrderSettlementResult } from "./cart-order-settlement";
@@ -17,6 +18,7 @@ import type { CartOwnerLifecycleV2, SavedCartMutationV2 } from "./cart-writer-v2
 import type { CartCheckoutCommandV2, CartCheckoutResultV2 } from "./cart-checkout-v2";
 import type { CartOrderBindingCommandV2, CartOrderBindingResultV2 } from "./cart-order-binding-v2";
 import type { CartRejectionCommandV2, CartRejectionResultV2, OrderRejectionReasonsV2 } from "./cart-order-rejection-v2";
+import type { CartPaymentCommandV2, CartPaymentResultV2 } from "./cart-payment-recovery-v2";
 
 export const CART_STORAGE_KEY = "brewlite.cart.v1";
 export const CART_LOCK_NAME = "brewlite:cart-envelope:v1";
@@ -184,6 +186,19 @@ export function createCartStorage(environment?: CartStorageEnvironment) {
         const saved = settleCartRejectionV2(envelope, captured, capturedReasons);
         requireCurrent(isCurrent);
         if (saved.envelope !== envelope) writeStoredV2(storage, saved.envelope);
+        return saved;
+      });
+    },
+
+    applyPaymentLifecycleV2(command: CartPaymentCommandV2, isCurrent: () => boolean): Promise<CartPaymentResultV2> {
+      const captured = structuredClone(command);
+      return underLock(storage => {
+        requireCurrent(isCurrent);
+        const envelope = parseStoredCartEnvelopeV2(readRaw(storage));
+        const saved = applyCartPaymentV2(envelope, captured);
+        requireCurrent(isCurrent);
+        if (saved.envelope !== envelope) writeStoredV2(storage, saved.envelope);
+        // Only a durably saved request is returned, after this synchronous lock callback.
         return saved;
       });
     },
