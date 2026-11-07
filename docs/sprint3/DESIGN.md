@@ -1,6 +1,6 @@
 # BrewLite Sprint 3 thiết kế triển khai
 
-Cập nhật • 06/11/2026 • Đã đồng bộ nền Sprint 2 main a1a0e4a • Assignment 1 • Gửi nhóm A–E.
+Cập nhật • 07/11/2026 • Đã đồng bộ nền Sprint 2 main a1a0e4a • Assignment 1 • Gửi nhóm A–E.
 
 Bản 1.3 kế thừa ba thay đổi đã được PO đồng ý: bỏ API quote riêng, bỏ GET payment riêng, chỉ kiểm soát tồn Product. Nhóm dùng bản này làm cơ sở triển khai Task 8–10. Các lựa chọn nghiệp vụ đã được PO cho phép cụ thể hóa; mỗi lead có đầu ra và tiêu chí kiểm tra riêng trong TEAM_PLAN.md. Không cần chờ một cuộc họp để bắt đầu các việc không bị chặn. Contract và schema ở CONTRACTS.md, ca nghiệm thu ở TEST_MATRIX.md. Khi phát hiện code nền khác contract, ghi đúng chỗ khác trên PR trước khi thay đổi; không tự mở rộng phạm vi.
 
@@ -20,6 +20,54 @@ Sprint Goal: khách đặt từ giỏ, thanh toán Ví hoặc Thẻ mô phỏng,
 | Test c | Hai khách tranh Product cuối trên PostgreSQL; không âm hoặc bán vượt kho |
 
 Giữ 13 model logic, 14 mã use case, 27 AC. Số model không phải quota cần tăng. Chín hình là các góc nhìn của năm nguồn PlantUML: master, hai activity, ba sequence, state và hai ERD. ERD A/B là cùng một mô hình 13 model.
+
+### 1.1 User story
+
+Bảng này được bổ sung ngày 07/11/2026 để diễn đạt phạm vi đã chốt dưới góc nhìn
+người dùng và nối với Sprint Backlog. Các mã `S3-US-*` dùng trong Sprint 3,
+không đổi mã story mẫu của đề, mã use case hoặc AC. Task 8–10 vẫn là ba hạng
+mục của đề; các story dưới đây là cách phân tách nhu cầu để triển khai.
+
+| Mã | User story | AC đối chiếu | Ticket liên quan |
+|---|---|---|---|
+| S3-US-01 | Là một khách hàng, tôi muốn tạo đơn từ giỏ, xem tổng chính thức và giữ lựa chọn trong lúc chờ thanh toán, để có thể tiếp tục hoặc xem lại mà không mất các món đã chọn. | S3-CART-01, S3-CART-03, S3-CART-05 | S3-A-01, S3-A-02, S3-B-01 |
+| S3-US-02 | Là một khách hàng, tôi muốn thanh toán bằng Ví hoặc Thẻ mô phỏng và chủ động khôi phục hoặc thử lại lần thanh toán, để biết đúng kết quả và tránh phát sinh giao dịch trùng. | S3-PAY-01, S3-PAY-02, S3-PAY-03, S3-PAY-04, S3-PAY-05, S3-PAY-06, S3-PAY-07, S3-PAY-08, S3-CART-02, S3-CART-04 | S3-A-01, S3-A-02, S3-D-01 |
+| S3-US-03 | Là một khách hàng, tôi muốn xem mã đơn, chi tiết và lịch sử với trạng thái hiện tại, để biết đơn của mình đang ở bước nào và chọn đơn cần xem lại. | S3-ORD-03, S3-ORD-04 | S3-B-01, S3-C-02 |
+| S3-US-04 | Là một khách hàng, tôi muốn hủy đơn trong thời điểm được phép và nhận kết quả hoàn trả phù hợp, để dừng đơn khi thay đổi nhu cầu mà không bị hoàn tiền hoặc thu hồi điểm nhiều lần. | S3-ORD-02 | S3-A-02, S3-D-02, S3-C-01, S3-E-02 |
+| S3-US-05 | Là một khách hàng, tôi muốn áp mã giảm giá khi tạo đơn và xem số tiền chính thức, để biết ưu đãi được chấp nhận và số tiền cần thanh toán. | S3-PRO-01, S3-PRO-02 | S3-A-02, S3-C-01, S3-D-01 |
+| S3-US-06 | Là một khách hàng, tôi muốn được cộng đúng điểm khi thanh toán thành công và điều chỉnh đúng khi hủy đơn được phép, để điểm thưởng phản ánh giao dịch thực tế. | S3-LOY-01 | S3-C-01, S3-D-01, S3-D-02 |
+
+Các story tuân [CONTRACTS.md](CONTRACTS.md): tạo PENDING chưa phải thanh toán
+thành công; pending/recovery chưa rõ giữ owner/key/body và không tự gửi sau
+đăng nhập. Sau FAILED đã xác nhận, khách có thể xác nhận một lần thanh toán mới
+với key mới trên cùng đơn còn hạn. Chỉ dọn giỏ khi đọc trạng thái thanh toán
+thành công hiện tại và binding còn khớp. Hủy PAID chỉ trước PREPARING, hoàn
+mock toàn phần theo thiết kế. Lịch sử được đọc/làm mới chủ động, không thêm
+polling. Mã giảm và điểm dùng đúng chính sách demo đã chốt.
+
+### 1.2 Nhiệm vụ kỹ thuật và bàn giao hỗ trợ story
+
+Các dòng `S3-EN-*` là nhóm để tra cứu công việc hỗ trợ, không phải actor, use
+case hoặc ticket mới. Chúng liên kết các AC về an toàn và bàn giao chưa được
+đặt ở một story người dùng cụ thể.
+
+| Mã | Công việc hỗ trợ | AC đối chiếu | Ticket liên quan |
+|---|---|---|---|
+| S3-EN-01 | Bảo vệ chuyển trạng thái và tính nguyên tử; kiểm soát kho Product bằng transaction/CAS, kiểm thử cạnh tranh và rollback. Chuyển pha chế dùng CLI nội bộ theo phạm vi đã chốt. | S3-ORD-01, S3-STK-01, S3-STK-02, S3-STK-03 | S3-D-01, S3-D-02, S3-D-03, S3-E-02 |
+| S3-EN-02 | Xác minh phiên/quyền cho đọc và ghi, bảo vệ dữ liệu khi đổi chủ; migration DB/storage và replay giữ tương thích nền. Legacy policy 1 chỉ xem. | S3-SEC-01, S3-MIG-01 | S3-A-01, S3-A-02, S3-C-02, S3-E-01 |
+| S3-EN-03 | Bàn giao Compose/README chạy được trên máy khác, demo và bằng chứng kiểm thử; tổng hợp Review/Retro/backlog từ kết quả thực tế. | S3-DEL-01, S3-DEL-02 | S3-E-03, S3-B-02, S3-D-03 |
+
+Task 8 được triển khai qua S3-US-01/02; Task 9 qua S3-US-03 và S3-EN-03;
+Task 10 qua các story về payment, hủy, giảm giá, điểm và các nhóm an toàn kỹ
+thuật. Việc nghiệm thu từng Task vẫn theo các AC và DoD hiện có.
+
+Bảng nối trên phủ đủ 27 AC, mỗi AC xuất hiện một lần để tiện tra cứu; một AC
+có thể bảo vệ nhiều story. Lead/reviewer của AC và ticket tiếp tục lấy từ
+[TEST_MATRIX.md](TEST_MATRIX.md) và [TEAM_PLAN.md](TEAM_PLAN.md), không suy
+lead mới từ thứ tự liệt kê. B có thể dẫn bảng này từ board/AC links; kết quả
+kiểm thử vẫn được ghi tại hồ sơ AC, không đánh dấu đạt chỉ vì đã có story,
+fixture hoặc unit test. Lần bổ sung này chỉ cập nhật tài liệu; các story
+chưa được nghiệm thu.
 
 ## 2 Quyết định thực hiện
 
