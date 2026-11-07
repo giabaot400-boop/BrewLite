@@ -7,6 +7,7 @@ import { decodeCartEnvelopeV2, encodeCartEnvelopeV2, parseStoredCartEnvelopeV2,
 import { applyCartMutationV2, applyCartOwnerLifecycleV2 } from "./cart-writer-v2.ts";
 import { applyCartCheckoutV2 } from "./cart-checkout-v2.ts";
 import { applyCartOrderBindingV2 } from "./cart-order-binding-v2.ts";
+import { settleCartRejectionV2 } from "./cart-order-rejection-v2.ts";
 import type { CartEnvelope } from "./cart-envelope";
 import type { CartLifecycleCommand, CartLifecycleResult } from "./cart-lifecycle";
 import type { OrderSettlementCommand, OrderSettlementResult } from "./cart-order-settlement";
@@ -15,6 +16,7 @@ import type { CartEnvelopeV2 } from "./cart-envelope-v2";
 import type { CartOwnerLifecycleV2, SavedCartMutationV2 } from "./cart-writer-v2";
 import type { CartCheckoutCommandV2, CartCheckoutResultV2 } from "./cart-checkout-v2";
 import type { CartOrderBindingCommandV2, CartOrderBindingResultV2 } from "./cart-order-binding-v2";
+import type { CartRejectionCommandV2, CartRejectionResultV2, OrderRejectionReasonsV2 } from "./cart-order-rejection-v2";
 
 export const CART_STORAGE_KEY = "brewlite.cart.v1";
 export const CART_LOCK_NAME = "brewlite:cart-envelope:v1";
@@ -167,6 +169,19 @@ export function createCartStorage(environment?: CartStorageEnvironment) {
         requireCurrent(isCurrent);
         const envelope = parseStoredCartEnvelopeV2(readRaw(storage));
         const saved = applyCartOrderBindingV2(envelope, captured);
+        requireCurrent(isCurrent);
+        if (saved.envelope !== envelope) writeStoredV2(storage, saved.envelope);
+        return saved;
+      });
+    },
+
+    settleRejectionV2(command: CartRejectionCommandV2, isCurrent: () => boolean,
+      reasons?: OrderRejectionReasonsV2): Promise<CartRejectionResultV2> {
+      const captured = structuredClone(command), capturedReasons = structuredClone(reasons);
+      return underLock(storage => {
+        requireCurrent(isCurrent);
+        const envelope = parseStoredCartEnvelopeV2(readRaw(storage));
+        const saved = settleCartRejectionV2(envelope, captured, capturedReasons);
         requireCurrent(isCurrent);
         if (saved.envelope !== envelope) writeStoredV2(storage, saved.envelope);
         return saved;
