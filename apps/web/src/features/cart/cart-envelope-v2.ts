@@ -147,15 +147,20 @@ export function encodeCartEnvelopeV2(value: CartEnvelopeV2): string {
   return JSON.stringify(value);
 }
 
-/** Read-only recovery: no migration, storage write, new key or body normalization. */
-export function decodeCartEnvelopeV2(raw: string | null): CartEnvelopeV2 {
+/** Validate persisted data without changing any owner's pending phase. Used by writers. */
+export function parseStoredCartEnvelopeV2(raw: string | null): CartEnvelopeV2 {
   if (raw === null) return createEmptyCartEnvelopeV2();
   const value = parse(raw);
   if (record(value) && own(value, "schemaVersion") && value.schemaVersion !== 2) {
     throw new CartStorageError("UNSUPPORTED_VERSION", "Phiên bản dữ liệu giỏ chưa được hỗ trợ.");
   }
   if (!isCartEnvelopeV2(value)) invalid();
-  return restore(value);
+  return value;
+}
+
+/** Read-only recovery: no migration, storage write, new key or body normalization. */
+export function decodeCartEnvelopeV2(raw: string | null): CartEnvelopeV2 {
+  return restore(parseStoredCartEnvelopeV2(raw));
 }
 
 /**

@@ -2,11 +2,15 @@ import { cartReducer } from "./cart-reducer.ts";
 import { CartStorageError, decodeCartEnvelope, encodeCartEnvelope, pendingForOwner } from "./cart-envelope.ts";
 import { applyCartLifecycle } from "./cart-lifecycle.ts";
 import { settleCartOrder } from "./cart-order-settlement.ts";
-import { planCartEnvelopeV2Migration } from "./cart-envelope-v2.ts";
+import { decodeCartEnvelopeV2, encodeCartEnvelopeV2, parseStoredCartEnvelopeV2,
+  planCartEnvelopeV2Migration } from "./cart-envelope-v2.ts";
+import { applyCartMutationV2, applyCartOwnerLifecycleV2 } from "./cart-writer-v2.ts";
 import type { CartEnvelope } from "./cart-envelope";
 import type { CartLifecycleCommand, CartLifecycleResult } from "./cart-lifecycle";
 import type { OrderSettlementCommand, OrderSettlementResult } from "./cart-order-settlement";
 import type { CartAction, CartError } from "./types";
+import type { CartEnvelopeV2 } from "./cart-envelope-v2";
+import type { CartOwnerLifecycleV2, SavedCartMutationV2 } from "./cart-writer-v2";
 
 export const CART_STORAGE_KEY = "brewlite.cart.v1";
 export const CART_LOCK_NAME = "brewlite:cart-envelope:v1";
@@ -56,18 +60,35 @@ export function createCartStorage(environment?: CartStorageEnvironment) {
     } finally { clearTimeout(timer); }
   }
 
-  function readStored(storage: CartStorageEnvironment["storage"]): CartEnvelope {
-    let raw: string | null;
-    try { raw = storage.getItem(CART_STORAGE_KEY); } catch {
+  function readRaw(storage: CartStorageEnvironment["storage"]): string | null {
+    try { return storage.getItem(CART_STORAGE_KEY); } catch {
       throw new CartStorageError("STORAGE_UNAVAILABLE", "Không đọc được giỏ đã lưu.");
     }
-    return decodeCartEnvelope(raw);
+  }
+
+  function readStored(storage: CartStorageEnvironment["storage"]): CartEnvelope {
+    return decodeCartEnvelope(readRaw(storage));
   }
 
   function writeStored(storage: CartStorageEnvironment["storage"], envelope: CartEnvelope): void {
     const raw = encodeCartEnvelope(envelope);
     try { storage.setItem(CART_STORAGE_KEY, raw); } catch {
       throw new CartStorageError("STORAGE_UNAVAILABLE", "Không lưu được giỏ. Thao tác chưa được xác nhận đã lưu.");
+    }
+  }
+
+  function writeStoredV2(storage: CartStorageEnvironment["storage"], envelope: CartEnvelopeV2): void {
+    const raw = encodeCartEnvelopeV2(envelope);
+    try { storage.setItem(CART_STORAGE_KEY, raw); } catch {
+      throw new CartStorageError("STORAGE_UNAVAILABLE", "Không lưu được giỏ. Thao tác chưa được xác nhận đã lưu.");
+    }
+  }
+
+  // A captured, synchronous session check is required for every v2 write.
+  // Returning a Promise is not verification and must not hold the lock across HTTP.
+  function requireCurrent(isCurrent: () => boolean): void {
+    if (typeof isCurrent !== "function" || isCurrent() !== true) {
+      throw new CartStorageError("OWNER_MISMATCH", "Phiên xác thực đã thay đổi. Vui lòng thử lại.");
     }
   }
 
@@ -80,17 +101,44 @@ export function createCartStorage(environment?: CartStorageEnvironment) {
     /** Explicit integration step; current UI keeps using v1 until backend S3 is ready. */
     migrateToV2() {
       return underLock((storage) => {
-        let raw: string | null;
-        try { raw = storage.getItem(CART_STORAGE_KEY); } catch {
-          throw new CartStorageError("STORAGE_UNAVAILABLE", "Không đọc được giỏ đã lưu.");
-        }
-        const migration = planCartEnvelopeV2Migration(raw);
+        const migration = planCartEnvelopeV2Migration(readRaw(storage));
         if (migration.rawToWrite !== null) {
           try { storage.setItem(CART_STORAGE_KEY, migration.rawToWrite); } catch {
             throw new CartStorageError("STORAGE_UNAVAILABLE", "Không lưu được giỏ. Giữ bản lưu để thử lại.");
           }
         }
         return migration.envelope;
+      });
+    },
+
+    /** Explicit v2 reader: recovery is in-memory only, and v1 needs migrateToV2 first. */
+    readV2(): Promise<CartEnvelopeV2> {
+      return underLock(storage => decodeCartEnvelopeV2(readRaw(storage)));
+    },
+
+    mutateCartV2(action: CartAction, expectedOwnerId: string | null,
+      isCurrent: () => boolean): Promise<SavedCartMutationV2> {
+      const captured = structuredClone(action);
+      return underLock((storage) => {
+        requireCurrent(isCurrent);
+        const envelope = parseStoredCartEnvelopeV2(readRaw(storage));
+        const saved = applyCartMutationV2(envelope, captured, expectedOwnerId);
+        requireCurrent(isCurrent);
+        if (saved.envelope !== envelope) writeStoredV2(storage, saved.envelope);
+        return saved;
+      });
+    },
+
+    applyOwnerLifecycleV2(command: CartOwnerLifecycleV2,
+      isCurrent: () => boolean): Promise<CartEnvelopeV2> {
+      const captured = structuredClone(command);
+      return underLock((storage) => {
+        requireCurrent(isCurrent);
+        const envelope = parseStoredCartEnvelopeV2(readRaw(storage));
+        const saved = applyCartOwnerLifecycleV2(envelope, captured);
+        requireCurrent(isCurrent);
+        if (saved !== envelope) writeStoredV2(storage, saved);
+        return saved;
       });
     },
 
