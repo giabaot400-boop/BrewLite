@@ -6,6 +6,7 @@ import { decodeCartEnvelopeV2, encodeCartEnvelopeV2, parseStoredCartEnvelopeV2,
   planCartEnvelopeV2Migration } from "./cart-envelope-v2.ts";
 import { applyCartMutationV2, applyCartOwnerLifecycleV2 } from "./cart-writer-v2.ts";
 import { applyCartCheckoutV2 } from "./cart-checkout-v2.ts";
+import { applyCartOrderBindingV2 } from "./cart-order-binding-v2.ts";
 import type { CartEnvelope } from "./cart-envelope";
 import type { CartLifecycleCommand, CartLifecycleResult } from "./cart-lifecycle";
 import type { OrderSettlementCommand, OrderSettlementResult } from "./cart-order-settlement";
@@ -13,6 +14,7 @@ import type { CartAction, CartError } from "./types";
 import type { CartEnvelopeV2 } from "./cart-envelope-v2";
 import type { CartOwnerLifecycleV2, SavedCartMutationV2 } from "./cart-writer-v2";
 import type { CartCheckoutCommandV2, CartCheckoutResultV2 } from "./cart-checkout-v2";
+import type { CartOrderBindingCommandV2, CartOrderBindingResultV2 } from "./cart-order-binding-v2";
 
 export const CART_STORAGE_KEY = "brewlite.cart.v1";
 export const CART_LOCK_NAME = "brewlite:cart-envelope:v1";
@@ -154,6 +156,19 @@ export function createCartStorage(environment?: CartStorageEnvironment) {
         requireCurrent(isCurrent);
         if (saved.envelope !== envelope) writeStoredV2(storage, saved.envelope);
         // Only a durable result may reach the caller; start HTTP after this promise releases the lock.
+        return saved;
+      });
+    },
+
+    applyOrderBindingV2(command: CartOrderBindingCommandV2,
+      isCurrent: () => boolean): Promise<CartOrderBindingResultV2> {
+      const captured = structuredClone(command);
+      return underLock((storage) => {
+        requireCurrent(isCurrent);
+        const envelope = parseStoredCartEnvelopeV2(readRaw(storage));
+        const saved = applyCartOrderBindingV2(envelope, captured);
+        requireCurrent(isCurrent);
+        if (saved.envelope !== envelope) writeStoredV2(storage, saved.envelope);
         return saved;
       });
     },
