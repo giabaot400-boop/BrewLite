@@ -18,6 +18,17 @@ Code hiện nằm trong `apps/web/src/components/`. A giữ `apps/web/src/featur
 Quy ước: mỗi trang dùng đúng một `PageContainer`; trạng thái lỗi dùng `role="alert"`,
 loading dùng `role="status"`.
 
+## Thành phần dùng chung cho đơn hàng (Sprint 3)
+
+Nằm ở `apps/web/src/features/orders/`, mô tả đầy đủ trong [SPRINT3_B_UI.md](SPRINT3_B_UI.md).
+
+| Thành phần | Dùng để |
+|---|---|
+| `formatMoney`, `formatDiscount`, `formatDateTime` (`order-format.ts`) | Tiền VND là số nguyên, khoản giảm có dấu trừ, giờ Việt Nam. Giá trị lạ hiện "—" |
+| `OrderStatusBadge`, `statusMeta` (`order-status.ts`) | Nhãn bảy trạng thái đơn, luôn có chữ (không chỉ màu) |
+| `guidanceForOrderError` (`order-error.ts`) | Thông báo lỗi nhất quán và việc tiếp theo; lỗi chưa rõ kết quả không bao giờ hiện là thất bại cuối |
+| `OrderLines`, `OrderTotals`, `PaymentSummary`, `PaymentDeadline` | Các khối hiển thị đơn dùng chung cho xác nhận, chi tiết và lịch sử |
+
 ## Breakpoint (mục 6.4)
 
 | Kích thước | Menu |
