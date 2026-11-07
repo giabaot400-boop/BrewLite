@@ -1,0 +1,98 @@
+@startuml master-use-case-sprint3
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #5B4636
+skinparam roundcorner 12
+skinparam packageStyle rectangle
+skinparam noteBackgroundColor #FFF6DA
+skinparam noteBorderColor #B89551
+skinparam actorBorderColor #5B4636
+skinparam actorFontColor #382A23
+skinparam rectangleBorderColor #80644F
+skinparam usecaseBorderColor #80644F
+skinparam entityBorderColor #80644F
+skinparam activityBorderColor #80644F
+skinparam activityBackgroundColor #F9F2E9
+skinparam activityDiamondBackgroundColor #FFF6DA
+skinparam activityDiamondBorderColor #80644F
+skinparam swimlaneBorderColor #C9B9A9
+top to bottom direction
+title BrewLite — Master Use Case\nSprint 3 — 06/11/2026
+skinparam usecaseBackgroundColor #FFFFFF
+skinparam nodesep 22
+skinparam ranksep 28
+
+actor "Khách hàng" as Customer
+
+rectangle "Hệ thống BrewLite" {
+  package "Sprint 1" as S1 #EAF4EB {
+    usecase "UC-01: Xem menu" as UC01
+    usecase "UC-02: Xem chi tiết\nsản phẩm" as UC02
+    usecase "UC-03: Chọn size\nvà topping" as UC03
+    usecase "UC-04: Tính và\nhiển thị giá" as UC04
+  }
+  package "Sprint 2" as S2 #FFF3D6 {
+    usecase "UC-05: Quản lý giỏ hàng" as UC05
+    usecase "UC-06: Đăng ký\ntài khoản" as UC06
+    usecase "UC-07: Đăng nhập" as UC07
+    usecase "UC-08: Đặt hàng" as UC08
+    usecase "S2-UC-LOGOUT: Đăng xuất" as Logout
+  }
+  package "Sprint 3" as S3 #E8EEF9 {
+    usecase "UC-09: Thanh toán\nkhông tiền mặt" as UC09
+    usecase "UC-10: Xem\nxác nhận đơn" as UC10
+    usecase "UC-11: Xem lịch sử\nvà trạng thái đơn" as UC11
+    usecase "UC-12: Áp mã giảm giá" as UC12
+    usecase "UC-13: Tích lũy\nđiểm thưởng" as UC13
+  }
+}
+
+Customer -left- UC01
+Customer -left- UC02
+Customer -left- UC03
+Customer -left- UC05
+Customer -left- UC06
+Customer -left- UC07
+Customer -left- UC08
+Customer -left- Logout
+Customer -left- UC09
+Customer -left- UC10
+Customer -left- UC11
+Customer -left- UC12
+
+UC03 .down.> UC04 : <<include>>
+UC12 .up.> UC08 : <<extend>>\n[có mã]
+UC13 .left.> UC09 : <<extend>>\n[kết quả SUCCEEDED]
+UC04 -[hidden]down-> UC05
+Logout -[hidden]down-> UC09
+UC01 -[hidden]down-> UC02
+UC02 -[hidden]down-> UC03
+UC05 -[hidden]down-> UC06
+UC06 -[hidden]down-> UC07
+UC07 -[hidden]down-> UC08
+UC08 -[hidden]down-> Logout
+UC09 -[hidden]down-> UC10
+UC10 -[hidden]down-> UC11
+UC11 -[hidden]down-> UC12
+UC12 -[hidden]down-> UC13
+
+legend bottom
+  Giữ UC-01 đến UC-13 và S2-UC-LOGOUT: 14 mã, không thêm mục tiêu mới.
+  Màu biểu thị nguồn kế thừa, không khẳng định các Sprint đã được nghiệm thu.
+  UC-08 tạo PENDING; UC-09 thanh toán đơn đã có, hai thao tác riêng.
+  Login là tiền điều kiện, không include thao tác đăng nhập cho mỗi lần đặt.
+  UC-12 mở rộng UC-08 khi khách dùng mã; server kiểm/tính khi tạo PENDING.
+  UC-10 là mục tiêu đọc riêng, có thể truy cập lại từ đơn/lịch sử.
+  UC-13 extend UC-09 khi kết quả thanh toán SUCCEEDED; hệ thống tự chạy.
+  Điểm mở rộng UC-09: Xử lý thanh toán thành công, trước COMMIT.
+  Điểm, đơn và kho cùng transaction; không có nút/request cộng điểm riêng.
+  Điểm bằng 0 vẫn có thể ghi entry theo policy; replay không cộng lại.
+  Extend là hành vi bổ sung theo điều kiện, không phải mũi tên thứ tự.
+  Hủy/retry/expiry là luồng thay thế/quy tắc của đơn và payment, chưa thêm UC.
+  Mock PaymentService là adapter bên trong NestJS, không phải actor ngoài hệ thống.
+  Chưa thêm actor quầy/admin hoặc trang quản trị; tiến trình pha chế demo nội bộ.
+endlegend
+
+@enduml

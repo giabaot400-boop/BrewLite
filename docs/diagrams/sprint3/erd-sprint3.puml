@@ -1,0 +1,244 @@
+@startuml erd-sprint3-core
+title BrewLite Sprint 3 - D07A\nERD logic: nền kế thừa và đơn hàng (06/11/2026)
+top to bottom direction
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #5B4636
+skinparam entityBorderColor #80644F
+skinparam nodesep 65
+skinparam ranksep 60
+hide circle
+entity User <<S2 mở rộng>> #E7F1FA {
+  * id <<PK>>
+  --
+  email <<UK>>
+  passwordHash
+  createdAt
+  loyaltyPoints
+}
+entity AuthSession <<S2 giữ>> #FFF3D6 {
+  * id <<PK>>
+  --
+  userId <<FK>>
+  createdAt
+  expiresAt
+  revokedAt <<nullable>>
+}
+entity OrderRequest <<S2 mở rộng>> #E7F1FA {
+  * id <<PK>>
+  --
+  userId <<FK>>
+  requestKey
+  requestHash
+  canonicalVersion = 1 hoặc 2
+  state = SUCCEEDED hoặc REJECTED
+  orderId <<FK,UK,nullable>>
+  httpStatus
+  responseJson
+  createdAt
+}
+entity Order <<S2 mở rộng>> #E7F1FA {
+  * id <<PK>>
+  --
+  userId <<FK>>
+  status
+  version
+  subtotal
+  discountTotal
+  total
+  createdAt
+  requestKey
+  requestHash
+  checkoutPolicyVersion
+  các trường thanh toán: xem D07B
+}
+entity OrderItem <<S2 giữ>> #FFF3D6 {
+  * id <<PK>>
+  --
+  orderId <<FK>>
+  productId <<FK>>
+  productName
+  size
+  basePrice
+  sizeExtraPrice
+  unitPrice
+  qty
+  lineTotal
+}
+entity OrderItemTopping <<S2 giữ>> #FFF3D6 {
+  * orderItemId <<PK,FK>>
+  * toppingId <<PK,FK>>
+  --
+  name
+  price
+}
+entity Product <<S1 mở rộng>> #E7F1FA {
+  * id <<PK>>
+  --
+  name
+  description
+  price
+  imageUrl
+  stock
+  reservedStock
+  stockVersion
+}
+entity Topping <<S1 giữ>> #E7F1FA {
+  * id <<PK>>
+  --
+  name
+  price
+
+}
+entity ProductTopping <<S1 giữ>> #EAF4EB {
+  * productId <<PK,FK>>
+  * toppingId <<PK,FK>>
+}
+User ||--o{ AuthSession : có phiên
+User ||--o{ OrderRequest : gửi
+User ||--o{ Order : đặt
+OrderRequest ||--o| Order : kết quả
+Order ||--|{ OrderItem : chứa snapshot
+Product ||--o{ OrderItem : tham chiếu
+OrderItem ||--o{ OrderItemTopping : chọn
+Topping ||--o{ OrderItemTopping : tham chiếu
+Product ||--o{ ProductTopping : cho phép
+Topping ||--o{ ProductTopping : được gắn
+legend bottom
+  D07A và D07B là hai góc nhìn cùng một ERD 13 model, không nhân đôi bảng trùng tên.
+  Kế thừa chín model từ ERD Sprint 2 v0.6; 13 model logic; không thêm bảng để đủ quota.
+  DEC-09 : chỉ tồn Product; Topping vẫn có giá/liên kết, không stock/reservation.
+  Types/defaults/checks/index ở CONTRACTS.md; E tạo migration mới.
+  Unique(userId,requestKey) trên OrderRequest và Order; v1/v2 chung namespace.
+  REJECTED không có Order; mỗi Order có đúng một ledger SUCCEEDED liên kết cùng transaction.
+  Snapshot tên / giá giữ lịch sử; không Cascade xóa danh mục vào dữ liệu đơn.
+  stock là hàng thực tế, reservedStock là tổng phần ACTIVE; stockVersion phục vụ optimistic locking.
+  Legacy policy1 không deadline/reservation giả; chỉ xem, không tự payment/expiry.
+endlegend
+@enduml
+
+@startuml erd-sprint3-business
+title BrewLite Sprint 3 - D07B\nERD logic: payment, giữ kho, khuyến mãi và điểm (06/11/2026)
+top to bottom direction
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #5B4636
+skinparam entityBorderColor #80644F
+skinparam nodesep 65
+skinparam ranksep 60
+hide circle
+entity User <<tham chiếu D07A>> #E7F1FA {
+  * id <<PK>>
+  --
+  loyaltyPoints
+}
+entity Promotion <<S3 mới>> #DDF3EE {
+  * id <<PK>>
+  --
+  code <<UK>>
+  active
+  startsAt
+  endsAt
+  minimumSubtotal
+  type
+  value
+  maxDiscountAmount <<nullable>>
+}
+entity Order <<mở rộng từ D07A>> #E7F1FA {
+  * id <<PK>>
+  --
+  userId <<FK>>
+  status / version / total
+  promotionId <<FK,nullable>>
+  promotionSnapshot <<nullable,immutable>>
+  promotionEvaluatedAt <<nullable>>
+  checkoutPolicyVersion
+  paymentDeadline <<legacy nullable>>
+  paidAt <<nullable>>
+  cancelReason <<nullable>>
+  loyaltyPolicySnapshot <<legacy nullable,immutable>>
+  loyaltyPointsExpected <<legacy nullable>>
+}
+entity Product <<tham chiếu D07A>> #E7F1FA {
+  * id <<PK>>
+  --
+  stock
+  reservedStock
+  stockVersion
+}
+entity PaymentAttempt <<S3 mới>> #DDF3EE {
+  * id <<PK>>
+  --
+  userId <<FK>>
+  orderId <<FK>>
+  requestKey
+  requestHash
+  canonicalVersion = 1
+  gatewayKey <<UK>>
+  method
+  amount
+  status = SUCCEEDED / FAILED (MVP)
+  version
+  failureCode <<nullable>>
+  refundedAmount
+  refundedAt <<nullable>>
+  createdAt
+  updatedAt
+  resolvedAt <<required in MVP>>
+}
+entity StockReservation <<S3 mới>> #DDF3EE {
+  * id <<PK>>
+  --
+  orderId <<FK>>
+  productId <<FK,NOT NULL>>
+  qty
+  state = ACTIVE / CONSUMED / RELEASED / RETURNED
+  createdAt
+  resolvedAt <<nullable>>
+}
+entity LoyaltyEntry <<S3 mới>> #DDF3EE {
+  * id <<PK>>
+  --
+  userId <<FK>>
+  orderId <<FK,UK>>
+  points
+  reversedAt <<nullable>>
+  createdAt
+}
+User ||--o{ Order : đặt
+Promotion |o--o{ Order : tham chiếu tùy chọn
+Order ||--o{ PaymentAttempt : có nhiều lần thử
+Order ||--o{ StockReservation : giữ theo nguồn kho
+Product ||--o{ StockReservation : giữ ly
+Order ||--o| LoyaltyEntry : cộng đúng một lần
+User ||--o{ LoyaltyEntry : nhận điểm
+PaymentAttempt -[hidden]right-> StockReservation
+StockReservation -[hidden]right-> LoyaltyEntry
+legend bottom
+  Bốn model S3 mới: PaymentAttempt, StockReservation, Promotion, LoyaltyEntry.
+  Reservation chỉ productId bắt buộc; qty gộp theo Product kể cả khác size/topping.
+  Unique(orderId,productId), không partial index theo topping hoặc CHECK XOR.
+  unique(userId,requestKey) cho payment; namespace tách với tạo đơn; gatewayKey ổn định toàn cổng.
+  Payment trong đề tương ứng PaymentAttempt ở đây; không thêm bảng Payment song song.
+  MVP chỉ commit SUCCEEDED / FAILED; partial unique success/order là hàng rào bổ sung.
+  Enum payment chỉ FAILED/SUCCEEDED; không active index hoặc trạng thái UNKNOWN server.
+  Các mutation cùng đơn còn phải phân xử trên Order; unique index không thay toàn bộ state machine.
+  Composite FK(orderId,userId) -> Order(id,userId) cho payment và điểm.
+  Payment resolvedAt bắt buộc cho kết quả cuối MVP; refund giữ nguyên mốc resolvedAt gốc.
+  PAID: attempt + Order + kho + reservation + LoyaltyEntry / số dư điểm cùng transaction.
+  Expiry policy2 phân xử cùng Order; tick60s/batch50 + startup catch-up.
+  PromotionSnapshot giữ lịch sử, không tính lại từ Promotion hiện tại khi retry payment.
+  Kho Product mặc định0; Topping không stock. Seed lượng chỉ DB demo riêng.
+  DEC-01/06 có cơ sở: giữ cart tới PAID; hủy PAID trước PREPARING với bù trừ mock.
+  CONSUMED -> RETURNED: trả stock, không tăng reserved; entry.reversedAt lưu thu hồi điểm.
+  Payment giữ SUCCEEDED; refundedAmount/refundedAt ghi hoàn tiền giả lập cùng tx.
+  DEC-02: mock không I/O, attempt cuối + Order/kho/điểm cùng tx; chưa worker payment.
+  DEC-03: DEMO10 10%, trần 20.000, tối thiểu 50.000; điểm floor(total/10000).
+  Chọn PERCENT DEMO10; cấu hình cần E seed/test theo CONTRACTS.md, chưa ghi đã chạy.
+  Tên bảng/field/check/index đã định ở CONTRACTS.md; E hiện thực bằng migration mới.
+endlegend
+@enduml
