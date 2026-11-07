@@ -45,6 +45,11 @@ Thêm một khối mỗi ngày, mới nhất ở trên. Không sửa khối cũ;
 - E: ...
 ```
 
+### 07/11/2026
+
+- B: đã làm: review PR #30 (đổi layout `apps/web`, `apps/api`, đã merge) và PR #31 (tài liệu kiến trúc frontend/BFF/PWA của A: approve kèm góp ý nhỏ, chưa merge tại thời điểm ghi); chuyển phần S3-B sang layout mới | tiếp theo: mở PR S3-B-01/S3-B-02, nhờ A và D review | blocked bởi: chưa có (backend đọc đơn của C chưa tích hợp, dùng fixture).
+- A, C, D, E: chưa cập nhật.
+
 ### 06/11/2026
 
 - B: đã làm: S3-B-01 (UI đọc đơn, trang xác nhận/chi tiết/lịch sử, BFF đọc, 378 test đơn vị toàn frontend, typecheck/lint/build chạy trên máy B; chưa có SHA push) và bộ tài liệu S3-B-02 | tiếp theo: mở PR, nhờ A review | blocked bởi: chưa có (backend đọc đơn của C chưa tích hợp, dùng fixture).
@@ -75,9 +80,25 @@ Chỉ điền số thật từng ngày; ô chưa có số để trống, **khôn
 | 06/11 | main chưa có workflow CI; Assignment 2 Task 4 cần CI chặn merge | A2-REPO-CI (B) | Làm sớm, trước khi dồn PR Sprint 3 |
 | 06/11 | PR đổi `frontend/backend` → `apps/web`, `apps/api` sẽ xung đột với PR Sprint 3 đang mở | A2-REPO-CI (B), A | Chốt thời điểm đóng băng merge hoặc hỏi giảng viên có chấp nhận giữ tên cũ kèm bảng ánh xạ |
 | 07/11 | _Đã xử lý:_ PR #30 (`apps/web`, `apps/api`) đã merge vào main; nhánh Sprint 3 cần cập nhật đường dẫn theo README | A2-REPO-CI | Mỗi lead cập nhật nhánh của mình |
+| 07/11 | Task 3.1/3.2 (mốc 06/11) chưa đủ tạo phẩm trên main: kiến trúc tổng thể/ADR (D) và deployment (E) chưa thấy; PR #31 mới có phần BFF/PWA của A | A2-ARCH (D), A2-DEPLOY-DESIGN (E) | D, E đặt mốc mới và ghi vào board trong 07/11 |
 | 06/11 | Giờ chốt nộp trên LMS chưa xác minh | PO | Kiểm tra trước 12/11 |
 
 Nếu cuối 08/11 chưa có E2E đầu tiên: A/B ghi rủi ro với ticket/owner/ngày mới trong ngày đó, cập nhật capacity và giảm việc ngoài phạm vi. Không bỏ Task 10 để đạt ngày.
+
+## 5A. Assignment 2: mục theo dõi (nguồn `docs/assignment2/TEAM_PLAN.md`)
+
+Chỉ ghi điều có bằng chứng trên repo tại 07/11/2026 (main `82c7675`). Ô không có bằng chứng ghi `chưa cập nhật`. Mốc dưới đây là mục tiêu của kế hoạch, không phải xác nhận.
+
+| Mã | Lead / reviewer | Mốc kế hoạch | Tình trạng ghi nhận | Bằng chứng |
+|---|---|---|---|---|
+| A2-REQ, A2-UML | A / B, B / D | 05/11 Task 1–2 trên repo | Tài liệu Task 1–2 đã có trên main | PR #29 (merge) |
+| A2-REPO-CI | B / E | 07–08/11 cổng Task 4 | **Một phần:** đã đổi layout `apps/web`, `apps/api`. **Chưa có CI**: main không có `.github/` | PR #30 (merge); `git ls-tree` main |
+| A2-ARCH | D / E | 06/11 Task 3.1 | Phần BFF/PWA của A đang ở PR #31 (đã review, chưa merge lúc ghi). Phần kiến trúc tổng thể và ADR của D: chưa thấy trên main | PR #31 |
+| A2-MENU-PWA | A / B | Task 5 (PWA) | Mới có tài liệu phương án; manifest, service worker, trang offline **chưa triển khai** | PR #31 |
+| A2-DEPLOY-DESIGN | E / C | 06/11 Task 3.2 | chưa cập nhật | |
+| A2-HEALTH-SECURITY, A2-CHECKOUT-TEST, A2-CD-PRODUCTION, A2-HANDOVER | C, D, E, B | 09–14/11 | chưa cập nhật | |
+
+Mốc 06/11 của Task 3.1/3.2 đã qua mà chưa có đủ tạo phẩm trên main: ghi BLOCKED/owner/mốc mới trong ngày (xem mục 5).
 
 ## 6. Phiếu nhận bàn giao mỗi ticket (TEAM_PLAN mục 6)
 
