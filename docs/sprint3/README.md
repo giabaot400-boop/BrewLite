@@ -1,6 +1,6 @@
 # BrewLite Sprint 3 gói triển khai rút gọn
 
-Cập nhật ngày 06/11/2026. Thiết kế triển khai Task 8–10 của Assignment 1 trên nền Sprint 2 tại a1a0e4a. Bộ tài liệu xác định phạm vi, contract, phân công và kiểm thử dự kiến; chưa xác nhận code hoặc AC Sprint 3 đã đạt.
+Cập nhật ngày 07/11/2026. Thiết kế triển khai Task 8–10 của Assignment 1 trên nền Sprint 2 tại a1a0e4a. Bộ tài liệu xác định phạm vi, contract, phân công và kiểm thử dự kiến; chưa xác nhận code hoặc AC Sprint 3 đã đạt.
 
 ## Đọc và nhận việc
 
@@ -10,6 +10,12 @@ Cập nhật ngày 06/11/2026. Thiết kế triển khai Task 8–10 của Assig
 4. `docs/sprint3/TEST_MATRIX.md` có fixture/thao tác/assertion cho 27 AC và ba test (a)(b)(c).
 5. `docs/diagrams/sprint3` có năm nguồn/chín SVG cùng nội dung thiết kế; hai ERD là một mô hình 13 model.
 6. [Rà soát phạm vi](REVIEW.md) giữ kết quả đối chiếu và lịch sử thay đổi thiết kế.
+
+Bảng [user story và công việc hỗ trợ](DESIGN.md#11-user-story) trong thiết kế
+được bổ sung ngày 07/11/2026: sáu story người dùng và ba nhóm công việc hỗ trợ,
+nối đủ 27 AC với 12 ticket hiện có. Bảng phục vụ backlog và tra cứu phạm vi;
+lead/reviewer, contract và trạng thái kiểm thử vẫn theo các tài liệu nêu trên.
+Khi xuất lại bản Word bàn giao, đồng bộ hai mục này từ `DESIGN.md`.
 
 ## Luồng khách hàng
 
