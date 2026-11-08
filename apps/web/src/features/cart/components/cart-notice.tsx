@@ -1,11 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useCart } from "../cart-provider";
+import { useCartEditing } from "../cart-edit-context";
 import type { CartViewState } from "../cart-view";
 
 export function CartNotice() {
-  const { state, reload } = useCart();
+  const { state, reload } = useCartEditing();
   return <CartNoticeContent state={state} reload={reload} />;
 }
 

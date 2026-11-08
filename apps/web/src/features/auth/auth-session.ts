@@ -18,7 +18,8 @@ export type AuthSnapshot = {
 };
 
 /** Thông tin giỏ do module giỏ hàng (A) cung cấp để hộp xác nhận đăng xuất nói đúng sự thật. */
-export type LogoutInfo = { cartItemCount: number; hasPendingOrder: boolean };
+export type LogoutInfo = { cartItemCount: number; hasPendingOrder: boolean;
+  hasCheckoutOrder?: boolean; hasUnresolvedPayment?: boolean };
 
 export type SignOutHandler = (scope: LogoutScope) => void;
 

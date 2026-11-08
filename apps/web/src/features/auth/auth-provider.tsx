@@ -18,6 +18,7 @@ export type { AuthStatus, LogoutInfo };
 export type AuthContextValue = {
   sessionSnapshot: AuthSnapshot;
   getSessionSnapshot: () => AuthSnapshot;
+  subscribeSession: (listener: () => void) => () => void;
   /** Same-owner /me refresh keeps this version; login/logout/account changes invalidate reviews. */
   sessionVersion: number;
   getSessionVersion: () => number;
@@ -55,6 +56,7 @@ export function AuthProvider({ children, client }: { children: ReactNode; client
       ...snapshot,
       sessionSnapshot: snapshot,
       getSessionSnapshot: session.getSnapshot,
+      subscribeSession: session.subscribe,
       sessionVersion: session.getSessionVersion(),
       getSessionVersion: session.getSessionVersion,
       login: session.login,

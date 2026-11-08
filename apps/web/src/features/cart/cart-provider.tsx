@@ -17,6 +17,7 @@ import { CART_STORAGE_KEY, createCartStorage } from "./cart-storage";
 import { cartViewReducer, createCartViewState } from "./cart-view";
 import type { CartViewState } from "./cart-view";
 import type { CartAction, CartLineDraft } from "./types";
+import { CartEditingContext } from "./cart-edit-context";
 
 type CartContextValue = {
   state: CartViewState;
@@ -310,7 +311,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     };
   }, [publishedIdentity, sessionSnapshot, state, hasPending, mutate, reload, phases, feedback, records, reviewOrder, submitOrder]);
 
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return <CartContext.Provider value={value}><CartEditingContext.Provider value={value}>{children}</CartEditingContext.Provider></CartContext.Provider>;
 }
 
 export function useCart(): CartContextValue {
