@@ -21,6 +21,9 @@ export function AuthNav() {
   if (status === "authenticated" && user) {
     return (
       <>
+        <Link href="/orders" className={linkClass}>
+          Đơn hàng
+        </Link>
         <span className="max-w-40 truncate px-1 text-sm text-stone-600" title={user.email}>
           <span className="sr-only">Đã đăng nhập: </span>
           {user.email}
