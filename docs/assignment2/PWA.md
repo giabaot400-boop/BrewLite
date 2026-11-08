@@ -1,6 +1,6 @@
 # PWA tối thiểu — hướng dẫn kiểm tra
 
-Ngày cập nhật: 07/11/2026. Nền code: main `82c7675` sau PR #30.
+Ngày cập nhật: 08/11/2026. Nền code: main `82c7675` sau PR #30.
 Phần này triển khai phía A cho NFR-07; không xác nhận hoàn tất Task 3–5 A2.
 Phương án frontend/BFF/PWA nằm trong PR #31; kết quả implementation được ghi riêng dưới đây.
 
@@ -11,7 +11,8 @@ Phương án frontend/BFF/PWA nằm trong PR #31; kết quả implementation đ�
 - Cache Storage chỉ có `/offline.html` và hai PNG trong cache `brewlite-pwa-static-v1`.
 - Navigation cùng origin thử mạng với `no-store`; lỗi mạng dùng trang offline chung. HTTP 401/403/404/500 giữ nguyên response.
 - Worker không xử lý `/api/*`, POST hoặc phương thức khác GET, request khác origin, RSC hay tài nguyên Next.js. Không lưu HTML ứng dụng hoặc dữ liệu API, không background sync, tự retry, sửa pending/key/body hoặc thao tác localStorage.
-- Bản worker mới không gọi `skipWaiting` hoặc tự reload tab đang thao tác; khi activate chỉ xóa cache phiên bản cũ có tiền tố `brewlite-pwa-static-`. Sửa nội dung tài nguyên precache phải tăng phiên bản cache.
+- Worker không gọi `skipWaiting()` và không tự reload tab đang thao tác. Bản cập nhật có thể ở trạng thái waiting cho đến khi worker cũ không còn điều khiển client.
+- Trong `activate`, worker xóa cache phiên bản cũ có tiền tố `brewlite-pwa-static-`, rồi gọi `clients.claim()` để nhận quyền điều khiển các trang trong scope. `clients.claim()` không bỏ qua giai đoạn waiting. Sửa nội dung tài nguyên precache phải tăng phiên bản cache.
 - Không thay auth, Order API, nghiệp vụ giỏ, schema, migration hoặc dependency. Hành vi dọn giỏ hiện vẫn theo Sprint 2; phần đổi sang giữ giỏ đến paid-current thuộc tích hợp Sprint 3 riêng.
 
 Trade-off: trang offline chung giúp tránh giữ dữ liệu cá nhân/giá cũ, nhưng không hỗ trợ duyệt menu hoặc đặt hàng offline. Không thêm push notification hoặc thư viện PWA.
