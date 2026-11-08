@@ -214,6 +214,8 @@ Luồng hủy dùng `cart-cancel-client-v2.ts`: đọc Order cho xác nhận và
 
 ### 7.1 Đầu vào bàn giao cho phần đọc đơn
 
+Bridge cho provider: `createCartSessionBridgeV2` chỉ dùng reader/writer v2 và trả giỏ, pending, kết quả, binding, recoveries theo đúng owner đã xác minh. Chỉ snapshot mới nhận từ login hoặc `/me` được cấp quyền nhận giỏ; thông báo storage/focus không tự cấp quyền này. Kiểm checkpoint phiên trước/sau await và trong khóa ghi; refresh cùng owner/binding không làm mất quyền thao tác, login mới vẫn làm vô hiệu checkpoint. Pending/binding/payment UNRESOLVED chặn sửa giỏ qua writer v2. Logout chuẩn bị checkpoint trước HTTP, chờ auth coordinator xác nhận scope và công bố anonymous đúng thế hệ rồi mới dọn giỏ trong khóa; giữ toàn bộ pending/binding/recovery của mọi owner, không xóa theo phản hồi logout cũ sau login mới. Bridge không tự migrate, không gọi HTTP/checkout, chưa gắn vào CartProvider hiện tại.
+
 Ba coordinator dùng chung type `CheckoutOrderReaderV2` export từ `apps/web/src/features/cart/cart-checkout-client-v2.ts`. Input gồm `orderId`, checkpoint `{ownerId,binding,sessionVersion}` và `signal?`; output gồm checkpoint của lượt đã xác minh và projection `CartCurrentOrder`. Adapter `createCartOrderReaderV2` ở `cart-order-reader-v2.ts` dùng HTTP client/parser OrderDetail của B (PR #32, `ee15c75`), không dùng fixture theo biến môi trường. Khởi tạo một adapter dùng chung cho ba coordinator; chưa nối vào CartProvider hoặc bật UI v2.
 
 - B/C đối chiếu đầy đủ OrderDetail trước khi trả projection; parser dùng cho response cancel cũng tái sử dụng parser OrderDetail của B. Không dựng parser DTO thứ hai trong module giỏ.
