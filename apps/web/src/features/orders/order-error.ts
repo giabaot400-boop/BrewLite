@@ -163,3 +163,8 @@ export function guidanceForOrderError(error: OrderApiError): ErrorGuidance {
 export function messageForOrderError(error: OrderApiError): string {
   return guidanceForOrderError(error).message;
 }
+
+/** Lỗi cho thấy phiên UI có thể đã lệch với cookie: cần đồng bộ lại auth và/hoặc đăng nhập lại. */
+export function needsSessionResync(error: OrderApiError): boolean {
+  return guidanceForOrderError(error).action === "login" || error.code === "REQUEST_FORBIDDEN";
+}

@@ -1,8 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { createOrderReadHandler, isReadableOrderId } from "./order-read-handler.ts";
 
-const request = (signal) => new Request("http://localhost/api/orders/me", { method: "GET", signal });
+const bindingOf = (token) => createHash("sha256").update(token).digest("hex");
+const GOOD = bindingOf("TOKEN");
+const request = (signal, expected = GOOD) => new Request("http://localhost/api/orders/me", {
+  method: "GET", signal, headers: expected === null ? {} : { "X-BrewLite-Expected-Session": expected },
+});
 const reply = (status, body, bodyFails = false) => ({
   status,
   json: bodyFails ? async () => { throw new SyntaxError("bad json"); } : async () => body,
@@ -12,6 +17,7 @@ function setup({ token = "TOKEN", noToken = false, upstream = reply(200, { items
   const calls = [];
   const handler = createOrderReadHandler({
     readToken: async () => (noToken ? undefined : token),
+    bindingOf,
     ordersUrl: () => "http://backend:3001/orders",
     fetch: fetchImpl ?? (async (url, init) => { calls.push({ url, init }); return upstream; }),
     schedule,
@@ -131,4 +137,45 @@ test("người dùng đóng trang giữa chừng: 502 và không gọi backend n
   const res = await handler(request(controller.signal), { kind: "history" });
   assert.equal(res.status, 502);
   assert.equal(calls.length, 0);
+});
+
+test("UI giữ tài khoản A nhưng cookie đã là B: 403 và KHÔNG gọi backend", async () => {
+  const { handler, calls } = setup({ token: "TOKEN_B" }); // request mang binding của A (TOKEN)
+  const res = await handler(request(), { kind: "history" });
+  assert.equal(res.status, 403);
+  assert.equal((await res.json()).error.code, "REQUEST_FORBIDDEN");
+  assert.equal(res.headers.get("Set-Cookie"), null);
+  assert.equal(calls.length, 0);
+  const detail = await handler(request(), { kind: "detail", id: "ord-1" });
+  assert.equal(detail.status, 403);
+  assert.equal(calls.length, 0);
+});
+
+test("thiếu hoặc sai dạng binding: 403, không gọi backend", async () => {
+  for (const expected of [null, "", "abc", GOOD.toUpperCase(), GOOD.slice(1)]) {
+    const { handler, calls } = setup();
+    const res = await handler(request(undefined, expected), { kind: "history" });
+    assert.equal(res.status, 403, String(expected));
+    assert.equal(calls.length, 0);
+  }
+});
+
+test("cùng một token dùng cho đối chiếu và gọi backend; readToken chỉ gọi một lần", async () => {
+  let reads = 0;
+  const calls = [];
+  const handler = createOrderReadHandler({
+    readToken: async () => (++reads === 1 ? "TOKEN" : "OTHER"),
+    bindingOf,
+    ordersUrl: () => "http://backend:3001/orders",
+    fetch: async (url, init) => { calls.push(init); return reply(200, { items: [] }); },
+  });
+  const res = await handler(request(), { kind: "history" });
+  assert.equal(res.status, 200);
+  assert.equal(reads, 1);
+  assert.equal(calls[0].headers.Authorization, "Bearer TOKEN");
+});
+
+test("thiếu cookie vẫn là 401 (không phải 403) dù có binding", async () => {
+  const { handler } = setup({ noToken: true });
+  assert.equal((await handler(request(), { kind: "history" })).status, 401);
 });

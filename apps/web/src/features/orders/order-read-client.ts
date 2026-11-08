@@ -1,3 +1,4 @@
+import { EXPECTED_SESSION_HEADER, isSessionBinding } from "../../lib/session-binding.ts";
 import { OrderApiError, type OrderErrorCode } from "./order-error.ts";
 import { createMockOrderReadClient } from "./order-fixtures.ts";
 import { parseHistory, parseOrderDetail } from "./order-parse.ts";
@@ -6,9 +7,13 @@ import type { HistoryView, OrderDetail } from "./types.ts";
 /** UI → BFF chờ tối đa 15 giây, gồm cả thời gian đọc body (cùng quy tắc với auth-client). */
 export const ORDER_READ_TIMEOUT_MS = 15_000;
 
+/**
+ * `binding` là binding của phiên mà UI đang hiển thị (từ /api/auth/me hoặc login). Mỗi lượt đọc gửi nó
+ * để BFF từ chối khi cookie đã thuộc phiên khác. Thiếu binding hợp lệ thì không gửi yêu cầu (fail-closed).
+ */
 export type OrderReadClient = {
-  getOrder(id: string): Promise<OrderDetail>;
-  getHistory(): Promise<HistoryView>;
+  getOrder(id: string, binding: string | undefined): Promise<OrderDetail>;
+  getHistory(binding: string | undefined): Promise<HistoryView>;
 };
 
 type FetchLike = typeof fetch;
@@ -41,8 +46,12 @@ async function getJson<T>(
   fetchImpl: FetchLike,
   path: string,
   timeoutMs: number,
+  binding: string | undefined,
   parse: (value: unknown) => T,
 ): Promise<T> {
+  if (!isSessionBinding(binding)) {
+    return Promise.reject(new OrderApiError("SESSION_INVALID", "Chưa xác minh được phiên đăng nhập.", 401));
+  }
   const controller = new AbortController();
   let timer: ReturnType<typeof setTimeout> | undefined;
   const deadline = new Promise<never>((_, reject) => {
@@ -56,7 +65,7 @@ async function getJson<T>(
       method: "GET",
       credentials: "same-origin",
       cache: "no-store",
-      headers: { Accept: "application/json" },
+      headers: { Accept: "application/json", [EXPECTED_SESSION_HEADER]: binding },
       signal: controller.signal,
     });
     if (!response.ok) throw await readError(response);
@@ -90,12 +99,12 @@ export function createHttpOrderReadClient(
   timeoutMs: number = ORDER_READ_TIMEOUT_MS,
 ): OrderReadClient {
   return {
-    getOrder(id) {
+    getOrder(id, binding) {
       if (id === "") return Promise.reject(new OrderApiError("RESOURCE_NOT_FOUND", "", 404));
-      return getJson(fetchImpl, orderPath(id), timeoutMs, parseOrderDetail);
+      return getJson(fetchImpl, orderPath(id), timeoutMs, binding, parseOrderDetail);
     },
-    getHistory() {
-      return getJson(fetchImpl, "/api/orders/me", timeoutMs, parseHistory);
+    getHistory(binding) {
+      return getJson(fetchImpl, "/api/orders/me", timeoutMs, binding, parseHistory);
     },
   };
 }

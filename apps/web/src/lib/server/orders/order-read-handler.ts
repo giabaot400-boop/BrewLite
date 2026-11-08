@@ -2,7 +2,12 @@
 // - Đọc cookie một lần, chuyển Bearer cho backend; backend tự xác thực và lọc theo chủ (CONTRACTS mục 3).
 // - Một deadline 10 giây phủ cả đọc body upstream. Không bao giờ xóa cookie (cùng nguyên tắc /auth/me).
 // - Chỉ chuyển tiếp JSON; không chuyển header của upstream (Set-Cookie...). Luôn Cache-Control: no-store.
+// - Chống lệch tài khoản: UI gửi binding của phiên nó đang hiển thị; BFF so với binding của CHÍNH cookie
+//   vừa đọc. Không khớp thì trả 403 và không gọi backend, nên tab còn giữ tài khoản A không nhận được
+//   dữ liệu của B (cookie đã đổi sang B). Binding chỉ là giá trị đối chiếu, không cấp quyền.
 // Handler thuần với I/O được tiêm vào để kiểm thử.
+
+import { EXPECTED_SESSION_HEADER, isSessionBinding } from "../../session-binding.ts";
 
 export const ORDER_READ_TIMEOUT_MS = 10_000;
 
@@ -10,6 +15,8 @@ export type ReadTarget = { kind: "history" } | { kind: "detail"; id: string };
 
 type Environment = {
   readToken: () => Promise<string | undefined>;
+  /** Binding công khai suy ra từ đúng token đã đọc (cùng hàm với /api/auth/me). */
+  bindingOf: (token: string) => string;
   /** Gốc đường dẫn /orders của backend, không có dấu "/" cuối. */
   ordersUrl: () => string;
   fetch: (url: string, init: RequestInit) => Promise<Pick<Response, "status" | "json">>;
@@ -65,6 +72,11 @@ export function createOrderReadHandler(environment: Environment) {
       const token = await environment.readToken();
       controller.signal.throwIfAborted();
       if (!token) return errorResponse(401, "AUTH_REQUIRED", "Vui lòng đăng nhập để xem đơn hàng.");
+      // Cùng một token được dùng để đối chiếu và để gọi backend; không đọc cookie lần hai.
+      const expected = request.headers.get(EXPECTED_SESSION_HEADER);
+      if (!isSessionBinding(expected) || expected !== environment.bindingOf(token)) {
+        return errorResponse(403, "REQUEST_FORBIDDEN", "Phiên đăng nhập đã thay đổi. Vui lòng kiểm tra lại tài khoản.");
+      }
 
       const base = environment.ordersUrl();
       const url = target.kind === "history" ? `${base}/me` : `${base}/${encodeURIComponent(target.id)}`;

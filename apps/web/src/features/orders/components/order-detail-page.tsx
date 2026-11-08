@@ -2,10 +2,10 @@
 
 import { ErrorState, LoadingState } from "@/components/ui/state-message";
 import { ButtonLink } from "@/components/ui/button";
-import { guidanceForOrderError } from "../order-error";
+import { guidanceForOrderError, needsSessionResync } from "../order-error";
 import { useOrderDetail } from "../use-order-reads";
 import { OrderDetailView, type OrderActionFlags } from "./order-detail-view";
-import { RequireSession } from "./require-session";
+import { RequireSession, loginHref } from "./require-session";
 import type { ReactNode } from "react";
 
 type Props = {
@@ -27,7 +27,10 @@ function Loader({ id, placed, renderActions }: Props) {
         message={guidance.message}
         onRetry={guidance.action === "none" || guidance.action === "login" ? undefined : reload}
       >
-        <div className="mt-4">
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          {needsSessionResync(state.error) && (
+            <ButtonLink href={loginHref(`/orders/${encodeURIComponent(id)}`)}>Đăng nhập lại</ButtonLink>
+          )}
           <ButtonLink href="/orders" variant="text">
             Xem lịch sử đơn
           </ButtonLink>

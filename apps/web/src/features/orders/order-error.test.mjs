@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { OrderApiError, guidanceForOrderError, isOutcomeUnknown } from "./order-error.ts";
+import { OrderApiError, guidanceForOrderError, isOutcomeUnknown, needsSessionResync } from "./order-error.ts";
 
 const err = (code, status = 0, details) => new OrderApiError(code, "", status, details);
 
@@ -78,4 +78,13 @@ test("đơn cũ policy 1 chỉ xem", () => {
 test("mã lạ không được coi là lỗi đã xác nhận", () => {
   const g = guidanceForOrderError(err("UNKNOWN", 418));
   assert.equal(g.confirmed, false);
+});
+
+test("lỗi phiên (đăng nhập/hết hạn/không khớp) cần đồng bộ lại auth; lỗi khác thì không", () => {
+  for (const code of ["AUTH_REQUIRED", "SESSION_EXPIRED", "SESSION_INVALID", "REQUEST_FORBIDDEN"]) {
+    assert.equal(needsSessionResync(err(code, 401)), true, code);
+  }
+  for (const code of ["RESOURCE_NOT_FOUND", "NETWORK_ERROR", "UPSTREAM_UNAVAILABLE", "INVALID_RESPONSE", "UNKNOWN"]) {
+    assert.equal(needsSessionResync(err(code)), false, code);
+  }
 });

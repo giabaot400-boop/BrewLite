@@ -5,16 +5,13 @@ import { Alert } from "@/components/ui/alert";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card, cardClassName } from "@/components/ui/card";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/state-message";
-import { guidanceForOrderError } from "../order-error";
+import { guidanceForOrderError, needsSessionResync } from "../order-error";
 import { formatDateTime, formatMoney, shortOrderId } from "../order-format";
 import { useOrderHistory } from "../use-order-reads";
 import type { HistoryItem } from "../types";
+import { isLegacyViewOnly } from "../order-status";
 import { OrderStatusBadge } from "./order-status-badge";
-import { RequireSession } from "./require-session";
-
-// Đơn cũ (policy 1): chưa có hạn thanh toán và không thể thanh toán/hủy.
-const isViewOnly = (item: HistoryItem) =>
-  item.status === "PENDING" && item.paymentDeadline === null && !item.canPay && !item.canCancel;
+import { RequireSession, loginHref } from "./require-session";
 
 function HistoryRow({ item }: { item: HistoryItem }) {
   return (
@@ -27,7 +24,7 @@ function HistoryRow({ item }: { item: HistoryItem }) {
           <span className="block font-semibold">{shortOrderId(item.id)}</span>
           <span className="block text-sm text-stone-600">
             {formatDateTime(item.createdAt)} · {item.totalItemQuantity} món
-            {isViewOnly(item) && " · Đơn cũ, chỉ xem"}
+            {isLegacyViewOnly(item) && " · Đơn cũ, chỉ xem"}
           </span>
         </span>
         <span className="flex items-center gap-3">
@@ -50,7 +47,13 @@ function Loader() {
       <ErrorState
         message={guidance.message}
         onRetry={guidance.action === "none" || guidance.action === "login" ? undefined : reload}
-      />
+      >
+        {needsSessionResync(state.error) && (
+          <div className="mt-4">
+            <ButtonLink href={loginHref("/orders")}>Đăng nhập lại</ButtonLink>
+          </div>
+        )}
+      </ErrorState>
     );
   }
 

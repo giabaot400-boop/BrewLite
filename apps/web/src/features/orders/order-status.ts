@@ -87,3 +87,13 @@ export const TONE_CLASS: Record<StatusTone, string> = {
   success: "border-green-300 bg-green-50 text-green-900",
   info: "border-sky-300 bg-sky-50 text-sky-900",
 };
+
+/**
+ * Đơn cũ (policy 1): PENDING nhưng không có hạn thanh toán và không thể thanh toán/hủy.
+ * Không có dữ liệu giữ kho/thanh toán S3, nên UI không được nói "đã giữ hàng" hay hướng dẫn thanh toán.
+ */
+export function isLegacyViewOnly(order: { status: OrderStatus; paymentDeadline: string | null; canPay: boolean; canCancel: boolean }): boolean {
+  return order.status === "PENDING" && order.paymentDeadline === null && !order.canPay && !order.canCancel;
+}
+
+export const LEGACY_DESCRIPTION = "Đây là đơn cũ, chỉ có thể xem. Đơn không có hạn thanh toán và không thể thanh toán hay hủy tại đây.";

@@ -52,7 +52,7 @@ Thêm một khối mỗi ngày, mới nhất ở trên. Không sửa khối cũ;
 
 ### 06/11/2026
 
-- B: đã làm: S3-B-01 (UI đọc đơn, trang xác nhận/chi tiết/lịch sử, BFF đọc, 378 test đơn vị toàn frontend, typecheck/lint/build chạy trên máy B; chưa có SHA push) và bộ tài liệu S3-B-02 | tiếp theo: mở PR, nhờ A review | blocked bởi: chưa có (backend đọc đơn của C chưa tích hợp, dùng fixture).
+- B: đã làm: S3-B-01 (UI đọc đơn, trang xác nhận/chi tiết/lịch sử, BFF đọc, PR #32; 378 test trên máy B Node 24 trước review; đã sửa 4 điểm review 08/11: 388 test, lint/typecheck/build/Playwright đạt trên Node 22.22, cần chạy lại trên Node 24 và ghi SHA) và bộ tài liệu S3-B-02 | tiếp theo: push bản sửa, nhờ A review lại | blocked bởi: chưa có (backend đọc đơn của C chưa tích hợp, dùng fixture).
 - A, C, D, E: chưa cập nhật.
 
 ## 4. Burndown (remaining hours)

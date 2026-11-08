@@ -7,6 +7,11 @@ import { LoadingState } from "@/components/ui/state-message";
 import { useAuth } from "@/features/auth/auth-provider";
 import { withReturnTo } from "@/features/auth/return-to";
 
+/** Liên kết đăng nhập có đích quay về đúng trang đang xem. */
+export function loginHref(returnTo: string): string {
+  return `${withReturnTo("/login", returnTo)}${returnTo === "/" ? "?" : "&"}reason=required`;
+}
+
 /**
  * Cổng đăng nhập cho trang đơn hàng. `children` được gọi với id chủ tài khoản để trang con
  * đặt `key` theo chủ + phiên: đổi tài khoản thì dữ liệu cũ bị bỏ, không hiện cho người khác.
@@ -23,7 +28,7 @@ export function RequireSession({
   if (status === "loading") return <LoadingState message="Đang kiểm tra phiên đăng nhập…" />;
 
   if (status !== "authenticated" || !user) {
-    const login = `${withReturnTo("/login", returnTo)}${returnTo === "/" ? "?" : "&"}reason=required`;
+    const login = loginHref(returnTo);
     return (
       <Card className="space-y-4 px-6 py-10">
         <p>Bạn cần đăng nhập để xem đơn hàng.</p>

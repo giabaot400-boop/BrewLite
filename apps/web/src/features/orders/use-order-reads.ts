@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { useAuth } from "@/features/auth/auth-provider";
-import { OrderApiError } from "./order-error";
+import { OrderApiError, needsSessionResync } from "./order-error";
 import { createOrderReadClient, type OrderReadClient } from "./order-read-client";
 import { createTicketCounter, historyViewReducer, initialViewState, orderViewReducer, type ViewAction, type ViewState } from "./order-view-state";
 import type { HistoryView, OrderDetail } from "./types";
@@ -16,10 +16,10 @@ type Loaded<T> = {
 function useRead<T>(
   reducer: (state: ViewState<T>, action: ViewAction<T>) => ViewState<T>,
   /** Phải ổn định giữa các lần render (useCallback) vì là đầu vào của effect. */
-  load: (client: OrderReadClient) => Promise<T>,
+  load: (client: OrderReadClient, binding: string | undefined) => Promise<T>,
   client?: OrderReadClient,
 ): Loaded<T> {
-  const { status, getSessionVersion } = useAuth();
+  const { status, getSessionVersion, getSessionSnapshot, refresh } = useAuth();
   const http = useMemo(() => client ?? createOrderReadClient(), [client]);
   const [state, dispatch] = useReducer(reducer, undefined, initialViewState<T>);
   // Bộ đếm lượt đọc: lượt cũ về muộn hoặc sau khi rời trang bị bỏ.
@@ -29,16 +29,23 @@ function useRead<T>(
   // bị bỏ, để dữ liệu của chủ cũ không hiện cho chủ mới. Màn hình còn được tách bằng key theo chủ.
   const run = useCallback(async () => {
     const sessionAtStart = getSessionVersion();
+    // Binding của phiên UI đang hiển thị, chụp cùng lúc với phiên bản; BFF đối chiếu với cookie hiện tại.
+    const binding = getSessionSnapshot().binding;
     const ticket = tracker.next();
     try {
-      const data = await load(http);
+      const data = await load(http, binding);
       if (!tracker.isCurrent(ticket) || getSessionVersion() !== sessionAtStart) return;
       dispatch({ type: "success", data, receivedAtMs: Date.now() });
     } catch (error) {
       if (!tracker.isCurrent(ticket) || getSessionVersion() !== sessionAtStart) return;
-      dispatch({ type: "failure", error: error instanceof OrderApiError ? error : new OrderApiError("UNKNOWN", "") });
+      const failure = error instanceof OrderApiError ? error : new OrderApiError("UNKNOWN", "");
+      dispatch({ type: "failure", error: failure });
+      // Server nói phiên không còn khớp (hết hạn, đổi tài khoản ở tab khác): đồng bộ lại auth bằng /me
+      // (chỉ đọc, không xóa cookie). Kết quả quyết định UI: anonymous -> cổng đăng nhập; tài khoản mới
+      // -> đổi key và đọc lại cho đúng chủ. Không tự thử lại yêu cầu đọc.
+      if (needsSessionResync(failure)) void refresh();
     }
-  }, [getSessionVersion, http, load, tracker]);
+  }, [getSessionVersion, getSessionSnapshot, http, load, refresh, tracker]);
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -57,11 +64,11 @@ function useRead<T>(
 }
 
 export function useOrderDetail(id: string, client?: OrderReadClient): Loaded<OrderDetail> {
-  const load = useCallback((c: OrderReadClient) => c.getOrder(id), [id]);
+  const load = useCallback((c: OrderReadClient, binding: string | undefined) => c.getOrder(id, binding), [id]);
   return useRead<OrderDetail>(orderViewReducer, load, client);
 }
 
-const loadHistory = (c: OrderReadClient) => c.getHistory();
+const loadHistory = (c: OrderReadClient, binding: string | undefined) => c.getHistory(binding);
 
 export function useOrderHistory(client?: OrderReadClient): Loaded<HistoryView> {
   return useRead<HistoryView>(historyViewReducer, loadHistory, client);

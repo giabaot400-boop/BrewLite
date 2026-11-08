@@ -4,7 +4,7 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatDateTime, formatPoints, shortOrderId } from "../order-format";
 import { guidanceForOrderError, type OrderApiError } from "../order-error";
-import { cancelReasonLabel, statusMeta } from "../order-status";
+import { LEGACY_DESCRIPTION, cancelReasonLabel, isLegacyViewOnly, statusMeta } from "../order-status";
 import type { OrderDetail } from "../types";
 import { OrderLines, OrderTotals } from "./order-lines";
 import { OrderStatusBadge } from "./order-status-badge";
@@ -33,7 +33,8 @@ type Props = {
 export function OrderDetailView({ order, receivedAtMs, placed, refreshError, onRefresh, renderActions }: Props) {
   const meta = statusMeta(order.status);
   const cancelText = cancelReasonLabel(order.cancelReason);
-  const awaitingPayment = order.status === "PENDING" || order.status === "PAYMENT_FAILED";
+  const legacy = isLegacyViewOnly(order);
+  const awaitingPayment = !legacy && (order.status === "PENDING" || order.status === "PAYMENT_FAILED");
 
   return (
     <div className="space-y-6">
@@ -51,16 +52,13 @@ export function OrderDetailView({ order, receivedAtMs, placed, refreshError, onR
       )}
 
       <Card className="space-y-2 p-5">
-        <p>{meta.description}</p>
+        <p>{legacy ? LEGACY_DESCRIPTION : meta.description}</p>
         {cancelText && <p className="text-stone-700">{cancelText}</p>}
         {awaitingPayment && order.paymentDeadline && (
           <PaymentDeadline deadline={order.paymentDeadline} serverTime={order.serverTime} receivedAtMs={receivedAtMs} />
         )}
         {order.status === "CANCELLED" && order.latestPayment?.refundedAt && (
           <p className="text-stone-700">Đã hoàn tiền cho lần thanh toán này.</p>
-        )}
-        {!order.canPay && !order.canCancel && order.paymentDeadline === null && order.status === "PENDING" && (
-          <p className="text-stone-700">Đây là đơn cũ, chỉ có thể xem.</p>
         )}
       </Card>
 

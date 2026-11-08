@@ -51,12 +51,16 @@ Kiểm tra trên fixture (`NEXT_PUBLIC_ORDERS_SOURCE=mock`) và lặp lại vớ
 
 | Mục | Cách kiểm tra | Trạng thái | Bằng chứng |
 |---|---|---|---|
-| Bảy trạng thái đều có nhãn/mô tả | Mở `/orders/ord-pending`, `ord-failed`, `ord-paid`, `ord-preparing`, `ord-ready`, `ord-done`, `ord-expired`, `ord-refunded` | Đã chạy trên fixture bằng Playwright (Chromium, 360 và 1280 px), chưa có backend thật | Script `s3b-e2e.cjs` (chưa commit); kết quả PASS toàn bộ trong phiên làm việc của B |
+| Bảy trạng thái đều có nhãn/mô tả | Mở `/orders/ord-pending`, `ord-failed`, `ord-paid`, `ord-preparing`, `ord-ready`, `ord-done`, `ord-expired`, `ord-refunded` | Đã chạy trên fixture bằng Playwright (Chromium, 360 và 1280 px), chưa có backend thật | Script `docs/sprint3/scripts/b-orders-e2e.cjs` (hướng dẫn chạy ở đầu file); 44/44 PASS trên Node 22.22 ngày 08/11/2026; chạy lại trên Node 24 + ghi SHA trước khi ghi PASS chính thức |
 | Đơn cũ (policy 1) chỉ xem | `/orders/ord-legacy` | Như trên | Như trên |
 | Chưa đăng nhập | `/orders` hiện lời mời đăng nhập có `next` và `reason=required` | Như trên | Như trên |
 | 404 không lộ dữ liệu | `/orders/id-la` | Như trên | Như trên |
 | Không cuộn ngang ở 360 px | Tất cả trang trên | Như trên | Như trên |
 | Replay create không đè trạng thái mới (S3-ORD-03) | Test đơn vị `order-version.test.mjs` | Test đơn vị PASS; **AC chưa chạy** với backend thật | |
+| Đơn cũ không nói "đã giữ hàng" | `/orders/ord-legacy` không có câu giữ hàng/thanh toán trước hạn | Script như trên PASS (08/11) | |
+| ID có `%` không đổi identity | `/orders/a%252Fb` hiện không tìm thấy; test đơn vị round-trip `orderPath` | Script + test đơn vị PASS; chưa E2E tới backend | |
+| Lệch tài khoản: UI A, cookie B | Test BFF: binding không khớp → 403, không gọi backend | Test đơn vị PASS; **chưa chạy với auth thật hai tab** | |
+| 401 khi đọc → đăng nhập lại | Nút "Đăng nhập lại" có `next`; `refresh()` đồng bộ auth | Phần link/`needsSessionResync` có test; **luồng với backend thật CHƯA CHẠY** | |
 | Trình đọc màn hình thật | NVDA/VoiceOver | CHƯA CHẠY | |
 | Safari / Firefox | | CHƯA CHẠY | |
 

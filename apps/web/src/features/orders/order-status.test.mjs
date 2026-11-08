@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { STATUS_META, cancelReasonLabel, statusMeta } from "./order-status.ts";
+import { LEGACY_DESCRIPTION, STATUS_META, cancelReasonLabel, isLegacyViewOnly, statusMeta } from "./order-status.ts";
 import { ORDER_STATUSES } from "./types.ts";
 
 test("đủ bảy trạng thái, mỗi trạng thái có nhãn và mô tả", () => {
@@ -27,4 +27,18 @@ test("lý do hủy có câu riêng, null thì không có", () => {
   assert.match(cancelReasonLabel("PAYMENT_WINDOW_EXPIRED"), /quá hạn/);
   assert.match(cancelReasonLabel("CUSTOMER_REQUEST"), /yêu cầu hủy/);
   assert.equal(cancelReasonLabel(null), null);
+});
+
+test("đơn cũ chỉ xem: chỉ PENDING không hạn, không thanh toán/hủy được", () => {
+  const legacy = { status: "PENDING", paymentDeadline: null, canPay: false, canCancel: false };
+  assert.equal(isLegacyViewOnly(legacy), true);
+  assert.equal(isLegacyViewOnly({ ...legacy, paymentDeadline: "2026-11-06T10:15:00.000Z" }), false);
+  assert.equal(isLegacyViewOnly({ ...legacy, canPay: true }), false);
+  assert.equal(isLegacyViewOnly({ ...legacy, canCancel: true }), false);
+  assert.equal(isLegacyViewOnly({ ...legacy, status: "PAID" }), false);
+});
+
+test("mô tả đơn cũ không khẳng định đã giữ hàng hay hướng dẫn thanh toán trước hạn", () => {
+  assert.doesNotMatch(LEGACY_DESCRIPTION, /giữ hàng|trước hạn|Hãy thanh toán/i);
+  assert.match(LEGACY_DESCRIPTION, /chỉ có thể xem/);
 });

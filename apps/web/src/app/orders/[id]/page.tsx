@@ -9,23 +9,15 @@ type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-/** ID là opaque; chỉ giải mã phần trăm khi hợp lệ, nếu không giữ nguyên để backend trả 404. */
-function safeDecode(value: string): string {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return value;
-  }
-}
-
 export default async function OrderPage({ params, searchParams }: Props) {
+  // Next.js đã giải mã route param đúng một lần; ID là opaque nên KHÔNG giải mã thêm (a%252Fb -> "a%2Fb").
   const { id } = await params;
   const query = await searchParams;
   // `placed=1` do luồng đặt hàng gắn vào sau khi tạo đơn thành công; chỉ bật thông báo, không đổi dữ liệu.
   const placed = (Array.isArray(query.placed) ? query.placed[0] : query.placed) === "1";
   return (
     <PageContainer spacing="compact">
-      <OrderDetailPage id={safeDecode(id)} placed={placed} />
+      <OrderDetailPage id={id} placed={placed} />
     </PageContainer>
   );
 }
