@@ -46,3 +46,25 @@ Các ngày 04–05/11 là mốc mục tiêu trong kế hoạch cũ, không phả
 ## Ghi chú thiết kế
 
 Xem [changelog](CHANGELOG.md). Giữ 13 model/14 UC/27 AC; làm rõ FR-13 và D16, công thức/canonical, kế hoạch A1/A2. Tất cả AC vẫn CHƯA CHẠY.
+
+## Xem thử UI checkout bằng dữ liệu mẫu
+
+Trang `/dev/checkout` phục vụ review phần UI của S3-A-02 trong lúc chờ adapter/read API và backend. `CheckoutV2Panel` nhận các port từ bên ngoài, tái sử dụng coordinator và UI dùng chung; route xem thử cung cấp fixture riêng. Đây không phải trang checkout đã tích hợp và không thay các trang xác nhận/chi tiết/lịch sử của B.
+
+Từ thư mục gốc repo, dừng frontend đang chạy ở cổng 3000 rồi mở bằng PowerShell:
+
+```powershell
+$env:CHECKOUT_PREVIEW_ENABLED = "1"
+npm run dev --workspace apps/web
+```
+
+Mở `http://localhost:3000/dev/checkout`. Cờ trên chỉ áp dụng cho terminal hiện tại; không cần sửa `.env`. Không bật cờ thì route trả 404. Production luôn trả 404 kể cả có cờ. Kết thúc bằng Ctrl+C rồi `Remove-Item Env:\CHECKOUT_PREVIEW_ENABLED`; lần mở dev bình thường không có cờ thì trang bị khóa.
+
+- Ban đầu có hai Cappuccino M, giá mẫu 50.000đ/ly. Nhập DEMO10 để xem giảm dự kiến 10.000đ; mở xác nhận rồi quay lại chưa tạo request. Tạo đơn xác nhận PENDING vẫn giữ hai ly và khóa sửa giỏ.
+- Ví/Thẻ đều có xác nhận riêng. Trong mục điều khiển dữ liệu mẫu, chọn “Không thành công” (FAILED) để thử giữ giỏ; đổi lại thành công rồi xác nhận lần mới để thấy key mới trên cùng orderId. Replay key cũ vẫn giữ kết quả cũ.
+- Có ba sự cố một lần: mất phản hồi tạo đơn, mất phản hồi payment sau khi lưu, GET Order lỗi sau payment. Dùng nút thử lại/khôi phục chủ động và dấu vết giả lập để đối chiếu key cũ; không tự POST sau đọc dữ liệu hoặc đổi cấu hình mẫu.
+- Hủy trước thanh toán giữ các món; hủy sau PAID không dựng lại giỏ đã dọn. Nút thêm/làm lại chỉ thao tác fixture; tải lại trang tạo fixture mới.
+
+Fixture chỉ giữ phiên/giỏ/orders/payments trong bộ nhớ của trang, dùng adapter HTTP/khóa giả lập và parser projection mẫu; không đọc/ghi localStorage giỏ thật, migrate storage, gửi mutation backend hoặc chạy kho/điểm/refund thật. Header và GET `/api/auth/me` vẫn thuộc nền ứng dụng hiện có, không xác thực tài khoản mẫu. Không dùng fixture làm bằng chứng quyền server, Web Locks nhiều tab, đầy đủ DTO của B, transaction hoặc AC Sprint 3 đạt. Các reason/nhánh recovery đang đề xuất ở CONTRACTS 7.2 chưa được kích hoạt.
+
+Kiểm tra trước bàn giao: unit test fixture/model và hồi quy frontend, typecheck/lint/build; HTTP smoke route bật/tắt và production. Trình duyệt cần thử thêm desktop/mobile, Tab/Shift+Tab/Escape, quay lại không gửi request và không đổi bytes giỏ thật. Bằng chứng trình duyệt ghi theo môi trường thực chạy; không suy kết quả từ build hoặc test giả lập.
