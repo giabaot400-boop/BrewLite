@@ -22,6 +22,9 @@ export type CheckoutOrderReadV2 = {
   session: CheckoutSessionV2;
   order: CartCurrentOrder;
 };
+export type CheckoutOrderReaderV2 = (input: {
+  orderId: string; session: CheckoutSessionV2; signal?: AbortSignal;
+}) => Promise<CheckoutOrderReadV2>;
 type Storage = ReturnType<typeof createCartStorage>;
 type Environment = {
   storage: Pick<Storage, "applyCheckoutLifecycleV2" | "applyOrderBindingV2" | "settleRejectionV2">;
@@ -34,7 +37,7 @@ type Environment = {
    * stale versions. Never echo these local checkpoint fields as proof of auth.
    * The current S2 reader is not sufficient; UI activation waits for DEP-05/06.
    */
-  readOrder: (input: { orderId: string; session: CheckoutSessionV2; signal?: AbortSignal }) => Promise<CheckoutOrderReadV2>;
+  readOrder: CheckoutOrderReaderV2;
   rejectionReasons?: OrderRejectionReasonsV2;
   randomUUID?: () => string;
   now?: () => string;

@@ -5,7 +5,7 @@ import { isSessionBinding } from "../../lib/session-binding.ts";
 import { encodeOrderPathSegment } from "../../lib/order-path.ts";
 import type { AuthClient } from "../auth/auth-client";
 import type { AuthSession } from "../auth/auth-session";
-import type { CheckoutSessionV2, CheckoutOrderReadV2 } from "./cart-checkout-client-v2";
+import type { CheckoutSessionV2, CheckoutOrderReaderV2 } from "./cart-checkout-client-v2";
 import type { CheckoutBinding } from "./cart-envelope-v2";
 import type { CartCurrentOrder, CartOrderBindingResultV2 } from "./cart-order-binding-v2";
 import type { createCartStorage } from "./cart-storage";
@@ -20,7 +20,7 @@ type Environment = {
   storage: Pick<ReturnType<typeof createCartStorage>, "readV2" | "applyOrderBindingV2">;
   transport: Pick<ReturnType<typeof createCartMutationTransport>, "cancelOrder">;
   /** Owner-bound reader with full DTO/session/version validation, shared with B/C. */
-  readOrder: (input: { orderId: string; session: CheckoutSessionV2; signal?: AbortSignal }) => Promise<CheckoutOrderReadV2>;
+  readOrder: CheckoutOrderReaderV2;
   /** Use B's full OrderDetail parser before projection; a projection-only parser is insufficient. */
   parseOrderDetail: (body: unknown) => CartCurrentOrder;
 };

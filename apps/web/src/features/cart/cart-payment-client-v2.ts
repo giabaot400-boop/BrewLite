@@ -5,7 +5,7 @@ import { requireCurrentCartOrder } from "./cart-order-binding-v2.ts";
 import { isSessionBinding } from "../../lib/session-binding.ts";
 import type { AuthClient } from "../auth/auth-client";
 import type { AuthSession } from "../auth/auth-session";
-import type { CheckoutOrderReadV2, CheckoutSessionV2 } from "./cart-checkout-client-v2";
+import type { CheckoutOrderReaderV2, CheckoutSessionV2 } from "./cart-checkout-client-v2";
 import type { PaymentRecovery } from "./cart-envelope-v2";
 import type { CartCurrentOrder } from "./cart-order-binding-v2";
 import type { CartPaymentResultV2 } from "./cart-payment-recovery-v2";
@@ -26,7 +26,7 @@ type Environment = {
   sessionClient: Pick<AuthClient, "me">;
   transport: Pick<ReturnType<typeof createCartMutationTransport>, "sendPayment">;
   /** Same owner-bound, full-DTO validating reader adapter as the create coordinator. */
-  readOrder: (input: { orderId: string; session: CheckoutSessionV2; signal?: AbortSignal }) => Promise<CheckoutOrderReadV2>;
+  readOrder: CheckoutOrderReaderV2;
   randomUUID?: () => string;
   now?: () => string;
 };

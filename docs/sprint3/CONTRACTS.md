@@ -212,6 +212,37 @@ Luồng hủy dùng `cart-cancel-client-v2.ts`: đọc Order cho xác nhận và
 
 Điểm tích hợp cần A/C/D chốt trước bật UI v2: khi payment chưa tới server nhưng Order đã CANCELLED (hoặc một key khác đã thanh toán), replay key cũ có thể trả 409 ORDER_NOT_PAYABLE mà không có PaymentAttempt. Baseline quy định tra key trước trạng thái và không dựng attempt giả, nhưng chưa nói rõ cách kết thúc recovery trong nhánh này. Code hiện giữ UNRESOLVED, nên vẫn chặn lần mới của owner; cancel/check không tự xóa hoặc giải quyết record. Cần xác định bằng chứng phản hồi đủ để kết thúc đúng key khi không có attempt, ghi hợp đồng và thêm kiểm thử tích hợp; không lấy riêng GET/latestPayment hoặc timeout làm bằng chứng.
 
+### 7.1 Đầu vào bàn giao cho phần đọc đơn
+
+Ba coordinator dùng chung type `CheckoutOrderReaderV2` export từ `apps/web/src/features/cart/cart-checkout-client-v2.ts`. Input gồm `orderId`, checkpoint `{ownerId,binding,sessionVersion}` và `signal?`; output gồm checkpoint của lượt đã xác minh và projection `CartCurrentOrder`. Đây là interface TypeScript của A, chưa có adapter HTTP hoàn chỉnh hoặc bằng chứng B/C đã nhận bàn giao.
+
+- B/C đối chiếu đầy đủ OrderDetail trước khi trả projection; parser dùng cho response cancel cũng tái sử dụng parser OrderDetail của B. Không dựng parser DTO thứ hai trong module giỏ.
+- A/B phối hợp ràng buộc lượt đọc chi tiết/lịch sử bằng `X-BrewLite-Expected-Owner` hiện có: UI mã hóa owner bằng helper chung; BFF capture token một lần, xác minh `/auth/me`, so owner rồi GET bằng cùng token. Header không thay quyền NestJS, sai owner không trả dữ liệu người khác. Giữ deadline chung 10 giây BFF và 15 giây client, no-store; không tự xóa cookie.
+- UI đối chiếu binding/getSessionVersion trước và sau HTTP, loại response phiên cũ kể cả cùng owner; version Order/Payment không được thấp hơn đã hiển thị. Chỉ gán lại checkpoint vào response ở client không chứng minh đã xác minh owner phía server.
+- Trước bật UI v2 cần test UI A + cookie B không nhận dữ liệu B; response A về sau login B hoặc login lại A bị bỏ; GET version cũ không ghi đè; ID chứa `%` chỉ encode một lần. UI dựng bằng fixture không chứng minh các điều kiện HTTP này.
+
+### 7.2 Đề xuất chờ A/C/D đối chiếu
+
+Phần này bổ sung phương án cho các điểm baseline còn mở, **chưa là hợp đồng đã chốt**. Runtime hiện chưa dùng các reason/nhánh kết thúc recovery dưới đây; không sửa enum hoặc tự mở fallback theo response. Khi có thống nhất, chuyển nội dung đã chốt vào mục 3/7, ghi PR/SHA xác nhận và thêm fixture/test tương ứng trước kích hoạt.
+
+| Nhánh | Reason đề xuất | Người đối chiếu |
+|---|---|---|
+| 409 CHECKOUT_CHANGED | `PRICE_OR_TOTAL_CHANGED`, dùng cho giá dòng hoặc tổng chính thức không khớp expected*; giữ nguyên details đã thiết kế | C pricing, D workflow, A classifier |
+| 409 OUT_OF_STOCK | `INSUFFICIENT_PRODUCT_STOCK`; resources chỉ gồm Product thiếu, requested là tổng qty qua mọi cấu hình | E stock, D workflow, A classifier |
+
+Hai reason trên không đổi HTTP status, thứ tự validation, canonical/hash hoặc request body. Frontend vẫn kiểm toàn bộ details với saved request trước khi kết thúc pending; không lấy số liệu server để sửa body/key cũ. Lỗi chưa thống nhất hoặc dữ liệu sai giữ UNKNOWN.
+
+Đề xuất nhánh payment không có attempt: sau khi lấy đúng khóa user/key, tra replay và khóa/đối chiếu Order bằng snapshot đủ mới, D chỉ bổ sung marker dưới đây vào 409 ORDER_NOT_PAYABLE khi đã chứng minh không có attempt của chính user/key và Order thuộc PAID/PREPARING/READY/COMPLETED/CANCELLED:
+
+```json
+{"error":{"code":"ORDER_NOT_PAYABLE","message":"Đơn không nhận lần thanh toán mới.","details":{"reason":"NO_ATTEMPT_TERMINAL_ORDER","orderId":"order-example","orderVersion":1,"orderStatus":"CANCELLED"}}}
+```
+
+- Có attempt thì replay PaymentView của chính key, kể cả FAILED cũ khi latestPayment là K2 hoặc Order đã đổi trạng thái/refund. Không phát marker nếu lookup lỗi, khóa bận, snapshot chưa chắc chắn; không dựng PaymentAttempt giả, đổi isolation hoặc đổi key để né lỗi.
+- A chỉ được kết thúc recovery đúng owner/key/body khi record còn UNRESOLVED, chưa pin paymentId, POST cùng key/body trả đúng marker đã thống nhất, rồi GET đã xác minh đúng Order terminal và version không thấp hơn marker. GET lỗi hoặc thiếu một bằng chứng vẫn giữ UNRESOLVED. Marker không áp cho riêng PAYMENT_WINDOW_EXPIRED khi Order chưa terminal.
+- Nếu được chốt, ghi RESOLVED với paymentId=null theo shape hiện có; UI diễn đạt yêu cầu này bị từ chối, không gọi đó là PaymentAttempt FAILED hoặc tạo payment giả. Chưa tự gửi key mới; giỏ vẫn theo binding/current Order, CANCELLED không dọn hoặc dựng lại.
+- Ca tích hợp bắt buộc cho đề xuất: K1 chưa tới server rồi cancel/expiry; K2 đã thanh toán khi K1 chưa có attempt; K1 FAILED đã tồn tại phải replay FAILED thay vì marker; recovery đã pin ID không nhận marker; GET sau marker lỗi/khác owner/version cũ giữ record. A/C/D cần xác nhận tính khả thi và bằng chứng DB trước khi đổi runtime.
+
 ## 8 Chạy triển khai và demo
 
 Nền dùng Node 24, Prisma 7.10.1, PostgreSQL 17 và bcrypt native 6.0.0 cost 12. npm ci theo lockfile; bcryptjs còn ở devDependencies phục vụ fixture tương thích hash cũ, không đổi runtime auth về bcryptjs. Bằng chứng S2 không thay test S3 sau tích hợp.
