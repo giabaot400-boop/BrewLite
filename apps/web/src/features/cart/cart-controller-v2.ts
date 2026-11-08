@@ -137,6 +137,30 @@ export function createCartControllerV2(environment: { auth: AuthPort; storage: S
     },
     read,
     reload,
+    /** One mounted-provider gate shared by checkout, payment, cancel, edits and logout. */
+    async runCheckout<T>(work: () => Promise<T>): Promise<T> {
+      const view = cartControllerViewV2(value, auth);
+      if (!active || busy || view.state.status !== "ready" || !view.records?.cart) {
+        throw new CartStorageError("CART_CHANGED", "Đang xử lý hoặc kiểm tra lại giỏ. Vui lòng chờ rồi xác nhận lại.");
+      }
+      if (view.records.ownerId === null) {
+        throw new CartStorageError("OWNER_MISMATCH", "Cần đăng nhập trước khi thao tác đơn hàng.");
+      }
+      const session = sessionOf(auth), life = lifetime;
+      busy = true;
+      emit({ ...value, state: { ...value.state, isSaving: true } });
+      try {
+        const result = await work();
+        if (!active || life !== lifetime || !current(session)) {
+          throw new CartStorageError("OWNER_MISMATCH", "Phiên đã thay đổi. Giữ dữ liệu để kiểm tra lại.");
+        }
+        return result;
+      } finally {
+        // Reading publishes durable pending/recovery even when HTTP failed; never auto-POST.
+        try { if (active && life === lifetime) await read(); }
+        finally { releaseBusy(); }
+      }
+    },
     async mutate(action: CartAction): Promise<boolean> {
       if (!active || busy || !cartControllerViewV2(value, auth).canMutate) return false;
       busy = true;

@@ -5,9 +5,11 @@ import { useAuth } from "../auth/auth-provider";
 import { CartEditingContext, type CartEditingValue } from "./cart-edit-context";
 import { createCartControllerV2, cartControllerViewV2, INITIAL_CART_SNAPSHOT_V2 } from "./cart-controller-v2";
 import { CART_STORAGE_KEY, createCartStorage } from "./cart-storage";
+import { createCartCheckoutRuntimeV2 } from "./cart-checkout-runtime-v2";
+import type { CheckoutUiEnvironment } from "./cart-checkout-ui";
 
 type Controller = ReturnType<typeof createCartControllerV2>;
-type Value = CartEditingValue & { records: ReturnType<Controller["getView"]>["records"] };
+type Value = CartEditingValue & { records: ReturnType<Controller["getView"]>["records"]; checkoutEnvironment: CheckoutUiEnvironment };
 const CartV2Context = createContext<Value | null>(null);
 
 /** Prepared for the S3 activation switch. Never mount beside the v1 provider. */
@@ -17,6 +19,7 @@ export function CartProviderV2({ children }: { children: ReactNode }) {
     subscribe: auth.subscribeSession, refresh: auth.refresh, prepareSignOut: auth.prepareSignOut, setLogoutInfoSource: auth.setLogoutInfoSource },
     storage: createCartStorage() }));
   const [controller] = useState(() => createCartControllerV2(environment));
+  const [checkoutEnvironment] = useState(() => createCartCheckoutRuntimeV2({ ...environment, controller }));
   const snapshot = useSyncExternalStore(controller.subscribe, controller.getSnapshot, () => INITIAL_CART_SNAPSHOT_V2);
   useEffect(() => controller.start(), [controller]);
   useEffect(() => {
@@ -37,11 +40,11 @@ export function CartProviderV2({ children }: { children: ReactNode }) {
   }, [controller]);
   const value = useMemo<Value>(() => {
     const view = cartControllerViewV2(snapshot, { getSnapshot: () => auth.sessionSnapshot, getSessionVersion: () => auth.sessionVersion });
-    return { ...view, reload: controller.reload, addItem: item => controller.mutate({ type: "ADD_ITEM", item }),
+    return { ...view, checkoutEnvironment, reload: controller.reload, addItem: item => controller.mutate({ type: "ADD_ITEM", item }),
       increment: lineKey => controller.mutate({ type: "INCREMENT", lineKey }),
       decrement: lineKey => controller.mutate({ type: "DECREMENT", lineKey }),
       removeItem: lineKey => controller.mutate({ type: "REMOVE_ITEM", lineKey }) };
-  }, [snapshot, controller, auth.sessionSnapshot, auth.sessionVersion]);
+  }, [snapshot, controller, checkoutEnvironment, auth.sessionSnapshot, auth.sessionVersion]);
   return <CartV2Context.Provider value={value}><CartEditingContext.Provider value={value}>{children}</CartEditingContext.Provider></CartV2Context.Provider>;
 }
 
