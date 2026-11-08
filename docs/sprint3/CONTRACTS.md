@@ -204,6 +204,8 @@ Envelope, migration và writer v1 tuân mục 8 bản phạm vi. A giữ root sc
 
 Crash sau create commit trước binding: replay cùng saved key/body rồi GET Order và bind đúng snapshot nếu còn khớp. Payment response hợp lệ nhưng GET Order lỗi: recovery còn UNRESOLVED; không payment key mới. Sau FAILED đã đối chiếu Order hiện tại còn hạn: đánh dấu resolved; khách bấm retry mới sinh key mới cùng orderId. Sau paid đọc Order mới hơn CANCELLED: không dọn hoặc dựng giỏ. Hai tab owner cookie đổi trước gửi: BFF captured-token guard chặn nhầm owner; response guard UI bảo vệ mọi local write sau đó.
 
+Luồng tạo đơn v2 dùng `cart-checkout-client-v2.ts`: xác nhận chủ động, kiểm `/me` đúng owner/binding và `getSessionVersion`, lưu pending bền trước POST, lưu phản hồi tạo đơn trước GET current Order rồi mới bind. `readOrder` là interface nội bộ chờ tích hợp với phần đọc của B/C: adapter phải bảo vệ owner phía server, kiểm đầy đủ OrderDetail và phiên/version trước khi trả projection `CartCurrentOrder`. Checkpoint trả từ adapter là dữ liệu cục bộ, không phải DTO/header HTTP mới hoặc bằng chứng xác thực. Chưa nối adapter đã kiểm chứng thì chưa bật UI v2; khởi tạo helper không tự migrate, gửi request, nhận chủ giỏ hay thanh toán. Lỗi GET giữ pending/key/body và giỏ để người dùng chủ động thử lại.
+
 ## 8 Chạy triển khai và demo
 
 Nền dùng Node 24, Prisma 7.10.1, PostgreSQL 17 và bcrypt native 6.0.0 cost 12. npm ci theo lockfile; bcryptjs còn ở devDependencies phục vụ fixture tương thích hash cũ, không đổi runtime auth về bcryptjs. Bằng chứng S2 không thay test S3 sau tích hợp.
