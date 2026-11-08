@@ -52,7 +52,7 @@ Thêm một khối mỗi ngày, mới nhất ở trên. Không sửa khối cũ;
 
 ### 06/11/2026
 
-- B: đã làm: S3-B-01 (UI đọc đơn, trang xác nhận/chi tiết/lịch sử, BFF đọc, PR #32; 378 test trên máy B Node 24 trước review; đã sửa 4 điểm review 08/11: 388 test, lint/typecheck/build/Playwright đạt trên Node 22.22, cần chạy lại trên Node 24 và ghi SHA) và bộ tài liệu S3-B-02 | tiếp theo: push bản sửa, nhờ A review lại | blocked bởi: chưa có (backend đọc đơn của C chưa tích hợp, dùng fixture).
+- B: đã làm: S3-B-01 (UI đọc đơn, trang xác nhận/chi tiết/lịch sử, BFF đọc, PR #32; 378 test trên máy B Node 24 trước review; đã sửa 4 điểm review 08/11: 388 test đạt trên Node 24 (máy B) và Node 22.22; lint/typecheck/build/Playwright mới chạy trên Node 22.22) và bộ tài liệu S3-B-02 | tiếp theo: push bản sửa, nhờ A review lại | blocked bởi: chưa có (backend đọc đơn của C chưa tích hợp, dùng fixture).
 - A, C, D, E: chưa cập nhật.
 
 ## 4. Burndown (remaining hours)
@@ -93,8 +93,8 @@ Chỉ ghi điều có bằng chứng trên repo tại 07/11/2026 (main `82c7675`
 |---|---|---|---|---|
 | A2-REQ, A2-UML | A / B, B / D | 05/11 Task 1–2 trên repo | Tài liệu Task 1–2 đã có trên main | PR #29 (merge) |
 | A2-REPO-CI | B / E | 07–08/11 cổng Task 4 | **Một phần:** đã đổi layout `apps/web`, `apps/api`. **Chưa có CI**: main không có `.github/` | PR #30 (merge); `git ls-tree` main |
-| A2-ARCH | D / E | 06/11 Task 3.1 | Phần BFF/PWA của A đang ở PR #31 (đã review, chưa merge lúc ghi). Phần kiến trúc tổng thể và ADR của D: chưa thấy trên main | PR #31 |
-| A2-MENU-PWA | A / B | Task 5 (PWA) | Mới có tài liệu phương án; manifest, service worker, trang offline **chưa triển khai** | PR #31 |
+| A2-ARCH | D / E | 06/11 Task 3.1 | Phần BFF/PWA của A ở PR #31 (đã review; chưa thấy trên main ngày 08/11). Phần kiến trúc tổng thể và ADR của D: chưa thấy trên main | PR #31; `git log` main 08/11 |
+| A2-MENU-PWA | A / B | Task 5 (PWA) | Tài liệu phương án ở PR #31. Phần triển khai (manifest, service worker, trang offline) ở PR #33, B đã review 08/11 (lint/typecheck/346 test/build và Chromium offline đạt; chưa merge lúc ghi). Cài app trên máy thật và HTTPS production chưa có bằng chứng | PR #31, PR #33 |
 | A2-DEPLOY-DESIGN | E / C | 06/11 Task 3.2 | chưa cập nhật | |
 | A2-HEALTH-SECURITY, A2-CHECKOUT-TEST, A2-CD-PRODUCTION, A2-HANDOVER | C, D, E, B | 09–14/11 | chưa cập nhật | |
 
