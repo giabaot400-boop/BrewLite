@@ -57,7 +57,7 @@ function payable(order: CartCurrentOrder): boolean {
 }
 
 /** Only a response from POST with the saved key/body is eligible; never pass GET.latestPayment here. */
-function paymentReply(reply: OrderReply, recovery: PaymentRecovery): CartPaymentView | null {
+export function parseCartPaymentReply(reply: OrderReply, recovery: PaymentRecovery): CartPaymentView | null {
   const p = reply.body;
   const keys = ["id", "version", "orderId", "method", "amount", "status", "failureCode", "createdAt", "resolvedAt", "refundedAmount", "refundedAt", "serverTime"];
   if (reply.status !== 200 && reply.status !== 201 || !record(p) || Object.keys(p).length !== keys.length
@@ -127,7 +127,7 @@ export function applyCartPaymentV2(value: CartEnvelopeV2, command: CartPaymentCo
   if (!recovery || !matchesCheckpoint(command.expectedRecovery, recovery)) return result(value, "IGNORED");
   // Duplicate/late responses cannot publish an older Order view after reconciliation.
   if (recovery.recoveryStatus === "RESOLVED") return result(value, "IGNORED");
-  const payment = paymentReply(command.reply, recovery);
+  const payment = parseCartPaymentReply(command.reply, recovery);
   if (!payment) return result(value, "UNKNOWN");
   // Pin the ID from this exact POST response even when the following GET fails.
   const pinned = recovery.paymentId === payment.id ? value : withRecovery(value, { ...recovery, paymentId: payment.id });
