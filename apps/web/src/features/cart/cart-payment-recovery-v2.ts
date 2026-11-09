@@ -139,7 +139,7 @@ export function applyCartPaymentV2(value: CartEnvelopeV2, command: CartPaymentCo
     type: "CURRENT_ORDER", ownerId: recovery.ownerId, expectedBinding: command.expectedBinding, order: command.order });
   // The attempt can be identified even if its old checkout binding has ended.
   // In that case do not publish its captured Order view or offer a new attempt.
-  const publishOrder = settled?.outcome !== "IGNORED";
+  const publishOrder = settled !== null && settled.outcome !== "IGNORED";
   return result(settled?.envelope ?? resolved, "RESOLVED", { payment, order: publishOrder ? structuredClone(command.order) : null,
     cartEffect: settled?.cartEffect ?? "UNCHANGED",
     canConfirmNewAttempt: publishOrder && payment.status === "FAILED" && payable(command.order) });

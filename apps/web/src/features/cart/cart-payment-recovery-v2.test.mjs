@@ -273,6 +273,7 @@ test("policy-2 history payment without a local binding never creates one or clea
   const value = fixture(); value.checkoutBindings = {};
   const saved = prepared(value), result = applyCartPaymentV2(saved, settle(saved));
   assert.equal(result.outcome, "RESOLVED"); assert.deepEqual(result.envelope.cart, value.cart); assert.deepEqual(result.envelope.checkoutBindings, {});
+  assert.equal(result.order, null); assert.equal(result.canConfirmNewAttempt, false);
 });
 
 test("a current cancellation read before payment settlement blocks publishing an older paid view", () => {
@@ -364,4 +365,34 @@ test("corrupt/v1 storage or missing Web Locks fail closed without generating a p
   const { storage, memory } = setup();
   await assert.rejects(createCartStorage({ storage, locks: undefined }).applyPaymentLifecycleV2(begin(), current), code("LOCK_UNAVAILABLE"));
   assert.equal(memory.writes, 0);
+});
+
+
+test("a failed payment without a matching binding resolves its key without publishing the old order or opening a new attempt", () => {
+  for (const otherBinding of [false, true]) {
+    const value = fixture();
+    if (otherBinding) value.checkoutBindings.A.orderId = "new-order";
+    else value.checkoutBindings = {};
+    const saved = prepared(value), before = structuredClone(saved);
+    const reply = { status: 200, body: failed() };
+    const result = applyCartPaymentV2(saved, settle(saved, { expectedBinding: null, reply, order: failedOrder() }));
+    assert.equal(result.outcome, "RESOLVED"); assert.equal(result.order, null); assert.equal(result.canConfirmNewAttempt, false);
+    assert.equal(result.envelope.paymentRecoveries.A[KEY].recoveryStatus, "RESOLVED");
+    assert.equal(result.envelope.paymentRecoveries.A[KEY].paymentId, "payment-k1");
+    assert.equal(result.envelope.paymentRecoveries.A[KEY].requestKey, before.paymentRecoveries.A[KEY].requestKey);
+    assert.deepEqual(result.envelope.paymentRecoveries.A[KEY].body, before.paymentRecoveries.A[KEY].body);
+    assert.deepEqual(result.envelope.cart, before.cart); assert.deepEqual(result.envelope.checkoutBindings, before.checkoutBindings);
+  }
+});
+
+test("durable settlement with a null binding returns no order or new-attempt permission while preserving newer cart choices", async () => {
+  const value = fixture(); value.checkoutBindings = {};
+  const { service, memory } = setup(value);
+  const prepared = await service.applyPaymentLifecycleV2(begin(), current);
+  const command = settle(prepared.envelope, { expectedBinding: null, reply: { status: 200, body: failed() }, order: failedOrder() });
+  const settled = await service.applyPaymentLifecycleV2(command, current), stored = JSON.parse(memory.raw);
+  assert.equal(settled.outcome, "RESOLVED"); assert.equal(settled.order, null); assert.equal(settled.canConfirmNewAttempt, false);
+  assert.equal(stored.paymentRecoveries.A[KEY].recoveryStatus, "RESOLVED"); assert.equal(stored.paymentRecoveries.A[KEY].requestKey, KEY);
+  assert.deepEqual(stored.paymentRecoveries.A[KEY].body, { orderId: "order-a", method: "WALLET" });
+  assert.deepEqual(stored.cart, value.cart); assert.deepEqual(stored.checkoutBindings, {});
 });
