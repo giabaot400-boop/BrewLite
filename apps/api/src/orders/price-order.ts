@@ -64,7 +64,7 @@ function validMoney(value: number): boolean {
 function normalizePromotionCode(value: string | null): string | null {
   if (value === null) return null;
 
-  const code = value.trim().toUpperCase();
+  const code = value.trim().replace(/[a-z]/g, (character) => character.toUpperCase());
   if (code === "") return null;
 
   if (!/^[A-Z0-9_-]{1,32}$/.test(code)) {

@@ -18,9 +18,7 @@ const orderReadInclude = {
       },
     },
   },
-  promotion: {
-    select: { code: true },
-  },
+
   paymentAttempts: {
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     take: 1,
@@ -146,6 +144,16 @@ export class OrdersReaderService {
   private toOrderDetail(order: OrderReadRow, now: Date) {
     const latest = order.paymentAttempts[0] ?? null;
     const capabilities = this.getCapabilities(order, now);
+    const promotionSnapshot =
+      order.promotionSnapshot !== null &&
+      typeof order.promotionSnapshot === "object" &&
+      !Array.isArray(order.promotionSnapshot)
+        ? order.promotionSnapshot
+        : null;
+    const promotionCode =
+      promotionSnapshot && typeof promotionSnapshot.code === "string"
+        ? promotionSnapshot.code
+        : null;
 
     return {
       id: order.id,
@@ -173,12 +181,13 @@ export class OrdersReaderService {
       discountTotal: order.discountTotal,
       total: order.total,
 
-      promotion: order.promotion
-        ? {
-            code: order.promotion.code,
-            discountAmount: order.discountTotal,
-          }
-        : null,
+      promotion:
+        promotionCode !== null
+          ? {
+              code: promotionCode,
+              discountAmount: order.discountTotal,
+            }
+          : null,
 
       paymentDeadline: order.paymentDeadline?.toISOString() ?? null,
       paidAt: order.paidAt?.toISOString() ?? null,
