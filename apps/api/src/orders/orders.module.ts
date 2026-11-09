@@ -3,10 +3,11 @@ import { PrismaModule } from "../database/prisma.module.js";
 import { AuthModule } from "../auth/auth.module.js";
 import { OrdersController } from "./orders.controller.js";
 import { OrdersService } from "./orders.service.js";
+import { OrdersReaderService } from "./orders-reader.service.js";
 
 @Module({
   imports: [PrismaModule, AuthModule],
   controllers: [OrdersController],
-  providers: [OrdersService],
+  providers: [OrdersService, OrdersReaderService],
 })
 export class OrdersModule {}
