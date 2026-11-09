@@ -64,7 +64,16 @@ Mở `http://localhost:3000/dev/checkout`. Cờ trên chỉ áp dụng cho termi
 - Ví/Thẻ đều có xác nhận riêng. Trong mục điều khiển dữ liệu mẫu, chọn “Không thành công” (FAILED) để thử giữ giỏ; đổi lại thành công rồi xác nhận lần mới để thấy key mới trên cùng orderId. Replay key cũ vẫn giữ kết quả cũ.
 - Có ba sự cố một lần: mất phản hồi tạo đơn, mất phản hồi payment sau khi lưu, GET Order lỗi sau payment. Dùng nút thử lại/khôi phục chủ động và dấu vết giả lập để đối chiếu key cũ; không tự POST sau đọc dữ liệu hoặc đổi cấu hình mẫu.
 - Hủy trước thanh toán giữ các món; hủy sau PAID không dựng lại giỏ đã dọn. Nút thêm/làm lại chỉ thao tác fixture; tải lại trang tạo fixture mới.
+- Dùng “Ẩn khung checkout” rồi “Mở lại khung checkout” để thử component đọc lại đơn đã lưu mà vẫn giữ fixture trong bộ nhớ. Đơn PENDING và payment recovery còn nguyên; việc mở lại không thêm dòng POST vào dấu vết. Đây là kiểm tra remount với fixture, không phải bằng chứng F5/localStorage/PostgreSQL thật.
 
 Fixture chỉ giữ phiên/giỏ/orders/payments trong bộ nhớ của trang, dùng adapter HTTP/khóa giả lập và parser projection mẫu; không đọc/ghi localStorage giỏ thật, migrate storage, gửi mutation backend hoặc chạy kho/điểm/refund thật. Header và GET `/api/auth/me` vẫn thuộc nền ứng dụng hiện có, không xác thực tài khoản mẫu. Không dùng fixture làm bằng chứng quyền server, Web Locks nhiều tab, đầy đủ DTO của B, transaction hoặc AC Sprint 3 đạt. Các reason/nhánh recovery đang đề xuất ở CONTRACTS 7.2 chưa được kích hoạt.
 
 Kiểm tra trước bàn giao: unit test fixture/model và hồi quy frontend, typecheck/lint/build; HTTP smoke route bật/tắt và production. Trình duyệt cần thử thêm desktop/mobile, Tab/Shift+Tab/Escape, quay lại không gửi request và không đổi bytes giỏ thật. Bằng chứng trình duyệt ghi theo môi trường thực chạy; không suy kết quả từ build hoặc test giả lập.
+
+## Nối panel với provider và khôi phục đơn
+
+Tại 09/11/2026, `CartCheckoutPanelV2` đã được chuẩn bị để dùng provider/runtime v2. Luồng mở lại đọc mã đơn theo đúng owner, xác minh phiên và GET trạng thái hiện tại; không tự tạo đơn, thanh toán hoặc gửi lại yêu cầu. Các record chưa rõ kết quả giữ nguyên key/body; chỉ settlement đã kiểm tra mới có thể cập nhật binding/giỏ theo CONTRACTS mục 7.1.
+
+Frontend unit test đạt 889/889 trên bản thay đổi này; typecheck/lint/build được kiểm tra riêng. Tests dùng storage/khóa/network giả lập. A đã xác nhận hai lượt thử UI bằng fixture: mở lại PENDING không tự POST; mở lại và khôi phục payment giữ key cũ. Chưa kiểm tra E2E Sprint 3 với Nest/PostgreSQL. Không đổi trạng thái AC thành đạt từ các kết quả trên.
+
+Layout và trang `/cart` vẫn dùng v1. Chưa tự migrate hoặc bật v2 trước DEP-05/06; phần còn chờ là backend/read API phù hợp contract, đóng băng các điểm mở mục 7.2, rồi kích hoạt một provider duy nhất và kiểm tra tích hợp thật. Các trang đơn hàng của B vẫn được giữ riêng.

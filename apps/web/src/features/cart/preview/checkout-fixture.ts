@@ -4,6 +4,7 @@ import { cartReducer } from "../cart-reducer.ts";
 import { createCartCheckoutClientV2 } from "../cart-checkout-client-v2.ts";
 import { createCartPaymentClientV2 } from "../cart-payment-client-v2.ts";
 import { createCartCancelClientV2 } from "../cart-cancel-client-v2.ts";
+import { createCartOrderRestoreV2 } from "../cart-order-restore-v2.ts";
 import { createCartOrderTransport } from "../cart-order-transport.ts";
 import { createCartMutationTransport } from "../cart-mutation-transport.ts";
 import { requireCurrentCartOrder } from "../cart-order-binding-v2.ts";
@@ -128,6 +129,7 @@ export function createCheckoutFixture(options: { delayMs?: number } = {}) {
   const common = { auth, sessionClient, storage, readOrder };
   const environment: CheckoutUiEnvironment = {
     auth, storage, subscribeCart: subscribe,
+    restoreOrder: createCartOrderRestoreV2(common),
     checkout: createCartCheckoutClientV2({ ...common, transport: createCartOrderTransport({ fetch: fetchFixture, now }), now }),
     payment: createCartPaymentClientV2({ ...common, transport: mutation, now }),
     cancel: createCartCancelClientV2({ ...common, transport: mutation,

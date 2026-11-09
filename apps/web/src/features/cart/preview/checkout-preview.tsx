@@ -10,6 +10,7 @@ import type { CheckoutPreviewFault } from "./checkout-fixture";
 export function CheckoutPreview() {
   const [fixture] = useState(() => createCheckoutFixture());
   useSyncExternalStore(fixture.subscribe, fixture.getTick, () => 0);
+  const [showCheckout, setShowCheckout] = useState(true);
   const [toolMessage, setToolMessage] = useState<string | null>(null);
   async function add() {
     try {
@@ -44,11 +45,13 @@ export function CheckoutPreview() {
         </div>
         <div className="mt-4 flex flex-wrap gap-3">
           <Button variant="secondary" onClick={() => { void add(); }}>Thêm Cappuccino M mẫu</Button>
+          <Button variant="secondary" onClick={() => setShowCheckout(value => !value)}>{showCheckout ? "Ẩn khung checkout" : "Mở lại khung checkout"}</Button>
           <Button variant="text" onClick={() => window.location.reload()}>Làm lại dữ liệu mẫu</Button>
         </div>
+        <p className="mt-3 text-sm text-stone-600">Ẩn rồi mở lại khung để thử khôi phục đơn từ bản lưu trong bộ nhớ. F5 vẫn tạo lại toàn bộ dữ liệu mẫu.</p>
         {toolMessage && <p className="mt-3 text-sm" role="alert">{toolMessage}</p>}
       </details>
-      <CheckoutV2Panel environment={fixture.environment} />
+      {showCheckout && <CheckoutV2Panel environment={fixture.environment} />}
       <Card className="mt-6 p-5">
         <h2 className="font-bold">Dấu vết yêu cầu giả lập</h2>
         <p className="mt-2 text-sm text-stone-600">Dùng để đối chiếu key khi thử lại. Các dòng này không phải request tới backend thật.</p>

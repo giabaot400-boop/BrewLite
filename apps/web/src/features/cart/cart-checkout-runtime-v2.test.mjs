@@ -112,7 +112,7 @@ async function fixture({ ownerId = "A", start = true } = {}) {
   if (start) { stop = controller.start(); await flush(); }
   return { runtime, controller, auth, storage, calls, mode, created, payments, stop,
     raw: () => raw, saved: () => JSON.parse(raw), writes: () => writes, keys: () => keys,
-    current: () => current, setServerSession(next) { serverSession = next; },
+    current: () => current, setCurrent(next) { current = next; }, setServerSession(next) { serverSession = next; },
     async switchOwner(id) { memorySession = session(id, BINDING_B); await auth.login({}); },
     reviewCreate(options = {}) { return runtime.checkout.review(controller.getView().state.cart, options); },
     async create(options = {}) { return runtime.checkout.submit(this.reviewCreate(options)); } };
@@ -259,4 +259,40 @@ test("subscribeCart observes successful durable operations through the same cont
   const remove = f.runtime.subscribeCart(() => notifications++);
   await f.create(); assert.ok(notifications > 0); const last = notifications; remove();
   await f.runtime.cancel.check(ID); assert.equal(notifications, last); f.stop();
+});
+
+
+test("runtime restores a stored bound order with HTTP GETs only after the panel is recreated", async () => {
+  const f = await fixture(); await f.create();
+  const before = f.raw(), posts = f.calls.filter(c => c.method === "POST").length, keys = f.keys();
+  const result = await f.runtime.restoreOrder();
+  assert.equal(result.order.id, ID); assert.equal(result.order.status, "PENDING");
+  assert.equal(f.raw(), before); assert.equal(f.keys(), keys);
+  assert.equal(f.calls.filter(c => c.method === "POST").length, posts);
+  assert.equal(f.calls.at(-1).headers["X-BrewLite-Expected-Session"], BINDING); f.stop();
+});
+
+test("restoring lost create never automatically resends the saved key", async () => {
+  const f = await fixture(); f.mode.lostCreate = true; await f.create();
+  const before = f.raw(), calls = f.calls.length;
+  assert.equal(await f.runtime.restoreOrder(), null);
+  assert.equal(f.calls.length, calls); assert.equal(f.raw(), before); assert.ok(f.saved().pendingRequests.A); f.stop();
+});
+
+test("restored PAID clears only the bound cart and keeps unresolved payment identity until explicit replay", async () => {
+  const f = await fixture(); await f.create(); f.mode.lostPayment = true;
+  const unknown = await f.runtime.payment.submit(await f.runtime.payment.review(ID, "CARD"));
+  const saved = f.saved().paymentRecoveries.A[unknown.request.requestKey];
+  assert.equal((await f.runtime.restoreOrder()).order.status, "PAID");
+  assert.equal(f.saved().cart.items.length, 0);
+  assert.deepEqual(f.saved().paymentRecoveries.A[unknown.request.requestKey], saved);
+  const paid = await f.runtime.payment.submit(f.runtime.payment.reviewRecovery(saved));
+  assert.equal(paid.kind, "RESOLVED"); assert.equal(f.payments.size, 1); f.stop();
+});
+
+test("restore HTTP failure releases the shared provider gate and permits a later read", async () => {
+  const f = await fixture(); await f.create(); f.mode.failNextOrderRead = true;
+  const before = f.raw(); await assert.rejects(f.runtime.restoreOrder());
+  assert.equal(f.raw(), before); assert.equal(f.controller.getView().state.isSaving, false);
+  assert.equal((await f.runtime.restoreOrder()).order.id, ID); f.stop();
 });

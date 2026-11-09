@@ -7,6 +7,7 @@ import type { createCartStorage } from "./cart-storage";
 import type { createCartCheckoutClientV2 } from "./cart-checkout-client-v2";
 import type { createCartPaymentClientV2 } from "./cart-payment-client-v2";
 import type { createCartCancelClientV2 } from "./cart-cancel-client-v2";
+import type { createCartOrderRestoreV2 } from "./cart-order-restore-v2";
 
 /** UI ports; production adapters/auth adoption remain a separate integration step. */
 export type CheckoutUiEnvironment = {
@@ -15,6 +16,7 @@ export type CheckoutUiEnvironment = {
   checkout: ReturnType<typeof createCartCheckoutClientV2>;
   payment: ReturnType<typeof createCartPaymentClientV2>;
   cancel: ReturnType<typeof createCartCancelClientV2>;
+  restoreOrder: ReturnType<typeof createCartOrderRestoreV2>;
   subscribeCart: (listener: () => void) => () => void;
 };
 
@@ -31,7 +33,7 @@ export function checkoutUiState(value: CartEnvelopeV2, ownerId: string, order: C
     canPay: cart !== null && !pending && !recovery && policy2 && order.canPay
       && ["PENDING", "PAYMENT_FAILED"].includes(order.status)
       && Date.parse(order.serverTime) < Date.parse(order.paymentDeadline!),
-    canCancel: policy2 && order.canCancel && ["PENDING", "PAYMENT_FAILED", "PAID"].includes(order.status),
+    canCancel: !pending && policy2 && order.canCancel && ["PENDING", "PAYMENT_FAILED", "PAID"].includes(order.status),
   };
 }
 

@@ -5,6 +5,7 @@ import { createCartCheckoutClientV2 } from "./cart-checkout-client-v2.ts";
 import { createCartPaymentClientV2 } from "./cart-payment-client-v2.ts";
 import { createCartCancelClientV2 } from "./cart-cancel-client-v2.ts";
 import { createCartOrderReaderV2 } from "./cart-order-reader-v2.ts";
+import { createCartOrderRestoreV2 } from "./cart-order-restore-v2.ts";
 import { createCartOrderTransport } from "./cart-order-transport.ts";
 import { createCartMutationTransport } from "./cart-mutation-transport.ts";
 import { requireCurrentCartOrder } from "./cart-order-binding-v2.ts";
@@ -51,6 +52,7 @@ export function createCartCheckoutRuntimeV2(environment: Environment): CheckoutU
   const transport = createCartMutationTransport(http);
   const payment = createCartPaymentClientV2({ ...shared, transport, now: environment.now, randomUUID: environment.randomUUID });
   const cancel = createCartCancelClientV2({ ...shared, transport, parseOrderDetail: currentOrder });
+  const restoreOrder = createCartOrderRestoreV2(shared);
   function requireReady() {
     const view = controller.getView();
     if (view.state.status !== "ready" || view.state.isSaving || !view.records?.cart) {
@@ -62,6 +64,7 @@ export function createCartCheckoutRuntimeV2(environment: Environment): CheckoutU
     auth,
     storage: { readV2: storage.readV2, mutateCartV2: (...args) => controller.runCheckout(() => storage.mutateCartV2(...args)) },
     subscribeCart: controller.subscribe,
+    restoreOrder: (...args) => controller.runCheckout(() => restoreOrder(...args)),
     checkout: { review: (...args) => { requireReady(); return checkout.review(...args); },
       submit: (...args) => controller.runCheckout(() => checkout.submit(...args)) },
     payment: { review: (...args) => controller.runCheckout(() => payment.review(...args)),

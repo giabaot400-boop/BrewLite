@@ -8,6 +8,7 @@ import { FormField } from "@/components/ui/form-field";
 import { INITIAL_AUTH_SNAPSHOT } from "../../auth/auth-session";
 import { formatPrice } from "../../products/format-price";
 import { checkoutPreviewV2 } from "../cart-checkout-v2";
+import { savedCheckoutOrderIdV2 } from "../cart-order-restore-v2";
 import { checkoutUiState, reviewedOrderTotal } from "../cart-checkout-ui";
 import { getCartLineKey, selectCartQuantity, selectCartTotal } from "../cart-reducer";
 import type { CheckoutUiEnvironment } from "../cart-checkout-ui";
@@ -28,17 +29,18 @@ type Confirmation = { session: CheckoutSessionV2; trigger: string } & (
 const message = (error: unknown) => error instanceof Error ? error.message : "Chưa hoàn tất thao tác. Vui lòng kiểm tra lại.";
 
 /** Reusable UI with injected ports. It does not choose a backend or migrate storage. */
-export function CheckoutV2Panel({ environment }: { environment: CheckoutUiEnvironment }) {
+export function CheckoutV2Panel({ environment, disabled = false }: { environment: CheckoutUiEnvironment; disabled?: boolean }) {
   const identity = useSyncExternalStore(environment.auth.subscribe, environment.auth.getSnapshot, () => INITIAL_AUTH_SNAPSHOT);
   const version = environment.auth.getSessionVersion();
   const [view, setView] = useState<{ session: CheckoutSessionV2; envelope: CartEnvelopeV2 } | null>(null);
   const [current, setCurrent] = useState<{ session: CheckoutSessionV2; order: CartCurrentOrder } | null>(null);
   const [promotion, setPromotion] = useState("");
   const [method, setMethod] = useState<"WALLET" | "CARD">("WALLET");
-  const [busy, setBusy] = useState(false);
+  const [workingState, setBusy] = useState(true);
+  const busy = workingState || disabled;
   const [notice, setNotice] = useState<{ session: CheckoutSessionV2; text: string; error: boolean } | null>(null);
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
-  const working = useRef(false), alive = useRef(false), sequence = useRef(0);
+  const working = useRef(false), alive = useRef(false), sequence = useRef(0), workSequence = useRef(0);
 
   const capture = useCallback((): CheckoutSessionV2 | null => {
     const snapshot = environment.auth.getSnapshot();
@@ -70,8 +72,35 @@ export function CheckoutV2Panel({ environment }: { environment: CheckoutUiEnviro
     return () => { active = false; alive.current = false; unsubscribe(); };
   }, [environment, reload, identity.status, identity.user?.id, identity.binding, version]);
 
+  // Navigation/F5 may issue GETs, never create/retry/pay/cancel automatically.
+  useEffect(() => {
+    const session = capture(), ticket = ++workSequence.current, abort = new AbortController();
+    working.current = true;
+    void Promise.resolve().then(async () => {
+      if (abort.signal.aborted) return;
+      setBusy(true);
+      try {
+        const restored = session ? await environment.restoreOrder(abort.signal) : null;
+        if (alive.current && ticket === workSequence.current && session && isCurrent(session)) {
+          setCurrent(restored ? { session, order: restored.order } : null);
+        }
+      } catch (error) {
+        if (!abort.signal.aborted && alive.current && session && isCurrent(session)) {
+          setNotice({ session, text: message(error), error: true });
+        }
+      } finally {
+        if (!abort.signal.aborted && ticket === workSequence.current) {
+          await reload();
+          if (ticket === workSequence.current) { working.current = false; if (alive.current) setBusy(false); }
+        }
+      }
+    });
+    return () => { abort.abort(); };
+  }, [environment, capture, isCurrent, reload, identity.status, identity.user?.id, identity.binding, version]);
+
   const visible = view !== null && isCurrent(view.session) ? view : null;
-  const order = current !== null && isCurrent(current.session) ? current.order : null;
+  const savedOrderId = visible ? savedCheckoutOrderIdV2(visible.envelope, visible.session.ownerId) : null;
+  const order = current !== null && isCurrent(current.session) && current.order.id === savedOrderId ? current.order : null;
   const shownNotice = notice !== null && isCurrent(notice.session) ? notice : null;
   const dialog = confirmation !== null && isCurrent(confirmation.session) ? confirmation : null;
   const ui = visible ? checkoutUiState(visible.envelope, visible.session.ownerId, order) : null;
@@ -90,13 +119,14 @@ export function CheckoutV2Panel({ environment }: { environment: CheckoutUiEnviro
   };
   async function run(work: (session: CheckoutSessionV2) => Promise<void>) {
     const session = capture();
-    if (!session || working.current) return;
+    if (!session || working.current || disabled) return;
+    const ticket = ++workSequence.current;
     working.current = true; setBusy(true); setNotice(null);
     try { await work(session); }
     catch (error) { tell(session, message(error), true); }
     finally {
-      await reload(); working.current = false;
-      if (alive.current) setBusy(false);
+      await reload();
+      if (ticket === workSequence.current) { working.current = false; if (alive.current) setBusy(false); }
     }
   }
   function edit(action: CartAction) {
@@ -106,7 +136,7 @@ export function CheckoutV2Panel({ environment }: { environment: CheckoutUiEnviro
     });
   }
   function reviewCreate(retry = false) {
-    if (!cart || !visible || working.current) return;
+    if (!cart || !visible || working.current || disabled) return;
     try {
       const review = environment.checkout.review(cart, { promotionCode: promotion, pending: retry ? ui?.pending : null });
       setConfirmation({ kind: "CREATE", review, session: visible.session, trigger: retry ? "checkout-retry-order" : "checkout-create" });
@@ -132,12 +162,10 @@ export function CheckoutV2Panel({ environment }: { environment: CheckoutUiEnviro
     });
   }
   function checkOrder() {
-    if (!order) return;
     void run(async session => {
-      const result = await environment.cancel.check(order.id);
-      if (result.kind === "CANCELLED" || result.kind === "CURRENT_ORDER") {
-        showOrder(session, result.order); tell(session, "Đã đọc lại trạng thái đơn.");
-      } else tell(session, "Chưa đối chiếu được đơn. Giữ dữ liệu để kiểm tra lại.", true);
+      const restored = await environment.restoreOrder();
+      showOrder(session, restored?.order ?? null);
+      tell(session, restored ? "Đã đọc lại trạng thái đơn." : "Không còn đơn đã lưu cần đối chiếu.");
     });
   }
   function confirm() {
@@ -222,6 +250,10 @@ export function CheckoutV2Panel({ environment }: { environment: CheckoutUiEnviro
             {ui.pending && <Button id="checkout-retry-order" variant="secondary" disabled={busy} onClick={() => reviewCreate(true)}>Thử lại lần đặt đã lưu</Button>}
           </Card>
         </div>
+        {!order && savedOrderId && <div className="rounded-xl border border-stone-200 bg-white p-5">
+          <p>Đã lưu mã đơn. Cần đọc trạng thái hiện tại trước khi thanh toán hoặc hủy.</p>
+          <div className="mt-3"><Button variant="secondary" disabled={busy} onClick={checkOrder}>Đọc lại đơn đã lưu</Button></div>
+        </div>}
         {order && <Card className="space-y-4 p-6">
           <h2 className="text-xl font-bold">Đơn đang thao tác</h2>
           <p className="break-all font-mono text-sm">{order.id}</p>
