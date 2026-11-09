@@ -48,3 +48,30 @@
 - Tích hợp pricing/payment/cancel/expiry với C và D.
 - Docker Compose, README và kiểm thử triển khai.
 - Chưa xác nhận hoàn thành toàn bộ S3-E-01 hoặc Sprint 3.
+## Helper kho — kiểm thử trên PostgreSQL
+
+File: apps/api/src/database/stock.ts
+
+Đã bổ sung:
+- aggregateNeeds, precheckStock.
+- reserveStock, consumeStock, releaseStock, returnStock.
+- Dùng transaction bên gọi; không tự commit hoặc retry.
+- CAS kiểm tra stockVersion và giá trị tồn đã đọc.
+- D phải khóa Order trước consume/release/return.
+- Gọi helper và cập nhật workflow trong cùng transaction;
+  lỗi phải rollback toàn bộ.
+
+Kết quả:
+- check-stock.ts: 10/10 PASS.
+- Kiểm tra gộp nhu cầu, giữ/trừ/hoàn/giải phóng kho,
+  chặn thao tác lặp và kế hoạch kho cũ; fixture đã rollback.
+- check-stock-concurrency.ts: 5/5 PASS.
+- Hai transaction RepeatableRead cùng đọc sản phẩm cuối:
+  một thành công, một xung đột; chỉ còn một đơn/item/reservation.
+- Transaction mới thấy hết hàng; fixture riêng đã dọn.
+
+Giới hạn:
+- Chưa kiểm thử tích hợp helper với ledger/payment/points,
+  cancel/expiry và vòng retry workflow của D.
+- Timeout của script phục vụ kiểm thử, không thay timeout workflow.
+- Seed demo và Compose vẫn chưa hoàn thành.
