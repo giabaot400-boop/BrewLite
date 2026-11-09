@@ -94,3 +94,14 @@ Giới hạn:
 - Cần kiểm tra timezone backend và các script khác.
 - Typecheck PASS.
 - Chưa kiểm thử seed với đơn/reservation đang hoạt động.
+## Seed khi có reservation ACTIVE — 10/11/2026
+
+- Kiểm thử trên PostgreSQL Docker, database brewlite_s3_demo.
+- Fixture đã commit: coffee-milk có stock 10,
+  reservedStock 1, stockVersion 2; reservation ACTIVE, qty 1.
+- Chạy seed-demo không bật INIT_DEMO_STOCK.
+- Sau seed: kho và reservation giữ nguyên; DEMO10 chỉ một dòng.
+- Cleanup thành công, xóa đúng user/order/item/reservation thử.
+- Sau cleanup: stock 10, reservedStock 0, stockVersion 3.
+- Đây là kiểm thử seed, không thay kiểm thử workflow tích hợp.
+- Fixture SQL yêu cầu coffee-milk ở trạng thái ban đầu 10/0/1.Sau cleanup phiên bản là 3; không chạy lại bằng cách đặt lùi version.
