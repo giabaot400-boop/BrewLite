@@ -646,6 +646,7 @@ export class OrdersService {
                 requestHash,
                 status: "PENDING",
                 total: checked.total,
+                subtotal: checked.total,
                 items: {
                   create: checked.snapshots.map((item) => ({
                     productId: item.productId,

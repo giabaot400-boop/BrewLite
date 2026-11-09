@@ -9,22 +9,26 @@ datasource db {
 }
 
 model Product {
-  id          String           @id
-  name        String
-  description String
-  price       Int
-  imageUrl    String           @map("image_url")
-  toppings    ProductTopping[]
-  orderItems OrderItem[]
+  id            String             @id
+  name          String
+  description   String
+  price         Int
+  imageUrl      String             @map("image_url")
+  toppings      ProductTopping[]
+  orderItems    OrderItem[]
+  stock         Int                @default(0)
+  reservedStock Int                @default(0) @map("reserved_stock")
+  stockVersion  Int                @default(0) @map("stock_version")
+  reservations  StockReservation[]
 
   @@map("products")
 }
 
 model Topping {
-  id       String           @id
-  name     String
-  price    Int
-  products ProductTopping[]
+  id                String             @id
+  name              String
+  price             Int
+  products          ProductTopping[]
   orderItemToppings OrderItemTopping[]
 
   @@map("toppings")
@@ -41,13 +45,16 @@ model ProductTopping {
 }
 
 model User {
-  id           String        @id @default(uuid())
-  email        String        @unique
-  passwordHash String        @map("password_hash")
-  createdAt    DateTime      @default(now()) @map("created_at")
-  sessions     AuthSession[]
-  orders        Order[]
-  orderRequests OrderRequest[]
+  id              String           @id @default(uuid())
+  email           String           @unique
+  passwordHash    String           @map("password_hash")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  sessions        AuthSession[]
+  orders          Order[]
+  orderRequests   OrderRequest[]
+  loyaltyPoints   Int              @default(0) @map("loyalty_points")
+  paymentAttempts PaymentAttempt[]
+  loyaltyEntries  LoyaltyEntry[]
 
   @@map("users")
 }
@@ -68,6 +75,12 @@ model AuthSession {
 
 enum OrderStatus {
   PENDING
+  PAYMENT_FAILED
+  PAID
+  PREPARING
+  READY
+  COMPLETED
+  CANCELLED
 }
 
 enum OrderRequestState {
@@ -84,11 +97,32 @@ model Order {
   requestKey  String      @map("request_key")
   requestHash String      @map("request_hash")
 
+  version               Int       @default(0)
+  subtotal              Int
+  discountTotal         Int       @default(0) @map("discount_total")
+  checkoutPolicyVersion Int       @default(1) @map("checkout_policy_version")
+  paymentDeadline       DateTime? @map("payment_deadline") @db.Timestamptz(3)
+  paidAt                DateTime? @map("paid_at") @db.Timestamptz(3)
+  cancelReason          String?   @map("cancel_reason")
+  promotionId           String?   @map("promotion_id")
+  promotionSnapshot     Json?     @map("promotion_snapshot")
+  promotionEvaluatedAt  DateTime? @map("promotion_evaluated_at") @db.Timestamptz(3)
+  loyaltyPolicySnapshot Json?     @map("loyalty_policy_snapshot")
+  loyaltyPointsExpected Int?      @map("loyalty_points_expected")
+
   user    User          @relation(fields: [userId], references: [id], onDelete: Restrict)
   items   OrderItem[]
   request OrderRequest?
 
+  promotion       Promotion?         @relation(fields: [promotionId], references: [id], onDelete: Restrict)
+  paymentAttempts PaymentAttempt[]
+  reservations    StockReservation[]
+  loyaltyEntry    LoyaltyEntry?
+
   @@unique([userId, requestKey])
+  @@unique([id, userId])
+  @@index([userId, createdAt, id])
+  @@index([checkoutPolicyVersion, status, paymentDeadline, id])
   @@map("orders")
 }
 
@@ -144,4 +178,97 @@ model OrderRequest {
 
   @@unique([userId, requestKey])
   @@map("order_requests")
+}
+
+enum PaymentMethod {
+  WALLET
+  CARD
+}
+
+enum PaymentStatus {
+  FAILED
+  SUCCEEDED
+}
+
+enum StockReservationState {
+  ACTIVE
+  CONSUMED
+  RELEASED
+  RETURNED
+}
+
+model Promotion {
+  id                String   @id @default(uuid())
+  code              String   @unique
+  active            Boolean  @default(true)
+  startsAt          DateTime @map("starts_at") @db.Timestamptz(3)
+  endsAt            DateTime @map("ends_at") @db.Timestamptz(3)
+  minimumSubtotal   Int      @map("minimum_subtotal")
+  type              String
+  value             Int
+  maxDiscountAmount Int?     @map("max_discount_amount")
+
+  orders Order[]
+
+  @@map("promotions")
+}
+
+model PaymentAttempt {
+  id               String        @id @default(uuid())
+  userId           String        @map("user_id")
+  orderId          String        @map("order_id")
+  requestKey       String        @map("request_key")
+  requestHash      String        @map("request_hash")
+  canonicalVersion Int           @default(1) @map("canonical_version")
+  gatewayKey       String        @unique @map("gateway_key")
+  method           PaymentMethod
+  amount           Int
+  status           PaymentStatus
+  version          Int           @default(0)
+  failureCode      String?       @map("failure_code")
+  refundedAmount   Int           @default(0) @map("refunded_amount")
+  refundedAt       DateTime?     @map("refunded_at") @db.Timestamptz(3)
+  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+  resolvedAt       DateTime      @map("resolved_at") @db.Timestamptz(3)
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Restrict)
+  order Order @relation(fields: [orderId, userId], references: [id, userId], onDelete: Restrict)
+
+  @@unique([userId, requestKey])
+  @@index([orderId, createdAt, id])
+  @@map("payment_attempts")
+}
+
+model StockReservation {
+  id         String                @id @default(uuid())
+  orderId    String                @map("order_id")
+  productId  String                @map("product_id")
+  qty        Int
+  state      StockReservationState
+  createdAt  DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
+  resolvedAt DateTime?             @map("resolved_at") @db.Timestamptz(3)
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@unique([orderId, productId])
+  @@index([orderId, state])
+  @@map("stock_reservations")
+}
+
+model LoyaltyEntry {
+  id         String    @id @default(uuid())
+  userId     String    @map("user_id")
+  orderId    String    @unique @map("order_id")
+  points     Int
+  reversedAt DateTime? @map("reversed_at") @db.Timestamptz(3)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Restrict)
+  order Order @relation(fields: [orderId, userId], references: [id, userId], onDelete: Restrict)
+
+  @@unique([orderId, userId])
+  @@index([userId])
+  @@map("loyalty_entries")
 }

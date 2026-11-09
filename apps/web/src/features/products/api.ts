@@ -44,7 +44,13 @@ function isDetail(value: unknown): value is ProductDetail {
 }
 
 async function request(path: string, signal?: AbortSignal): Promise<unknown> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+    const baseUrl = typeof window === 'undefined'
+    ? (
+        process.env.BACKEND_INTERNAL_URL ||
+        process.env.BACKEND_URL ||
+        process.env.NEXT_PUBLIC_API_URL
+      )
+    : '/api';
   if (!baseUrl) throw new ProductApiError("Thiếu NEXT_PUBLIC_API_URL.");
   const response = await fetch(`${baseUrl.replace(/\/+$/, "")}${path}`, { signal, cache: "no-store" });
   if (!response.ok) throw new ProductApiError("Không tải được dữ liệu sản phẩm.", response.status);

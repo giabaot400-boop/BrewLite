@@ -7,7 +7,12 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   constructor() {
     const connectionString = process.env.DATABASE_URL;
     if (!connectionString) throw new Error('Thiếu DATABASE_URL trong apps/api/.env.');
-    super({ adapter: new PrismaPg({ connectionString }) });
+    super({
+  adapter: new PrismaPg({
+    connectionString,
+    options: '-c timezone=UTC',
+  }),
+});
   }
 
   async onModuleInit() {
