@@ -3,11 +3,11 @@
 | Thông tin | Giá trị |
 |---|---|
 | Tạo phẩm | Task 1.2 — Yêu cầu chức năng và phi chức năng |
-| Ngày cập nhật | 06/11/2026 |
-| Trạng thái | Đang review, chưa là baseline được phê duyệt |
+| Ngày cập nhật | 09/11/2026 |
+| Trạng thái | Đã merge tài liệu qua PR #29; còn điểm mở, chưa xác nhận nghiệm thu Task 1 |
 | Nền phạm vi | [context-and-scope.md](context-and-scope.md) |
 | Master use case | [Nguồn PlantUML](../diagrams/master-use-case.puml) và [hình SVG](../diagrams/master-use-case.svg) |
-| Đường dẫn dự kiến | `docs/requirements/srs.md` |
+| Đường dẫn trên repository | `docs/requirements/srs.md` |
 
 ## Nền sử dụng và trạng thái
 
@@ -19,7 +19,7 @@ Chi tiết kế thừa nằm tại [contract dùng chung](../assignment2/CONTRAC
 
 BrewLite phục vụ khách chọn đồ uống, đặt đơn, thanh toán Ví/Thẻ mô phỏng và theo dõi đơn để nhận đồ tại quầy. Tài liệu này chuyển phạm vi Task 1.1 thành yêu cầu có mã và tiêu chí chấp nhận để dùng khi đặc tả use case, thiết kế và viết test.
 
-Các yêu cầu mô tả hành vi mục tiêu, không xác nhận code hoặc test đã đạt. Mọi tiêu chí trong bản này có trạng thái **CHƯA KIỂM CHỨNG theo SRS Assignment 2**; có thể tái sử dụng bằng chứng cũ nếu đối chiếu đúng yêu cầu, phiên bản và điều kiện chạy. Tài liệu được quản lý trên nhánh PR #29; việc đưa tài liệu lên repo không tự xác nhận đã tạo ticket hoặc giao việc mới.
+Các yêu cầu mô tả hành vi mục tiêu, không xác nhận code hoặc test đã đạt. Mọi tiêu chí trong bản này có trạng thái **CHƯA KIỂM CHỨNG theo SRS Assignment 2**; có thể tái sử dụng bằng chứng cũ nếu đối chiếu đúng yêu cầu, phiên bản và điều kiện chạy. Tài liệu đã được review và merge qua [PR #29](https://github.com/giabaot400-boop/BrewLite/pull/29); việc merge không tự xác nhận các chính sách còn mở, nghiệm thu Task 1 hoặc giao việc mới.
 
 Task 1.3 đã có [đặc tả UC-09 Thanh toán không tiền mặt](use-case-checkout.md), kèm sơ đồ phạm vi. Activity/sequence/class thuộc Task 2; kiến trúc/ADR/deployment thuộc Task 3; CI/CD, test chạy thật và production thuộc Task 4–5. Việc có tài liệu không tự xác nhận các task đó đã hoàn thành hoặc được nghiệm thu.
 
@@ -40,7 +40,7 @@ Task 1.3 đã có [đặc tả UC-09 Thanh toán không tiền mặt](use-case-c
 | Could | Có thể cân nhắc khi còn năng lực. Bản hiện tại chưa chọn thêm yêu cầu Could để giữ phạm vi gọn |
 | Won’t | Không thực hiện trong MVP hiện tại; các mục OUT-01…OUT-08 của Task 1.1 thuộc mức này |
 
-Ưu tiên dưới đây là đề xuất để nhóm review. Must của chức năng cốt lõi không biến mọi cấu hình demo hoặc lựa chọn triển khai trong BR thành yêu cầu do giảng viên ấn định.
+Các FR đều ở mức Must vì mô tả phạm vi MVP nhóm đã chọn, gồm cả phần kế thừa Assignment 1. Ưu tiên dưới đây là đề xuất để nhóm review. Must của chức năng cốt lõi không biến mọi cấu hình demo hoặc lựa chọn triển khai trong BR thành yêu cầu do giảng viên ấn định.
 
 ## 2. Người sử dụng và ranh giới
 
@@ -212,7 +212,7 @@ Các ngưỡng đo mới dưới đây là đề xuất kiểm chứng để nh�
 | NFR-08 | Bảo trì và kiểm soát phiên bản | Must | Task 4.1/4.2/4.4 |
 | NFR-09 | Triển khai và vận hành | Must | Task 3 và Task 5 |
 | NFR-10 | Kiểm thử và truy vết | Must | Task 5.2 và mục 8 |
-| NFR-11 | Tương thích nền và dữ liệu cũ | Must | Kế thừa Task 1.1 C-04 |
+| NFR-11 | Tương thích nền và dữ liệu cũ | Must | Kế thừa Task 1.1 CON-04 |
 | NFR-12 | Thao tác bằng bàn phím | Should | Tính dễ dùng; kế thừa định hướng UI Sprint 2 |
 
 ### NFR-01. Hiệu năng
@@ -292,6 +292,16 @@ API có mục tiêu phản hồi dưới 500 ms với dữ liệu mẫu theo Ass
 
 Toàn bộ BR đang chờ nhóm review, chưa là quyết định được cả nhóm phê duyệt. Các cấu hình 15 phút, DEMO10, tỷ lệ điểm, giới hạn 0đ và kiểu mock là phương án demo, không phải con số do Assignment 2 ấn định. Thay BR phải cập nhật AC liên quan và lịch sử, không sửa kết quả request đã được lưu.
 
+### 5.1. Quy tắc giá và canonical v2
+
+Quy tắc demo: khi DEMO10 hợp lệ và subtotal ≥ 50.000 VND, discount = min(floor(subtotal × 10 / 100), 20000), total = subtotal − discount. Tiền là số nguyên VND; total ≥ 1 và giữ các giới hạn số học của contract. Ví dụ subtotal 50.001 → discount 5.000 → total 45.001 VND. Điểm vẫn floor(total / 10000), không làm tròn lên. Đây là chính sách nhóm chọn, không phải con số đề bài ấn định.
+
+Chuẩn hóa promotionCode được định nghĩa tập trung ở contract Sprint 3 mục 1: trim, chuyển chữ ASCII thường thành hoa, rỗng thành null, rồi kiểm tra [A-Z0-9_-]{1,32}. Backend áp dụng cùng một hàm trước tra mã và xây canonical v2; field promotionCode trong canonical/hash là giá trị đã chuẩn hóa. Không chuẩn hóa ID opaque hoặc canonical v1 theo quy tắc này.
+
+UI dùng quy tắc tương đương để preview và lập request mới; BFF chuyển nguyên body/key đã nhận, không tự sửa mã hay tính một hash khác. UI lưu body trước HTTP và retry nguyên body/key đã lưu, không chạy lại bước dựng payload từ giỏ hiện tại. Backend chuẩn hóa lại một cách xác định rồi lập canonical; tương đương mã không tạo conflict giả, còn thay đổi có ý nghĩa ở items/mã/tổng vẫn conflict với key cũ. Không sửa ledger/hash/pending v1 hoặc nâng identity một request v2 đã lưu.
+
+Fixture cần kiểm khi hiện thực: hai body mới giống nhau ngoài promotionCode=" demo10 " và "DEMO10" cho cùng canonical/hash sau chuẩn hóa; replay cùng key trả cùng kết quả nếu toàn bộ nội dung còn lại tương đương. Mã khác hoặc expectedTotal khác phải conflict. BFF không thay body; test riêng chứng minh retry dùng đúng bytes body đã lưu. Những fixture này cụ thể hóa AC hiện có, chưa phải kết quả PASS và không thêm AC mới.
+
 ## 6. Master use case và truy vết
 
 ![Master use case BrewLite Assignment 2](../diagrams/master-use-case.svg)
@@ -303,7 +313,7 @@ Sơ đồ tổng quát thể hiện mục tiêu đã kế thừa; màu là nhóm
 | UC-01 | Xem menu | FR-01 |
 | UC-02 | Xem chi tiết sản phẩm | FR-02 |
 | UC-03 | Chọn size và topping | FR-02 |
-| UC-04 | Tính và hiển thị giá | FR-02, FR-07 |
+| UC-04 | Tính và hiển thị giá | FR-02 |
 | UC-05 | Quản lý giỏ hàng | FR-03 |
 | UC-06 | Đăng ký tài khoản | FR-04 |
 | UC-07 | Đăng nhập | FR-05 |
@@ -317,13 +327,15 @@ Sơ đồ tổng quát thể hiện mục tiêu đã kế thừa; màu là nhóm
 
 ### 6.1. Ý nghĩa quan hệ
 
+UC-04 truy vết phần giá xem trước của FR-02. Kiểm tra giá chính thức và xác nhận tạo đơn thuộc FR-07/UC-08; cách phân biệt này thống nhất với bảng danh mục FR, không đổi quy tắc tính giá.
+
 - UC-03 include UC-04: lựa chọn cấu hình kéo theo tính/hiển thị giá; không dùng quan hệ này thay trình tự API.
 - UC-12 extend UC-08 khi khách dùng mã, tại điểm mở rộng **Kiểm tra ưu đãi khi tạo đơn**. Không có mã vẫn đặt đơn được.
 - UC-13 extend UC-09 khi kết quả thanh toán SUCCEEDED, tại điểm **Xử lý thanh toán thành công trước COMMIT**. Hệ thống tự ghi điểm cùng transaction; không nối actor như một thao tác cộng điểm riêng. Entry 0 theo BR-05 không thêm lần thao tác.
 - UC-10 là mục tiêu đọc độc lập; không dùng extend chỉ để nói xem xác nhận xảy ra sau thanh toán.
 - Đăng nhập là tiền điều kiện của thao tác bảo vệ, không include thao tác login cho mỗi lần đặt. Hủy/retry/expiry là luồng thay thế và quy tắc trong các UC liên quan.
 
-Đặc tả [Task 1.3 — UC-09 Thanh toán không tiền mặt](use-case-checkout.md) chỉ chọn UC-09 làm trọng tâm. UC-08 tạo đơn là đầu vào; các chi tiết tạo đơn/hủy/expiry được giữ trong [ngữ cảnh hỗ trợ](checkout-supporting-flows.md). Giữ master 14 mã UC, không thêm hoặc gộp mã. Đặc tả đã có trigger, tiền/hậu điều kiện, luồng chính/thay thế/ngoại lệ, diagram phạm vi và liên kết FR/AC. Nội dung đã đồng bộ thiết kế và có trên nhánh PR #29; việc chốt baseline vẫn cần kết quả review theo quy trình nhóm.
+Đặc tả [Task 1.3 — UC-09 Thanh toán không tiền mặt](use-case-checkout.md) chỉ chọn UC-09 làm trọng tâm. UC-08 tạo đơn là đầu vào; các chi tiết tạo đơn/hủy/expiry được giữ trong [ngữ cảnh hỗ trợ](checkout-supporting-flows.md). Giữ master 14 mã UC, không thêm hoặc gộp mã. Đặc tả đã có trigger, tiền/hậu điều kiện, luồng chính/thay thế/ngoại lệ, diagram phạm vi và liên kết FR/AC. Tài liệu đã được merge qua PR #29; các điểm mở tại mục 7 vẫn cần được chốt theo quy trình nhóm trước khi ghi nghiệm thu.
 
 NFR áp dụng xuyên suốt, không nhất thiết tạo UC riêng. NFR-01/05/06/07/12 liên quan tương tác người dùng; NFR-02/03/04/11 bảo vệ các luồng dữ liệu; NFR-08/09/10 gắn kiến trúc, repository, kiểm thử và bàn giao.
 
@@ -333,7 +345,7 @@ NFR áp dụng xuyên suốt, không nhất thiết tạo UC riêng. NFR-01/05/0
 |---|---|---|
 | O-01 | Browser/version kiểm chứng PWA, manifest/app shell/offline tối thiểu và viewport mục tiêu | NFR-06/07; chưa được nghiệm thu PWA khi chưa có điều kiện đo |
 | O-02 | Môi trường, dữ liệu, endpoint và quy trình đo dưới 500 ms; review các ngưỡng mẫu đề xuất | NFR-01; mục tiêu chưa là kết quả benchmark |
-| O-03 | Kiểm chứng startup/tick 60 giây/batch 50 và đo độ trễ; CLI pha chế có cờ bật nội bộ theo | FR-13/17; chưa có kết quả chạy, không mở endpoint pha chế public |
+| O-03 | Kiểm chứng startup/tick 60 giây/batch 50 và đo độ trễ; CLI pha chế chỉ bật khi DEMO_WORKFLOW_ENABLED=true theo FR-13 | FR-13/17; chưa có kết quả chạy, không mở endpoint pha chế public |
 | O-04 | Review BR-01…06, dữ liệu legacy, schema và rollout/storage trước triển khai | FR-03/07–10/14–17, NFR-11 |
 | O-05 | Chấp nhận ưu tiên Should của bàn phím, lịch/lead/reviewer và nền tảng production ở đúng task | NFR-09/12, kế hoạch Task 3–5 |
 
@@ -347,9 +359,10 @@ Những điểm mở không phải lý do tự phát sinh chức năng ngoài OU
 - [x] Có phân biệt chính sách demo, tiêu chí đề xuất, kết quả chưa kiểm chứng và phạm vi không làm.
 - [ ] Nhóm review/chốt phạm vi, chính sách, ưu tiên và điểm mở ảnh hưởng baseline.
 - [x] Có tài liệu Task 1.3 và sơ đồ phạm vi liên kết với SRS.
-- [ ] Có đầy đủ tạo phẩm Task 1 trên repo với lịch sử commit/PR và review theo đề.
+- [x] Các tạo phẩm Task 1 đã có trên repo, được review và merge qua PR #29.
+- [ ] Xác nhận nghiệm thu Task 1 sau khi chốt các điểm mở ảnh hưởng baseline; không suy ra kết quả code/test từ việc merge tài liệu.
 
-Bản này là tài liệu Task 1.2 đang review, chưa tuyên bố Task 1 được nghiệm thu. Chưa sửa code, cấu trúc repo, migration, tài liệu lịch sử hoặc kết quả test từ việc soạn SRS.
+Đây là tài liệu Task 1.2 đã merge, còn điểm mở cần chốt; chưa tuyên bố Task 1 được nghiệm thu. Chưa sửa code, cấu trúc repo, migration, tài liệu lịch sử hoặc kết quả test từ việc soạn SRS.
 
 ## 8. Nguồn tham chiếu
 
@@ -358,17 +371,5 @@ Bản này là tài liệu Task 1.2 đang review, chưa tuyên bố Task 1 đư�
 | `Assignment2-BrewLite.pdf`, mục 1, 3.2, 3.3, 4, 6–9 | FR/NFR, MoSCoW, AC, master, thứ tự task, mô hình và kiểm chứng/bàn giao |
 | [context-and-scope.md](context-and-scope.md) | IN-01…10, OUT-01…08, stakeholder, ràng buộc và chính sách đang review |
 | `BrewLite-CongNghePhanMem.pdf`, mục 4/8/9/12 | Chức năng nền, mục tiêu API, mock, state, idempotency, optimistic locking, ưu đãi/điểm |
-| `BrewLite_Sprint2_Phan_Tich_Thiet_Ke_v0.6(2).docx`, P01–P10 và master | Phiên/giỏ/owner, đăng xuất, canonical/replay v1, giới hạn chờ và mã UC kế thừa |
+| `BrewLite_Sprint2_Phan_Tich_Thiet_Ke_v0.6.docx`, P01–P10 và master | Phiên/giỏ/owner, đăng xuất, canonical/replay v1, giới hạn chờ và mã UC kế thừa |
 | `docs/sprint3/DESIGN.md`, ngày 06/11/2026; master Sprint 3 hiện hành | BR-01…06, xác nhận/giữ giỏ, payment/kho/điểm, cách dùng UC-10, UC-13 và retry |
-
-## Quy tắc giá và canonical
-
-### Quy tắc giá và identity v2
-
-Quy tắc demo: khi DEMO10 hợp lệ và subtotal ≥ 50.000 VND, discount = min(floor(subtotal × 10 / 100), 20000), total = subtotal − discount. Tiền là số nguyên VND; total ≥ 1 và giữ các giới hạn số học của contract. Ví dụ subtotal 50.001 → discount 5.000 → total 45.001 VND. Điểm vẫn floor(total / 10000), không làm tròn lên. Đây là chính sách nhóm chọn, không phải con số đề bài ấn định.
-
-Chuẩn hóa promotionCode được định nghĩa tập trung ở contract Sprint 3 mục 1: trim, chuyển chữ ASCII thường thành hoa, rỗng thành null, rồi kiểm tra [A-Z0-9_-]{1,32}. Backend áp dụng cùng một hàm trước tra mã và xây canonical v2; field promotionCode trong canonical/hash là giá trị đã chuẩn hóa. Không chuẩn hóa ID opaque hoặc canonical v1 theo quy tắc này.
-
-UI dùng quy tắc tương đương để preview và lập request mới; BFF chuyển nguyên body/key đã nhận, không tự sửa mã hay tính một hash khác. UI lưu body trước HTTP và retry nguyên body/key đã lưu, không chạy lại bước dựng payload từ giỏ hiện tại. Backend chuẩn hóa lại một cách xác định rồi lập canonical; tương đương mã không tạo conflict giả, còn thay đổi có ý nghĩa ở items/mã/tổng vẫn conflict với key cũ. Không sửa ledger/hash/pending v1 hoặc nâng identity một request v2 đã lưu.
-
-Fixture cần kiểm khi hiện thực: hai body mới giống nhau ngoài promotionCode=" demo10 " và "DEMO10" cho cùng canonical/hash sau chuẩn hóa; replay cùng key trả cùng kết quả nếu toàn bộ nội dung còn lại tương đương. Mã khác hoặc expectedTotal khác phải conflict. BFF không thay body; test riêng chứng minh retry dùng đúng bytes body đã lưu. Những fixture này cụ thể hóa AC hiện có, chưa phải kết quả PASS và không thêm AC mới.
