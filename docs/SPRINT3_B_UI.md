@@ -64,8 +64,8 @@ Mỗi dòng ghi đúng môi trường đã chạy. Không gộp kết quả gi�
 | lint, typecheck, `npm test` (frontend) trên bản trước khi sửa review | Máy B, Node 24, 06–07/11/2026 | Đạt; 378/378 test |
 | lint, `npm run typecheck --workspace apps/web`, `npm test --workspace apps/web` sau khi sửa review PR #32 | Môi trường hỗ trợ của B, Node 22.22 (repo yêu cầu ≥ 24.15 < 25), 08/11/2026 | Không lỗi lint/typecheck; 388/388 test (thêm 10 test: binding client/BFF, `needsSessionResync`, đơn cũ, ID có `%`) |
 | `npm test --workspace apps/web` trên nhánh PR #32 (commit `703b820`, code đã sửa review) | Máy B, Node 24, 08/11/2026 | 388/388 test đạt, không fail/skip |
-| `npm run build` với `NEXT_PUBLIC_AUTH_SOURCE=mock NEXT_PUBLIC_ORDERS_SOURCE=mock` | Như trên | Thành công; có route `/orders`, `/orders/[id]`, `/api/orders/me`, `/api/orders/[id]` |
-| `docs/sprint3/scripts/b-orders-e2e.cjs` (Playwright/Chromium, mock auth + mock orders, 360 px và 1280 px) | Như trên | 44/44 PASS, gồm đơn cũ không có câu "giữ hàng/thanh toán trước hạn" và URL `/orders/a%252Fb` |
+| `npm run build` với `NEXT_PUBLIC_AUTH_SOURCE=mock NEXT_PUBLIC_ORDERS_SOURCE=mock` | Môi trường hỗ trợ của B, Node 22.22 (repo yêu cầu ≥ 24.15 < 25), 08/11/2026; chưa chạy trên Node 24 | Thành công; có route `/orders`, `/orders/[id]`, `/api/orders/me`, `/api/orders/[id]` |
+| `docs/sprint3/scripts/b-orders-e2e.cjs` (Playwright/Chromium, mock auth + mock orders, 360 px và 1280 px) | Môi trường hỗ trợ của B, Node 22.22 (repo yêu cầu ≥ 24.15 < 25), 08/11/2026; chưa chạy trên Node 24 | 44/44 PASS, gồm đơn cũ không có câu "giữ hàng/thanh toán trước hạn" và URL `/orders/a%252Fb` |
 
 **Việc còn lại trước khi ghi PASS chính thức**: trên Node 24 ở máy B mới có kết quả `npm test`; còn lint, typecheck, build và script Playwright chưa chạy trên Node 24, cần chạy và ghi thêm vào bảng. Kết quả Node 22.22 chỉ là tham khảo.
 

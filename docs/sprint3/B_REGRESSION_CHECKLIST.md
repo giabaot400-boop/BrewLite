@@ -52,10 +52,10 @@ Kiểm tra trên fixture (`NEXT_PUBLIC_ORDERS_SOURCE=mock`) và lặp lại vớ
 | Mục | Cách kiểm tra | Trạng thái | Bằng chứng |
 |---|---|---|---|
 | Bảy trạng thái đều có nhãn/mô tả | Mở `/orders/ord-pending`, `ord-failed`, `ord-paid`, `ord-preparing`, `ord-ready`, `ord-done`, `ord-expired`, `ord-refunded` | Đã chạy trên fixture bằng Playwright (Chromium, 360 và 1280 px), chưa có backend thật | Script `docs/sprint3/scripts/b-orders-e2e.cjs` (hướng dẫn chạy ở đầu file); 44/44 PASS trên Node 22.22 ngày 08/11/2026; chạy lại trên Node 24 + ghi SHA trước khi ghi PASS chính thức |
-| Đơn cũ (policy 1) chỉ xem | `/orders/ord-legacy` | Như trên | Như trên |
-| Chưa đăng nhập | `/orders` hiện lời mời đăng nhập có `next` và `reason=required` | Như trên | Như trên |
-| 404 không lộ dữ liệu | `/orders/id-la` | Như trên | Như trên |
-| Không cuộn ngang ở 360 px | Tất cả trang trên | Như trên | Như trên |
+| Đơn cũ (policy 1) chỉ xem | `/orders/ord-legacy` | Đã chạy trên fixture bằng Playwright (Chromium, Node 22.22 môi trường hỗ trợ của B, 08/11/2026); chưa chạy trên Node 24, chưa có backend thật | Script `docs/sprint3/scripts/b-orders-e2e.cjs`, ca tương ứng PASS (Node 22.22, 08/11/2026) |
+| Chưa đăng nhập | `/orders` hiện lời mời đăng nhập có `next` và `reason=required` | Đã chạy trên fixture bằng Playwright (Chromium, Node 22.22 môi trường hỗ trợ của B, 08/11/2026); chưa chạy trên Node 24, chưa có backend thật | Script `docs/sprint3/scripts/b-orders-e2e.cjs`, ca tương ứng PASS (Node 22.22, 08/11/2026) |
+| 404 không lộ dữ liệu | `/orders/id-la` | Đã chạy trên fixture bằng Playwright (Chromium, Node 22.22 môi trường hỗ trợ của B, 08/11/2026); chưa chạy trên Node 24, chưa có backend thật | Script `docs/sprint3/scripts/b-orders-e2e.cjs`, ca tương ứng PASS (Node 22.22, 08/11/2026) |
+| Không cuộn ngang ở 360 px | Tất cả trang trên | Đã chạy trên fixture bằng Playwright (Chromium, Node 22.22 môi trường hỗ trợ của B, 08/11/2026); chưa chạy trên Node 24, chưa có backend thật | Script `docs/sprint3/scripts/b-orders-e2e.cjs`, ca tương ứng PASS (Node 22.22, 08/11/2026) |
 | Replay create không đè trạng thái mới (S3-ORD-03) | Test đơn vị `order-version.test.mjs` | Test đơn vị PASS; **AC chưa chạy** với backend thật | |
 | Đơn cũ không nói "đã giữ hàng" | `/orders/ord-legacy` không có câu giữ hàng/thanh toán trước hạn | Script như trên PASS (08/11) | |
 | ID có `%` không đổi identity | `/orders/a%252Fb` hiện không tìm thấy; test đơn vị round-trip `orderPath` | Script + test đơn vị PASS; chưa E2E tới backend | |
