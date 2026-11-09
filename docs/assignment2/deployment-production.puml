@@ -1,0 +1,67 @@
+@startuml
+title BrewLite — Railway production deployment (PROPOSED)
+top to bottom direction
+skinparam componentStyle uml2
+skinparam defaultFontSize 14
+skinparam nodesep 35
+skinparam ranksep 45
+
+node "Client device" as client {
+  artifact "Web browser" as browser
+}
+
+cloud "GitHub" {
+  artifact "BrewLite repository\nRelease commit SHA" as repo
+  node "GitHub Actions runner" as ci {
+    artifact "Quality gate\nInstall / Lint / Typecheck\nTests / Build" as gate
+  }
+}
+
+cloud "Railway project / production environment" as railway {
+  node "Railway HTTPS Edge" as edge
+
+  node "Web service" as web {
+    artifact "Next.js UI + BFF\napps/web/Dockerfile" as next
+  }
+
+  node "API service" as api {
+    artifact "NestJS application\napps/api/Dockerfile\nMock payment inside API" as nest
+  }
+
+  node "Database service" as db {
+    database "PostgreSQL 17" as pg
+  }
+
+  node "Persistent Railway Volume" as volume {
+    artifact "PostgreSQL data directory" as data
+  }
+
+  node "API pre-deploy execution\nTemporary execution, not a fourth service" as migration {
+    artifact "prisma migrate deploy\nFrom approved API image" as migrate
+  }
+}
+
+browser --> edge : HTTPS / Railway domain
+edge --> next : HTTP / configured target port
+next --> nest : Private HTTP / API internal hostname
+nest --> pg : Private PostgreSQL / 5432
+pg -- data : Persistent storage
+
+repo --> gate : PR + release SHA checks
+gate ..> web : Deploy only after gate PASS\nand release approval
+gate ..> api : Same approved SHA
+migrate --> pg : Private connection / migration
+
+note bottom of railway
+PROPOSED — not deployed or verified on Railway.
+Only Web has a public domain.
+API and PostgreSQL have no public endpoint/TCP proxy.
+Secrets remain in Railway variables / CI secrets.
+Compose is local only.
+end note
+
+note bottom of ci
+B/E must verify gate failure blocks deployment.
+No successful Railway pipeline is claimed.
+end note
+@enduml
