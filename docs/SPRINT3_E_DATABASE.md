@@ -41,10 +41,10 @@
 - Sau kiểm thử: payments/reservations/loyalty_entries đều 0.
 
 ## Chưa hoàn thành
-- Migration trên database sạch và máy thành viên khác.
+- Migration trên máy thành viên khác chưa xác nhận.
 - Các constraint chưa kiểm thử không được tính PASS.
-- Seed demo có guard, không reset tồn khi chạy lại.
-- Helper kho CAS và kiểm thử tranh chấp sản phẩm cuối.
+- Còn kiểm thử seed với đơn/reservation đang hoạt động.
+- Tích hợp helper kho với workflow của D và kiểm thử hồi quy.
 - Tích hợp pricing/payment/cancel/expiry với C và D.
 - Docker Compose, README và kiểm thử triển khai.
 - Chưa xác nhận hoàn thành toàn bộ S3-E-01 hoặc Sprint 3.
@@ -74,4 +74,23 @@ Giới hạn:
 - Chưa kiểm thử tích hợp helper với ledger/payment/points,
   cancel/expiry và vòng retry workflow của D.
 - Timeout của script phục vụ kiểm thử, không thay timeout workflow.
-- Seed demo và Compose vẫn chưa hoàn thành.
+- Seed demo đã kiểm tra khởi tạo và chạy lại trên fixture chưa có đơn.
+- Còn kiểm thử seed với đơn/reservation đang hoạt động.
+- Compose chưa hoàn thành.
+## Seed demo
+
+- File: apps/api/prisma/seed-demo.ts.
+- Database riêng: brewlite_s3_demo.
+- Cả ba migration áp dụng thành công trên database sạch.
+- Catalog: 4 sản phẩm, 2 topping, 2 liên kết.
+- Guard yêu cầu đúng database và DEMO_SEED_ENABLED=true.
+- Khởi tạo lần đầu: mỗi Product tồn 10, giữ 0, phiên bản 1.
+- Seed thường chạy lại không reset kho; DEMO10 vẫn một dòng.
+- Bật INIT_DEMO_STOCK lần hai bị từ chối, kho không thay đổi.
+- DEMO10: giảm 10%, tối thiểu 50000, trần 20000.
+- Hiệu lực UTC: 01/11/2026 đến trước 01/12/2026.
+- Kết nối seed dùng options: '-c timezone=UTC';
+  đã xác nhận thời gian lưu đúng UTC.
+- Cần kiểm tra timezone backend và các script khác.
+- Typecheck PASS.
+- Chưa kiểm thử seed với đơn/reservation đang hoạt động.
