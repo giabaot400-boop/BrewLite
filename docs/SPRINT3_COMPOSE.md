@@ -84,9 +84,12 @@ Migration và seed chạy bằng lệnh riêng, không tự chạy mỗi lần a
 - Restart container: service Healthy, API 200;
   dữ liệu vẫn bốn sản phẩm, tổng tồn 40.
 - Backend build/typecheck và khởi động đạt sau cấu hình UTC.
+- Quan sát trình duyệt: menu hiển thị đủ bốn sản phẩm.
+- Chi tiết coffee-milk: chọn L + Kem + Trân châu,
+  tổng dự kiến 57000 VND, đúng phép tính.
+- Chưa kiểm chứng thao tác thêm giỏ hoặc checkout qua hai ảnh này.
 
 Chưa xác nhận:
-- Giao diện menu/chi tiết bằng quan sát trên trình duyệt.
 - Luồng auth/cart/order/payment hoàn chỉnh trong Docker.
 - Tính đúng thời gian backend qua kiểm thử round-trip.
 - Chạy theo hướng dẫn trên máy thành viên khác.
