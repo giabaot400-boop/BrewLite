@@ -6,6 +6,8 @@ import type { PrismaService } from "../database/prisma.service.js";
 import { OrdersService } from "./orders.service.js";
 import type { CreateOrderDto } from "./dto/create-order.dto.js";
 import { canonicalizeOrder } from "./order-canonical.js";
+import type { CreateOrderV2Dto } from "./dto/create-order-v2.dto.js";
+import { canonicalizeOrderV2 } from "./order-canonical-v2.js";
 
 const USER_ID = "user-001";
 const REQUEST_KEY = "550e8400-e29b-41d4-a716-446655440000";
@@ -67,9 +69,10 @@ function createMock(options: MockOptions = {}) {
     },
 
     orderRequest: {
-      findUnique: async () => storedRequest === null
-        ? options.existing ?? null
-        : { ...storedRequest, order: storedOrder },
+      findUnique: async () =>
+        storedRequest === null
+          ? (options.existing ?? null)
+          : { ...storedRequest, order: storedOrder },
       create: async (args: { data: Record<string, unknown> }) => {
         calls.requestsCreated.push(args);
         storedRequest = { ...args.data };
@@ -208,6 +211,7 @@ test("UT-S04: Same key and hash - replay HTTP 200", async () => {
 
   const { service, calls } = createMock({
     existing: {
+      canonicalVersion: 1,
       requestHash,
       state: "SUCCEEDED",
       httpStatus: 201,
@@ -301,6 +305,7 @@ test("UT-S07: Rejected replay remaps fieldErrors after item reorder", async () =
   // Giả lập ledger REJECTED đã lưu lỗi theo canonical index
   const { service, calls } = createMock({
     existing: {
+      canonicalVersion: 1,
       requestHash: originalCanonical.requestHash,
       state: "REJECTED",
       httpStatus: 400,
@@ -350,7 +355,9 @@ test("UT-S07: Rejected replay remaps fieldErrors after item reorder", async () =
 for (const side of ["order", "ledger"]) {
   for (const field of ["userId", "requestKey", "requestHash"]) {
     test(`ORDER-08: persisted ${side}.${field} mismatch aborts before commit`, async () => {
-      const { service, calls } = createMock({ storedCorruption: `${side}.${field}` });
+      const { service, calls } = createMock({
+        storedCorruption: `${side}.${field}`,
+      });
       await assert.rejects(
         () => service.createOrder(USER_ID, REQUEST_KEY, createDto()),
         { message: "ORDER_REQUEST_INVARIANT_VIOLATION" },
@@ -360,3 +367,153 @@ for (const side of ["order", "ledger"]) {
     });
   }
 }
+test("UT-S08: V1 must reject V2 ledger with same hash", async () => {
+  const dto = createDto();
+  const requestHash = canonicalizeOrder(dto).requestHash;
+
+  const { service, calls } = createMock({
+    existing: {
+      canonicalVersion: 2,
+      requestHash,
+      state: "SUCCEEDED",
+      httpStatus: 201,
+      responseJson: {
+        id: "existing-v2-order",
+        status: "PENDING",
+        total: 94000,
+      },
+    },
+  });
+
+  await expectHttpError(
+    () => service.createOrder(USER_ID, REQUEST_KEY, dto),
+    409,
+    "IDEMPOTENCY_CONFLICT",
+  );
+
+  assert.equal(calls.ordersCreated.length, 0);
+});
+test("UT-S3-D28: V2 rejects V1 ledger even with same hash", async () => {
+  const dto: CreateOrderV2Dto = {
+    schemaVersion: 2,
+    items: [
+      {
+        productId: "coffee-milk",
+        size: "M",
+        toppingIds: ["cream"],
+        qty: 2,
+        expectedUnitPrice: 47000,
+      },
+    ],
+    promotionCode: null,
+    expectedTotal: 94000,
+  };
+
+  const requestHash = canonicalizeOrderV2(dto).requestHash;
+
+  const { service, calls } = createMock({
+    existing: {
+      canonicalVersion: 1,
+      requestHash,
+      state: "SUCCEEDED",
+      httpStatus: 201,
+      responseJson: {
+        id: "existing-v1-order",
+        status: "PENDING",
+        total: 94000,
+      },
+    },
+  });
+
+  await expectHttpError(
+    () => service.createOrderV2(USER_ID, REQUEST_KEY, dto),
+    409,
+    "IDEMPOTENCY_CONFLICT",
+  );
+
+  assert.equal(calls.ordersCreated.length, 0);
+  assert.equal(calls.requestsCreated.length, 0);
+});
+test("UT-S3-D29: V2 successful replay returns HTTP 200", async () => {
+  const dto: CreateOrderV2Dto = {
+    schemaVersion: 2,
+    items: [
+      {
+        productId: "coffee-milk",
+        size: "M",
+        toppingIds: ["cream"],
+        qty: 2,
+        expectedUnitPrice: 47000,
+      },
+    ],
+    promotionCode: null,
+    expectedTotal: 94000,
+  };
+
+  const requestHash = canonicalizeOrderV2(dto).requestHash;
+
+  const { service, calls } = createMock({
+    existing: {
+      canonicalVersion: 2,
+      requestHash,
+      state: "SUCCEEDED",
+      httpStatus: 201,
+      responseJson: {
+        id: "existing-v2-order",
+        status: "PENDING",
+        total: 94000,
+      },
+    },
+  });
+
+  const result = await service.createOrderV2(USER_ID, REQUEST_KEY, dto);
+
+  assert.equal(result.httpStatus, 200);
+  assert.equal(result.body.id, "existing-v2-order");
+  assert.equal(result.body.total, 94000);
+
+  assert.equal(calls.ordersCreated.length, 0);
+  assert.equal(calls.requestsCreated.length, 0);
+});
+test("UT-S3-D30: V2 rejected replay preserves stored error", async () => {
+  const dto: CreateOrderV2Dto = {
+    schemaVersion: 2,
+    items: [
+      {
+        productId: "coffee-milk",
+        size: "M",
+        toppingIds: ["cream"],
+        qty: 2,
+        expectedUnitPrice: 47000,
+      },
+    ],
+    promotionCode: null,
+    expectedTotal: 94000,
+  };
+
+  const requestHash = canonicalizeOrderV2(dto).requestHash;
+
+  const { service, calls } = createMock({
+    existing: {
+      canonicalVersion: 2,
+      requestHash,
+      state: "REJECTED",
+      httpStatus: 409,
+      responseJson: {
+        error: {
+          code: "PRICE_CHANGED",
+          message: "Giá sản phẩm đã thay đổi.",
+        },
+      },
+    },
+  });
+
+  await expectHttpError(
+    () => service.createOrderV2(USER_ID, REQUEST_KEY, dto),
+    409,
+    "PRICE_CHANGED",
+  );
+
+  assert.equal(calls.ordersCreated.length, 0);
+  assert.equal(calls.requestsCreated.length, 0);
+});

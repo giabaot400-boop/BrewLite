@@ -4,6 +4,9 @@ import { PrismaService } from "../database/prisma.service.js";
 import { tryLockOrderRequest } from "../database/order-request-lock.js";
 import { CreateOrderDto, CreateOrderItemDto } from "./dto/create-order.dto.js";
 import { canonicalizeOrder } from "./order-canonical.js";
+import { CreateOrderV2Dto } from "./dto/create-order-v2.dto.js";
+import { canonicalizeOrderV2 } from "./order-canonical-v2.js";
+import { decideOrderIdempotencyV2 } from "./order-idempotency-v2.js";
 
 const SIZE_EXTRA_PRICE = {
   S: 0,
@@ -79,6 +82,99 @@ type ItemCheck =
 @Injectable()
 export class OrdersService {
   constructor(private readonly prisma: PrismaService) {}
+  async createOrderV2(
+    userId: string,
+    requestKey: string,
+    dto: CreateOrderV2Dto,
+  ): Promise<{
+    httpStatus: 200 | 201;
+    body: OrderResponse;
+  }> {
+    const canonical = canonicalizeOrderV2({
+      schemaVersion: dto.schemaVersion,
+      items: dto.items,
+      promotionCode: dto.promotionCode ?? null,
+      expectedTotal: dto.expectedTotal,
+    });
+
+    const requestHash = canonical.requestHash;
+
+    return this.prisma.$transaction(
+      async (tx) => {
+        const acquired = await tryLockOrderRequest(tx, userId, requestKey);
+
+        if (!acquired) {
+          throw new ConflictException({
+            error: {
+              code: "ORDER_REQUEST_IN_PROGRESS",
+              message: "Yêu cầu đang được xử lý.",
+            },
+          });
+        }
+
+        const existing = await tx.orderRequest.findUnique({
+          where: {
+            userId_requestKey: { userId, requestKey },
+          },
+        });
+
+        const decision = decideOrderIdempotencyV2(
+          existing
+            ? {
+                canonicalVersion: existing.canonicalVersion,
+                requestHash: existing.requestHash,
+                state: existing.state,
+              }
+            : null,
+          requestHash,
+        );
+
+        if (decision.kind === "CONFLICT") {
+          throw new ConflictException({
+            error: {
+              code: "IDEMPOTENCY_CONFLICT",
+              message: "Idempotency-Key đã dùng cho nội dung khác.",
+            },
+          });
+        }
+
+        if (decision.kind === "REPLAY") {
+          if (!existing) {
+            throw new Error("Không tìm thấy ledger để replay.");
+          }
+
+          if (existing.state === "SUCCEEDED") {
+            return {
+              httpStatus: 200 as const,
+              body: existing.responseJson as OrderResponse,
+            };
+          }
+
+          throw new HttpException(
+            existing.responseJson as OrderErrorResponse,
+            existing.httpStatus,
+          );
+        }
+
+        // NEW: Chưa triển khai pricing, stock và promotion.
+        // Throw để transaction rollback, không ghi ledger hoặc Order.
+        throw new HttpException(
+          {
+            error: {
+              code: "ORDER_V2_NOT_READY",
+              message: "Chức năng tạo đơn V2 chưa hoàn thiện.",
+            },
+          },
+          501,
+        );
+      },
+      {
+        isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead,
+        maxWait: 1000,
+        timeout: 2000,
+      },
+    );
+  }
 
   private isValidMoney(value: number): boolean {
     return Number.isInteger(value) && value >= 0 && value <= MAX_MONEY;
@@ -407,7 +503,12 @@ export class OrdersService {
         state: true,
         orderId: true,
         order: {
-          select: { id: true, userId: true, requestKey: true, requestHash: true },
+          select: {
+            id: true,
+            userId: true,
+            requestKey: true,
+            requestHash: true,
+          },
         },
       },
     });
@@ -465,7 +566,10 @@ export class OrdersService {
             });
 
             if (existing) {
-              if (existing.requestHash !== requestHash) {
+              if (
+                existing.canonicalVersion !== 1 ||
+                existing.requestHash !== requestHash
+              ) {
                 throw new ConflictException({
                   error: {
                     code: "IDEMPOTENCY_CONFLICT",
@@ -586,7 +690,11 @@ export class OrdersService {
 
             // P07: đối chiếu dữ liệu đã ghi trong cùng tx; sai thì rollback.
             await this.assertSucceededRequest(
-              tx, userId, requestKey, requestHash, order.id,
+              tx,
+              userId,
+              requestKey,
+              requestHash,
+              order.id,
             );
 
             return {
