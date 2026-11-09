@@ -64,6 +64,7 @@ export function createCartCheckoutRuntimeV2(environment: Environment): CheckoutU
     auth,
     storage: { readV2: storage.readV2, mutateCartV2: (...args) => controller.runCheckout(() => storage.mutateCartV2(...args)) },
     subscribeCart: controller.subscribe,
+    getOrderDetail: readOrder.getDetail,
     restoreOrder: (...args) => controller.runCheckout(() => restoreOrder(...args)),
     checkout: { review: (...args) => { requireReady(); return checkout.review(...args); },
       submit: (...args) => controller.runCheckout(() => checkout.submit(...args)) },

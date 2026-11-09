@@ -8,6 +8,7 @@ import type { createCartCheckoutClientV2 } from "./cart-checkout-client-v2";
 import type { createCartPaymentClientV2 } from "./cart-payment-client-v2";
 import type { createCartCancelClientV2 } from "./cart-cancel-client-v2";
 import type { createCartOrderRestoreV2 } from "./cart-order-restore-v2";
+import type { createCartOrderReaderV2 } from "./cart-order-reader-v2";
 
 /** UI ports; production adapters/auth adoption remain a separate integration step. */
 export type CheckoutUiEnvironment = {
@@ -17,6 +18,7 @@ export type CheckoutUiEnvironment = {
   payment: ReturnType<typeof createCartPaymentClientV2>;
   cancel: ReturnType<typeof createCartCancelClientV2>;
   restoreOrder: ReturnType<typeof createCartOrderRestoreV2>;
+  getOrderDetail: ReturnType<typeof createCartOrderReaderV2>["getDetail"];
   subscribeCart: (listener: () => void) => () => void;
 };
 

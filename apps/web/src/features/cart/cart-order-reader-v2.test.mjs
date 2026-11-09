@@ -251,3 +251,53 @@ test("reader and BFF together: UI A + cookie B cannot fetch orders or expose B's
   assert.equal(upstream[0].init.cache, "no-store");
   assert.notEqual(bindingA, bindingB);
 });
+
+test("official detail comes from the same validated GET and getter adds no HTTP", async () => {
+  const f = setup(), empty = detail();
+  assert.equal(f.reader.getDetail({ session: session(), order: empty }), null);
+  const result = await f.read(), calls = f.calls.length;
+  const official = f.reader.getDetail(result);
+  assert.equal(official.subtotal, 100000); assert.equal(official.discountTotal, 10000);
+  assert.equal(official.total, 90000); assert.equal(official.promotion.code, "DEMO10");
+  assert.deepEqual(official.items, detail().items); assert.equal(f.calls.length, calls);
+  official.total = 1; official.items[0].productName = "tampered";
+  assert.equal(f.reader.getDetail(result).total, 90000);
+  assert.equal(f.reader.getDetail(result).items[0].productName, "Cappuccino");
+});
+
+for (const field of ["id", "version", "status", "total", "paymentDeadline", "paidAt", "canPay", "canCancel", "serverTime"]) {
+  test(`official detail is unavailable when displayed ${field} differs from the accepted snapshot`, async () => {
+    const f = setup(), result = await f.read();
+    const changes = { id: "another-order", version: 1, status: "PAYMENT_FAILED", total: 90001,
+      paymentDeadline: null, paidAt: TIME, canPay: false, canCancel: false, serverTime: "2026-11-08T10:00:01.000Z" };
+    assert.equal(f.reader.getDetail({ ...result, order: { ...result.order, [field]: changes[field] } }), null);
+  });
+}
+
+for (const change of ["owner", "binding", "version", "logout", "unknown"]) {
+  test(`official detail never leaks through a render after ${change} changes the session`, async () => {
+    const f = setup(), result = await f.read();
+    if (change === "owner") f.set(snapshot({ user: { id: "B" }, binding: OTHER_BINDING }), 2);
+    if (change === "binding") f.set(snapshot({ binding: OTHER_BINDING }));
+    if (change === "version") f.set(snapshot(), 2);
+    if (change === "logout") f.set(snapshot({ status: "anonymous", user: null, binding: undefined }), 2);
+    if (change === "unknown") f.set(snapshot({ status: "unknown", user: null, binding: undefined }), 2);
+    assert.equal(f.reader.getDetail(result), null);
+  });
+}
+
+test("newer GET hides the previous price snapshot instead of combining versions", async () => {
+  let value = detail(); const f = setup(async () => Response.json(value));
+  const first = await f.read();
+  value = detail({ version: 1, status: "PAYMENT_FAILED", serverTime: "2026-11-08T10:00:01.000Z" });
+  const second = await f.read();
+  assert.equal(f.reader.getDetail(first), null); assert.equal(f.reader.getDetail(second).version, 1);
+  value = detail(); await assert.rejects(f.read(), code("INVALID_DATA"));
+  assert.equal(f.reader.getDetail(second).version, 1);
+});
+
+test("malformed pricing never supplies an official detail or a replacement zero total", async () => {
+  const f = setup(async () => Response.json(detail({ subtotal: "100000" })));
+  await assert.rejects(f.read(), code("INVALID_RESPONSE"));
+  assert.equal(f.reader.getDetail({ session: session(), order: detail() }), null);
+});

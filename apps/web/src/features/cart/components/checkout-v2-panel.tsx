@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormField } from "@/components/ui/form-field";
+import { OrderLines, OrderTotals } from "../../orders/components/order-lines";
+import type { OrderDetail } from "../../orders/types";
 import { INITIAL_AUTH_SNAPSHOT } from "../../auth/auth-session";
 import { formatPrice } from "../../products/format-price";
 import { checkoutPreviewV2 } from "../cart-checkout-v2";
@@ -23,7 +25,7 @@ const labels: Record<CartCurrentOrder["status"], string> = { PENDING: "Chờ tha
   PAID: "Đã thanh toán", PREPARING: "Đang pha chế", READY: "Sẵn sàng nhận", COMPLETED: "Hoàn tất", CANCELLED: "Đã hủy" };
 type Confirmation = { session: CheckoutSessionV2; trigger: string } & (
   | { kind: "CREATE"; review: CheckoutReviewV2 }
-  | { kind: "PAYMENT"; review: PaymentReviewV2 }
+  | { kind: "PAYMENT"; review: PaymentReviewV2; detail: OrderDetail | null }
   | { kind: "CANCEL"; review: CancelReviewV2 }
 );
 const message = (error: unknown) => error instanceof Error ? error.message : "Chưa hoàn tất thao tác. Vui lòng kiểm tra lại.";
@@ -101,6 +103,7 @@ export function CheckoutV2Panel({ environment, disabled = false }: { environment
   const visible = view !== null && isCurrent(view.session) ? view : null;
   const savedOrderId = visible ? savedCheckoutOrderIdV2(visible.envelope, visible.session.ownerId) : null;
   const order = current !== null && isCurrent(current.session) && current.order.id === savedOrderId ? current.order : null;
+  const official = order && visible ? environment.getOrderDetail({ session: visible.session, order }) : null;
   const shownNotice = notice !== null && isCurrent(notice.session) ? notice : null;
   const dialog = confirmation !== null && isCurrent(confirmation.session) ? confirmation : null;
   const ui = visible ? checkoutUiState(visible.envelope, visible.session.ownerId, order) : null;
@@ -148,7 +151,9 @@ export function CheckoutV2Panel({ environment, disabled = false }: { environment
         : await environment.payment.review(order!.id, method);
       if (!isCurrent(session)) return;
       if (review.order) showOrder(session, review.order);
-      setConfirmation({ kind: "PAYMENT", review, session, trigger: recovery ? "checkout-payment-recovery" : "checkout-payment" });
+      const detail = review.order ? environment.getOrderDetail({ session, order: review.order }) : null;
+      if (review.kind === "NEW" && detail === null) throw new Error("Chưa đọc được bảng giá chính thức. Vui lòng đọc lại đơn trước khi thanh toán.");
+      setConfirmation({ kind: "PAYMENT", review, detail, session, trigger: recovery ? "checkout-payment-recovery" : "checkout-payment" });
     });
   }
   function reviewCancel() {
@@ -258,17 +263,21 @@ export function CheckoutV2Panel({ environment, disabled = false }: { environment
           <h2 className="text-xl font-bold">Đơn đang thao tác</h2>
           <p className="break-all font-mono text-sm">{order.id}</p>
           <p className="font-semibold" role="status">Trạng thái: {labels[order.status]}</p>
-          <p>Số tiền trên đơn: <strong>{formatPrice(order.total)}</strong></p>
+          {official ? <section aria-label="Giá chính thức của đơn" className="space-y-3">
+            <h3 className="font-bold">Giá chính thức của đơn</h3>
+            <OrderLines items={official.items} />
+            <OfficialTotals order={official} />
+          </section> : <p role="status">Chưa đọc đủ bảng giá chính thức. Vui lòng đọc lại đơn trước khi thanh toán.</p>}
           {order.paymentDeadline === null ? <p>Đơn cũ chỉ xem; không có thanh toán hoặc hủy theo chính sách mới.</p>
             : ["PENDING", "PAYMENT_FAILED"].includes(order.status) && <p className="text-sm text-stone-600">Hạn thanh toán: {new Date(order.paymentDeadline).toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" })}</p>}
-          {ui.canPay && <fieldset disabled={busy} className="flex flex-wrap gap-5">
+          {ui.canPay && official && <fieldset disabled={busy} className="flex flex-wrap gap-5">
             <legend className="mb-2 font-semibold">Phương thức thanh toán</legend>
             {(["WALLET", "CARD"] as const).map(value => <label key={value} className="flex min-h-11 items-center gap-2">
               <input type="radio" name="checkout-payment-method" value={value} checked={method === value} onChange={() => setMethod(value)} />{value === "WALLET" ? "Ví mô phỏng" : "Thẻ mô phỏng"}
             </label>)}
           </fieldset>}
           <div className="flex flex-wrap gap-3">
-            {ui.canPay && <Button id="checkout-payment" disabled={busy} onClick={() => reviewPayment()}>{order.status === "PAYMENT_FAILED" ? "Thử thanh toán mới" : "Xác nhận thanh toán"}</Button>}
+            {ui.canPay && official && <Button id="checkout-payment" disabled={busy} onClick={() => reviewPayment()}>{order.status === "PAYMENT_FAILED" ? "Thử thanh toán mới" : "Xác nhận thanh toán"}</Button>}
             {ui.canCancel && <Button id="checkout-cancel" variant="secondary" disabled={busy} onClick={reviewCancel}>Hủy đơn</Button>}
             <Button variant="text" disabled={busy} onClick={checkOrder}>Đọc lại trạng thái</Button>
           </div>
@@ -289,7 +298,8 @@ export function CheckoutV2Panel({ environment, disabled = false }: { environment
         </>}
         {dialog?.kind === "PAYMENT" && <>
           <p>Đơn: <span className="break-all">{dialog.review.body.orderId}</span></p>
-          <p className="mt-2">{dialog.review.body.method === "WALLET" ? "Ví mô phỏng" : "Thẻ mô phỏng"}{dialog.review.order ? ` · ${formatPrice(dialog.review.order.total)}` : " · Yêu cầu cũ đã lưu"}</p>
+          <p className="mt-2">{dialog.review.body.method === "WALLET" ? "Ví mô phỏng" : "Thẻ mô phỏng"}{dialog.review.kind === "RECOVERY" ? " · Yêu cầu cũ đã lưu" : ""}</p>
+          {dialog.detail && <div className="mt-4"><OfficialTotals order={dialog.detail} /></div>}
           {dialog.review.kind === "RECOVERY" && <p className="mt-2">Tra lại đúng lần đã gửi; không đổi phương thức hoặc tạo key mới.</p>}
         </>}
         {dialog?.kind === "CANCEL" && <p>{dialog.review.order.status === "PAID"
@@ -298,4 +308,13 @@ export function CheckoutV2Panel({ environment, disabled = false }: { environment
       </ConfirmDialog>
     </div>
   );
+}
+
+
+/** B owns the official totals renderer; the no-promotion case explicitly shows zero discount. */
+function OfficialTotals({ order }: { order: OrderDetail }) {
+  return <>
+    {order.promotion === null && <p className="text-sm text-stone-600">Không áp dụng mã giảm giá · Giảm giá: {formatPrice(order.discountTotal)}</p>}
+    <OrderTotals order={order} />
+  </>;
 }

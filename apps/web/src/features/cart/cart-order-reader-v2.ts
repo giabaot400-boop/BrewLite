@@ -6,6 +6,10 @@ import { requireCurrentCartOrder } from "./cart-order-binding-v2.ts";
 import type { AuthSession } from "../auth/auth-session";
 import type { CheckoutOrderReaderV2, CheckoutSessionV2 } from "./cart-checkout-client-v2";
 import type { CartCurrentOrder } from "./cart-order-binding-v2";
+import type { OrderDetail } from "../orders/types";
+
+export type CheckoutOrderDetailInputV2 = { session: CheckoutSessionV2; order: Readonly<CartCurrentOrder> };
+type Reader = CheckoutOrderReaderV2 & { getDetail: (input: CheckoutOrderDetailInputV2) => OrderDetail | null };
 
 type Environment = {
   auth: Pick<AuthSession, "getSnapshot" | "getSessionVersion">;
@@ -39,10 +43,10 @@ function abortable<T>(work: Promise<T>, signal?: AbortSignal): Promise<T> {
  * fixture flag is set. No storage, migration, auth refresh, key allocation or POST.
  * Share one instance across the three coordinators for per-session version guards.
  */
-export function createCartOrderReaderV2(environment: Environment): CheckoutOrderReaderV2 {
+export function createCartOrderReaderV2(environment: Environment): Reader {
   const fetchImpl = environment.fetch ?? ((input, init) => fetch(input, init));
   let observedSession: string | null = null;
-  const observed = new Map<string, { version: number; serverTime: number }>();
+  const observed = new Map<string, { version: number; serverTime: number; detail: OrderDetail }>();
 
   function requireSession(session: CheckoutSessionV2) {
     const snapshot = environment.auth.getSnapshot();
@@ -52,7 +56,7 @@ export function createCartOrderReaderV2(environment: Environment): CheckoutOrder
       || snapshot.binding !== session.binding || environment.auth.getSessionVersion() !== session.sessionVersion) changed();
   }
 
-  return async ({ orderId, session: inputSession, signal }) => {
+  const read: CheckoutOrderReaderV2 = async ({ orderId, session: inputSession, signal }) => {
     requireSession(inputSession);
     // Capture primitives, not mutable aliases to the caller's checkpoint.
     const session = Object.freeze({ ownerId: inputSession.ownerId, binding: inputSession.binding,
@@ -85,7 +89,7 @@ export function createCartOrderReaderV2(environment: Environment): CheckoutOrder
         || order.version === previous.version && serverTime < previous.serverTime)) {
         throw new CartStorageError("INVALID_DATA", "Phản hồi đơn đã cũ. Giữ trạng thái mới hơn và đọc lại khi cần.");
       }
-      observed.set(orderId, { version: order.version, serverTime });
+      observed.set(orderId, { version: order.version, serverTime, detail: structuredClone(detail) });
       return { session, order };
     } catch (error) {
       requireSession(session);
@@ -93,4 +97,16 @@ export function createCartOrderReaderV2(environment: Environment): CheckoutOrder
       throw error;
     }
   };
+  return Object.assign(read, {
+    /** Rendering only: the exact full DTO already accepted by this reader, never a new GET. */
+    getDetail({ session, order }: CheckoutOrderDetailInputV2): OrderDetail | null {
+      try { requireSession(session); } catch { return null; }
+      if (observedSession !== JSON.stringify([session.ownerId, session.binding, session.sessionVersion])) return null;
+      const detail = observed.get(order.id)?.detail;
+      if (!detail || !["id", "version", "status", "total", "paymentDeadline", "paidAt", "canPay", "canCancel", "serverTime"]
+        .every(key => detail[key as keyof OrderDetail] === order[key as keyof CartCurrentOrder])) return null;
+      // A consumer cannot mutate the reader's accepted snapshot or the coordinator's projection.
+      return structuredClone(detail);
+    },
+  });
 }

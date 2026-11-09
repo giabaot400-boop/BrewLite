@@ -64,3 +64,49 @@ test("confirmation displays the saved v2 total or exact v1 line sum without usin
   assert.equal(reviewedOrderTotal({ items }), 100000);
   assert.equal(reviewedOrderTotal({ schemaVersion: 2, items, promotionCode: "DEMO10", expectedTotal: 90000 }), 90000);
 });
+
+test("official discounted prices remain available after panel restore without another POST", async () => {
+  const f = createCheckoutFixture({ delayMs: 0 }), env = f.environment;
+  const value = await env.storage.readV2();
+  await env.checkout.submit(env.checkout.review(value.cart, { promotionCode: "DEMO10" }));
+  const posts = f.getTrace().length, restored = await env.restoreOrder();
+  const detail = env.getOrderDetail(restored);
+  assert.equal(detail.subtotal, 100000); assert.equal(detail.discountTotal, 10000);
+  assert.equal(detail.total, 90000); assert.equal(detail.promotion.code, "DEMO10");
+  assert.equal(f.getTrace().length, posts);
+});
+
+test("no-promotion official prices explicitly retain zero discount and the full subtotal", async () => {
+  const { env, result } = await created();
+  const checkpoint = { ownerId: env.auth.getSnapshot().user.id, binding: env.auth.getSnapshot().binding,
+    sessionVersion: env.auth.getSessionVersion() };
+  const detail = env.getOrderDetail({ session: checkpoint, order: result.order });
+  assert.equal(detail.promotion, null); assert.equal(detail.discountTotal, 0);
+  assert.equal(detail.subtotal, 100000); assert.equal(detail.total, 100000);
+});
+
+test("retry preserves the saved promotion, key and body rather than rebuilding from the new preview", async () => {
+  const f = createCheckoutFixture({ delayMs: 0 }), env = f.environment;
+  const value = await env.storage.readV2(); f.setFault("CREATE_RESPONSE_LOST");
+  await env.checkout.submit(env.checkout.review(value.cart, { promotionCode: "DEMO10" }));
+  const pending = (await env.storage.readV2()).pendingRequests[value.cart.ownerId];
+  const review = env.checkout.review(value.cart, { pending, promotionCode: "" });
+  assert.equal(review.payload.promotionCode, "DEMO10"); assert.deepEqual(review.payload, pending.payload);
+  const result = await env.checkout.submit(review);
+  const detail = env.getOrderDetail({ session: { ownerId: value.cart.ownerId, binding: env.auth.getSnapshot().binding,
+    sessionVersion: env.auth.getSessionVersion() }, order: result.order });
+  assert.equal(detail.total, 90000); assert.equal(detail.promotion.code, "DEMO10");
+  const trace = f.getTrace(); assert.equal(trace[0].key, trace[1].key); assert.equal(trace[1].replay, true);
+});
+
+test("the paid order's official snapshot is independent of the next cart's prices", async () => {
+  const f = createCheckoutFixture({ delayMs: 0 }), env = f.environment;
+  const value = await env.storage.readV2();
+  const created = await env.checkout.submit(env.checkout.review(value.cart, { promotionCode: "DEMO10" }));
+  const paid = await env.payment.submit(await env.payment.review(created.order.id, "WALLET"));
+  await f.addSample(); const next = await env.storage.readV2();
+  assert.equal(next.cart.items[0].qty, 1);
+  const detail = env.getOrderDetail({ session: { ownerId: value.cart.ownerId, binding: env.auth.getSnapshot().binding,
+    sessionVersion: env.auth.getSessionVersion() }, order: paid.settlement.order });
+  assert.equal(detail.items[0].qty, 2); assert.equal(detail.total, 90000); assert.equal(detail.discountTotal, 10000);
+});

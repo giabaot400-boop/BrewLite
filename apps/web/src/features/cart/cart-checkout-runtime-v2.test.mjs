@@ -296,3 +296,24 @@ test("restore HTTP failure releases the shared provider gate and permits a later
   assert.equal(f.raw(), before); assert.equal(f.controller.getView().state.isSaving, false);
   assert.equal((await f.runtime.restoreOrder()).order.id, ID); f.stop();
 });
+
+test("assembled runtime supplies the exact official DTO already fetched for checkout and payment review", async () => {
+  const f = await fixture(); const created = await f.create({ promotionCode: "DEMO10" });
+  const checkpoint = { ownerId: "A", binding: BINDING, sessionVersion: f.auth.getSessionVersion() };
+  const calls = f.calls.length;
+  const detail = f.runtime.getOrderDetail({ session: checkpoint, order: created.order });
+  assert.equal(detail.subtotal, 100000); assert.equal(detail.discountTotal, 10000);
+  assert.equal(detail.total, 90000); assert.equal(detail.promotion.code, "DEMO10");
+  assert.equal(f.calls.length, calls);
+  const review = await f.runtime.payment.review(ID, "CARD");
+  assert.equal(f.runtime.getOrderDetail({ session: checkpoint, order: review.order }).total, review.order.total);
+  assert.equal(f.payments.size, 0); f.stop();
+});
+
+test("an order change after price review requires confirmation again before allocating a payment key", async () => {
+  const f = await fixture(); await f.create(); const review = await f.runtime.payment.review(ID, "WALLET");
+  const keys = f.keys(); f.setCurrent({ ...f.current(), version: 1, total: 90000, discountTotal: 10000,
+    promotion: { code: "DEMO10", discountAmount: 10000 } });
+  await assert.rejects(f.runtime.payment.submit(review), code("CART_CHANGED"));
+  assert.equal(f.keys(), keys); assert.equal(f.payments.size, 0); assert.deepEqual(f.saved().paymentRecoveries, {}); f.stop();
+});
