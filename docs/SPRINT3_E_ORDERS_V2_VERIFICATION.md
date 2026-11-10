@@ -23,9 +23,18 @@ Nhánh nguồn: integration/sprint3-orders-ce.
 
 ## Lệnh kiểm thử PostgreSQL
 npm.cmd exec --workspace apps/api -- tsx prisma/check-orders-v2-postgres.ts
-
+## Concurrency Orders V2 trên PostgreSQL
+- Script: apps/api/prisma/check-orders-v2-concurrency.ts.
+- Kết quả: 4/4 PASS.
+- Hai transaction cùng đọc tồn khả dụng bằng 1.
+- Một request tạo đơn; request còn lại retry rồi nhận OUT_OF_STOCK.
+- Số lần chạy transaction quan sát được: 2 và 1.
+- Chỉ một Order/item/reservation ACTIVE, không giữ kho vượt tồn.
+- Hai ledger V2: một SUCCEEDED và một REJECTED.
+- Fixture riêng đã được dọn.
+- Dùng barrier kiểm thử; giữ nguyên timeout/retry của service.
 ## Chưa xác nhận
-- Concurrency và retry của workflow V2 trên PostgreSQL.
+- Các tình huống retry exhaustion, timeout và tranh chấp khác.
 - Promotion trong bài kiểm thử PostgreSQL này.
 - HTTP/BFF, auth và frontend tích hợp.
 - Payment, loyalty award/reversal, cancel và expiry.
