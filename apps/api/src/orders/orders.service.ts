@@ -7,6 +7,14 @@ import { canonicalizeOrder } from "./order-canonical.js";
 import { CreateOrderV2Dto } from "./dto/create-order-v2.dto.js";
 import { canonicalizeOrderV2 } from "./order-canonical-v2.js";
 import { decideOrderIdempotencyV2 } from "./order-idempotency-v2.js";
+import { priceOrder, PriceOrderError } from "./price-order.js";
+import {
+  aggregateNeeds,
+  precheckStock,
+  reserveStock,
+  OutOfStock,
+  StockConflict,
+} from "../database/stock.js";
 
 const SIZE_EXTRA_PRICE = {
   S: 0,
@@ -86,10 +94,22 @@ export class OrdersService {
     userId: string,
     requestKey: string,
     dto: CreateOrderV2Dto,
-  ): Promise<{
-    httpStatus: 200 | 201;
-    body: OrderResponse;
-  }> {
+  ): Promise<
+    | {
+        httpStatus: 200 | 201;
+        body: OrderResponse;
+      }
+    | {
+        httpStatus: 400 | 409;
+        body: {
+          error: {
+            code: string;
+            message: string;
+            details?: Record<string, unknown>;
+          };
+        };
+      }
+  > {
     const canonical = canonicalizeOrderV2({
       schemaVersion: dto.schemaVersion,
       items: dto.items,
@@ -99,80 +119,323 @@ export class OrdersService {
 
     const requestHash = canonical.requestHash;
 
-    return this.prisma.$transaction(
-      async (tx) => {
-        const acquired = await tryLockOrderRequest(tx, userId, requestKey);
+    const startedAt = Date.now();
 
-        if (!acquired) {
-          throw new ConflictException({
-            error: {
-              code: "ORDER_REQUEST_IN_PROGRESS",
-              message: "Yêu cầu đang được xử lý.",
-            },
-          });
-        }
-
-        const existing = await tx.orderRequest.findUnique({
-          where: {
-            userId_requestKey: { userId, requestKey },
-          },
-        });
-
-        const decision = decideOrderIdempotencyV2(
-          existing
-            ? {
-                canonicalVersion: existing.canonicalVersion,
-                requestHash: existing.requestHash,
-                state: existing.state,
-              }
-            : null,
-          requestHash,
-        );
-
-        if (decision.kind === "CONFLICT") {
-          throw new ConflictException({
-            error: {
-              code: "IDEMPOTENCY_CONFLICT",
-              message: "Idempotency-Key đã dùng cho nội dung khác.",
-            },
-          });
-        }
-
-        if (decision.kind === "REPLAY") {
-          if (!existing) {
-            throw new Error("Không tìm thấy ledger để replay.");
-          }
-
-          if (existing.state === "SUCCEEDED") {
-            return {
-              httpStatus: 200 as const,
-              body: existing.responseJson as OrderResponse,
-            };
-          }
-
-          throw new HttpException(
-            existing.responseJson as OrderErrorResponse,
-            existing.httpStatus,
-          );
-        }
-
-        // NEW: Chưa triển khai pricing, stock và promotion.
-        // Throw để transaction rollback, không ghi ledger hoặc Order.
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      if (attempt > 1 && Date.now() - startedAt >= 8000) {
         throw new HttpException(
           {
             error: {
-              code: "ORDER_V2_NOT_READY",
-              message: "Chức năng tạo đơn V2 chưa hoàn thiện.",
+              code: "TRANSACTION_RETRY_EXHAUSTED",
+              message: "Không thể xử lý đơn hàng lúc này. Vui lòng thử lại.",
+              details: {
+                reason: "RETRY_EXHAUSTED",
+              },
             },
           },
-          501,
+          503,
         );
-      },
+      }
+
+      try {
+        return await this.prisma.$transaction(
+          async (tx) => {
+            const acquired = await tryLockOrderRequest(tx, userId, requestKey);
+
+            if (!acquired) {
+              throw new ConflictException({
+                error: {
+                  code: "ORDER_REQUEST_IN_PROGRESS",
+                  message: "Yêu cầu đang được xử lý.",
+                },
+              });
+            }
+
+            const existing = await tx.orderRequest.findUnique({
+              where: {
+                userId_requestKey: { userId, requestKey },
+              },
+            });
+
+            const decision = decideOrderIdempotencyV2(
+              existing
+                ? {
+                    canonicalVersion: existing.canonicalVersion,
+                    requestHash: existing.requestHash,
+                    state: existing.state,
+                  }
+                : null,
+              requestHash,
+            );
+
+            if (decision.kind === "CONFLICT") {
+              throw new ConflictException({
+                error: {
+                  code: "IDEMPOTENCY_CONFLICT",
+                  message: "Idempotency-Key đã dùng cho nội dung khác.",
+                },
+              });
+            }
+
+            if (decision.kind === "REPLAY") {
+              if (!existing) {
+                throw new Error("Không tìm thấy ledger để replay.");
+              }
+
+              if (existing.state === "SUCCEEDED") {
+                return {
+                  httpStatus: 200 as const,
+                  body: existing.responseJson as OrderResponse,
+                };
+              }
+
+              throw new HttpException(
+                existing.responseJson as OrderErrorResponse,
+                existing.httpStatus,
+              );
+            }
+            const at = new Date();
+
+            const pricingInput = {
+              schemaVersion: 2 as const,
+              items: canonical.items.map((item) => ({
+                productId: item.productId,
+                size: item.size,
+                toppingIds: item.toppingIds,
+                qty: item.qty,
+                expectedUnitPrice: item.expectedUnitPrice,
+              })),
+              promotionCode: canonical.promotionCode,
+              expectedTotal: canonical.expectedTotal,
+            };
+
+            let pricing: Awaited<ReturnType<typeof priceOrder>>;
+
+            try {
+              pricing = await priceOrder(tx, pricingInput, at);
+            } catch (error) {
+              if (!(error instanceof PriceOrderError)) {
+                throw error;
+              }
+
+              const httpStatus: 400 | 409 =
+                error.code === "VALIDATION_ERROR" ? 400 : 409;
+
+              const body = {
+                error: {
+                  code: error.code,
+                  message: error.message,
+                  ...(error.details ? { details: error.details } : {}),
+                },
+              };
+
+              await tx.orderRequest.create({
+                data: {
+                  userId,
+                  requestKey,
+                  requestHash,
+                  canonicalVersion: 2,
+                  state: "REJECTED",
+                  orderId: null,
+                  httpStatus,
+                  responseJson: body as Prisma.InputJsonValue,
+                },
+              });
+
+              return {
+                httpStatus,
+                body,
+              };
+            }
+
+            // Tạm thời chưa tạo Order hoặc giữ hàng.
+            // Bước tiếp theo sẽ sử dụng kết quả pricing.
+            const needs = aggregateNeeds(
+              pricing.items.map((item) => ({
+                productId: item.productId,
+                qty: item.qty,
+              })),
+            );
+
+            let stockPlan: Awaited<ReturnType<typeof precheckStock>>;
+
+            try {
+              stockPlan = await precheckStock(tx, needs);
+            } catch (error) {
+              if (!(error instanceof OutOfStock)) {
+                throw error;
+              }
+
+              const httpStatus = 409 as const;
+
+              const body = {
+                error: {
+                  code: "OUT_OF_STOCK",
+                  message: "Không đủ hàng trong kho.",
+                  details: {
+                    reason: "INSUFFICIENT_STOCK",
+                    resources: error.resources,
+                  },
+                },
+              };
+
+              await tx.orderRequest.create({
+                data: {
+                  userId,
+                  requestKey,
+                  requestHash,
+                  canonicalVersion: 2,
+                  state: "REJECTED",
+                  orderId: null,
+                  httpStatus,
+                  responseJson: body as Prisma.InputJsonValue,
+                },
+              });
+
+              return {
+                httpStatus,
+                body,
+              };
+            }
+            // Lấy thời gian trực tiếp từ PostgreSQL.
+            // clock_timestamp() trả về thời gian thực của database.
+            const dbTimeRows = await tx.$queryRaw<{ now: Date }[]>`
+  SELECT clock_timestamp() AS now
+`;
+
+            const dbNow = dbTimeRows[0]?.now;
+
+            if (!(dbNow instanceof Date)) {
+              throw new Error("DATABASE_TIME_UNAVAILABLE");
+            }
+
+            // Thời hạn thanh toán = thời gian DB + 15 phút.
+            const paymentDeadline = new Date(dbNow.getTime() + 15 * 60 * 1000);
+
+            // Tạo Order PENDING và lưu snapshot sản phẩm.
+            const order = await tx.order.create({
+              data: {
+                userId,
+                requestKey,
+                requestHash,
+                status: "PENDING",
+                checkoutPolicyVersion: 2,
+                paymentDeadline,
+
+                subtotal: pricing.subtotal,
+                discountTotal: pricing.discountTotal,
+                total: pricing.total,
+
+                promotionId: pricing.promotionId,
+                promotionSnapshot:
+                  pricing.promotionSnapshot === null
+                    ? Prisma.DbNull
+                    : (pricing.promotionSnapshot as Prisma.InputJsonValue),
+                promotionEvaluatedAt: pricing.promotionEvaluatedAt,
+
+                loyaltyPolicySnapshot:
+                  pricing.loyaltyPolicySnapshot as Prisma.InputJsonValue,
+                loyaltyPointsExpected: pricing.loyaltyPointsExpected,
+
+                items: {
+                  create: pricing.items.map((item) => ({
+                    productId: item.productId,
+                    productName: item.productName,
+                    size: item.size,
+                    basePrice: item.basePrice,
+                    sizeExtraPrice: item.sizeExtraPrice,
+                    unitPrice: item.unitPrice,
+                    qty: item.qty,
+                    lineTotal: item.lineTotal,
+                    toppings: {
+                      create: item.toppings.map((topping) => ({
+                        toppingId: topping.toppingId,
+                        name: topping.name,
+                        price: topping.price,
+                      })),
+                    },
+                  })),
+                },
+              },
+            });
+
+            // Giữ hàng trong cùng transaction.
+            await reserveStock(tx, order.id, stockPlan, at);
+
+            // Chuẩn bị phản hồi thành công.
+            const body: OrderResponse = {
+              id: order.id,
+              status: "PENDING",
+              total: order.total,
+            };
+
+            // Lưu kết quả để hỗ trợ Idempotency V2.
+            await tx.orderRequest.create({
+              data: {
+                userId,
+                requestKey,
+                requestHash,
+                canonicalVersion: 2,
+                state: "SUCCEEDED",
+                orderId: order.id,
+                httpStatus: 201,
+                responseJson: body as Prisma.InputJsonValue,
+              },
+            });
+
+            // Kiểm tra tính nhất quán Order và OrderRequest trước commit.
+            await this.assertSucceededRequest(
+              tx,
+              userId,
+              requestKey,
+              requestHash,
+              order.id,
+            );
+
+            return {
+              httpStatus: 201 as const,
+              body,
+            };
+          },
+          {
+            isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead,
+            maxWait: 1000,
+            timeout: 2000,
+          },
+        );
+      } catch (error) {
+        if (!this.shouldRetry(error)) {
+          throw error;
+        }
+
+        if (attempt === 3 || Date.now() - startedAt > 8000) {
+          throw new HttpException(
+            {
+              error: {
+                code: "TRANSACTION_RETRY_EXHAUSTED",
+                message: "Không thể xử lý đơn hàng lúc này. Vui lòng thử lại.",
+                details: {
+                  reason: "RETRY_EXHAUSTED",
+                },
+              },
+            },
+            503,
+          );
+        }
+      }
+    }
+
+    throw new HttpException(
       {
-        isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead,
-        maxWait: 1000,
-        timeout: 2000,
+        error: {
+          code: "TRANSACTION_RETRY_EXHAUSTED",
+          message: "Không thể xử lý đơn hàng lúc này. Vui lòng thử lại.",
+          details: {
+            reason: "RETRY_EXHAUSTED",
+          },
+        },
       },
+      503,
     );
   }
 
@@ -415,6 +678,12 @@ export class OrdersService {
   }
 
   private shouldRetry(error: unknown): boolean {
+    // StockConflict là lỗi CAS do module Stock phát hiện.
+    // Cần rollback transaction và thử lại từ đầu.
+    if (error instanceof StockConflict) {
+      return true;
+    }
+
     if (!(error instanceof Prisma.PrismaClientKnownRequestError)) {
       return false;
     }

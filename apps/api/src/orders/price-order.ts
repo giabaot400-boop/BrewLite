@@ -64,7 +64,9 @@ function validMoney(value: number): boolean {
 function normalizePromotionCode(value: string | null): string | null {
   if (value === null) return null;
 
-  const code = value.trim().replace(/[a-z]/g, (character) => character.toUpperCase());
+  const code = value
+    .trim()
+    .replace(/[a-z]/g, (character) => character.toUpperCase());
   if (code === "") return null;
 
   if (!/^[A-Z0-9_-]{1,32}$/.test(code)) {
@@ -255,7 +257,10 @@ export async function priceOrder(
   const total = subtotal - discountTotal;
 
   if (!validMoney(total) || total < 1) {
-    throw new PriceOrderError("VALIDATION_ERROR", "Tổng thanh toán không hợp lệ.");
+    throw new PriceOrderError(
+      "VALIDATION_ERROR",
+      "Tổng thanh toán không hợp lệ.",
+    );
   }
 
   if (isV2 && (priceChanged || total !== input.expectedTotal)) {
@@ -277,22 +282,18 @@ export async function priceOrder(
   }
 
   if (!isV2 && priceChanged) {
-    throw new PriceOrderError(
-      "PRICE_CHANGED",
-      "Giá sản phẩm đã thay đổi.",
-      {
-        items: items.map((line, index) => ({
-          productId: line.productId,
-          size: line.size,
-          toppingIds: line.toppings.map((t) => t.toppingId),
-          qty: line.qty,
-          expectedUnitPrice: input.items[index].expectedUnitPrice,
-          currentUnitPrice: line.unitPrice,
-          currentLineTotal: line.lineTotal,
-        })),
-        currentTotal: subtotal,
-      },
-    );
+    throw new PriceOrderError("PRICE_CHANGED", "Giá sản phẩm đã thay đổi.", {
+      items: items.map((line, index) => ({
+        productId: line.productId,
+        size: line.size,
+        toppingIds: line.toppings.map((t) => t.toppingId),
+        qty: line.qty,
+        expectedUnitPrice: input.items[index].expectedUnitPrice,
+        currentUnitPrice: line.unitPrice,
+        currentLineTotal: line.lineTotal,
+      })),
+      currentTotal: subtotal,
+    });
   }
 
   return {

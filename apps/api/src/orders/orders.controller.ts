@@ -16,7 +16,7 @@ import { AuthGuard } from "../auth/auth.guard.js";
 import { OrdersService } from "./orders.service.js";
 import { OrdersReaderService } from "./orders-reader.service.js";
 import { CreateOrderDto } from "./dto/create-order.dto.js";
-
+import { CreateOrderV2Dto } from "./dto/create-order-v2.dto.js";
 type AuthRequest = Request & {
   user?: { id?: string; userId?: string };
 };
@@ -58,7 +58,36 @@ export class OrdersController {
       id,
     );
   }
+@Post("v2")
+@UseGuards(AuthGuard)
+async createOrderV2(
+  @Body() dto: CreateOrderV2Dto,
+  @Headers("idempotency-key") requestKey: string,
+  @Req() req: Request,
+  @Res() res: Response,
+) {
+  const userId = this.getUserId(req as AuthRequest);
 
+  const uuidV4 =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+  if (!requestKey || !uuidV4.test(requestKey)) {
+    throw new BadRequestException({
+      error: {
+        code: "VALIDATION_ERROR",
+        message: "Idempotency-Key phải là UUID v4.",
+      },
+    });
+  }
+
+  const result = await this.ordersService.createOrderV2(
+    userId,
+    requestKey,
+    dto,
+  );
+
+  return res.status(result.httpStatus).json(result.body);
+}
   @Post()
   @UseGuards(AuthGuard)
   async createOrder(
