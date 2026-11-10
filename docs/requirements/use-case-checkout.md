@@ -3,8 +3,8 @@
 | Thông tin | Giá trị |
 |---|---|
 | Tạo phẩm | Task 1.3 — Đặc tả một use case trọng tâm |
-| Ngày cập nhật | 06/11/2026 |
-| Trạng thái | Đang review; chưa xác nhận code/test hoặc nghiệm thu |
+| Ngày cập nhật | 09/11/2026 |
+| Trạng thái | Đã merge tài liệu qua PR #29; còn điểm mở, chưa xác nhận code/test hoặc nghiệm thu |
 | Use case trọng tâm duy nhất | UC-09 — Thanh toán không tiền mặt |
 | Actor chính | Khách hàng |
 | Thành phần nội bộ | Next.js UI/BFF, NestJS API, PostgreSQL, PaymentService mock nội bộ NestJS |
@@ -14,7 +14,9 @@
 
 ## 1. Mục tiêu và ranh giới
 
-Khách thanh toán Ví/Thẻ mô phỏng cho một Order đã tồn tại và nhận kết quả đáng tin cậy, kể cả khi gửi lại yêu cầu. **Task 1.3 chỉ đặc tả UC-09**; UC-08 không đồng trọng tâm. Giữ master 14 mã UC, 17 FR, 12 NFR, 59 AC và thiết kế Sprint 3 trên nền Sprint 2 a1a0e4a.
+Khách dùng Ví hoặc Thẻ mô phỏng để thanh toán một đơn đã tạo. Hệ thống hiển thị tổng tiền chính thức, xử lý yêu cầu và cho khách xem kết quả hiện tại của đơn. Nếu mất phản hồi, khách có thể chủ động thử lại đúng yêu cầu đã lưu mà không tạo tác động thanh toán trùng. Phạm vi không bao gồm chuyển tiền thật hoặc nhập thông tin thẻ thật. **Giá trị nghiệp vụ:** giúp khách xác định tình trạng thanh toán của đơn và giúp cửa hàng tránh ghi nhận thanh toán, kho hoặc điểm thưởng lặp khi khách thử lại.
+
+**Task 1.3 chỉ đặc tả UC-09**; UC-08 cung cấp đơn đầu vào, không là trọng tâm thứ hai. Nền phạm vi và các mã yêu cầu được quản lý tại [SRS](srs.md) và [contract dùng chung](../assignment2/CONTRACTS.md).
 
 Tạo đơn, preview/ưu đãi và giữ hàng ban đầu nằm trước điểm bắt đầu UC-09; chi tiết được giữ tại [ngữ cảnh hỗ trợ](checkout-supporting-flows.md). Hủy/hoàn và expiry là luồng/tác vụ liên quan được tham chiếu khi chúng thay đổi trạng thái Order, không phải mục tiêu chính thứ hai. Không gọi tạo đơn lại khi thử lại payment.
 
@@ -38,17 +40,19 @@ PaymentService là thành phần nội bộ NestJS, không là actor/cổng ngo�
 
 Chỉ UC-09 ở nhóm trọng tâm; UC-08, UC-05, UC-10, UC-11, UC-12, UC-13 là ngữ cảnh. Liên kết actor–UC không thể hiện thứ tự. Không thêm include UC-09 vào UC-08: tạo đơn kết thúc PENDING, khách xác nhận payment riêng. UC-13 extend UC-09 tại xử lý SUCCEEDED trước COMMIT; UC-12 extend UC-08 được giữ trong vùng ngữ cảnh của master.
 
-**M-01 — Chuẩn bị thanh toán:** khách mở Order; UI GET /orders/:id bằng phiên hiện tại, kiểm owner/phiên/version và hiển thị subtotal/discountTotal/total chính thức cùng hành động được phép. Có recovery chưa rõ thì đi A-07/E-04 trước canPay lần mới. Trường hợp không cho trả đi A-09/A-10/E-07. M-01 không tạo Order hoặc giữ thêm kho.
-
 Luồng chính M-01…M-05 chỉ bao gồm thanh toán trên Order đã có. Các bước tạo đơn C-01…C-06 nằm trong tài liệu hỗ trợ.
 
 | Bước | Khách hàng | Hệ thống và kết quả quan sát được | FR |
 |---|---|---|---|
-| M-01 | Mở Order của mình để thanh toán | GET /orders/:id; kiểm owner/phiên/version và hiển thị subtotal/discountTotal/total chính thức. Recovery chưa rõ đi A-07/E-04 trước kiểm canPay lần mới; không tạo Order mới | FR-03/09/11 |
+| M-01 | Mở Order của mình để thanh toán | GET /orders/:id; kiểm owner/phiên/version và hiển thị subtotal/discountTotal/total chính thức. Recovery chưa rõ đi A-07/E-04 trước kiểm canPay lần mới; không tạo Order mới hoặc giữ thêm kho. Không được trả lần mới thì đi A-09/A-10/E-07 | FR-03/09/11 |
 | M-02 | Chọn WALLET/CARD, xem tổng chính thức và xác nhận | Kiểm owner/phiên/binding/trạng thái, lưu recovery bất biến owner/key/body an toàn trước HTTP. BFF kiểm Origin/media/header, capture token T một lần; GET /auth/me và POST /payments dùng cùng T, mismatch thì dừng | FR-03/05/09/10 |
 | M-03 | Chờ kết quả | NestJS xác minh JWT/AuthSession, validate key/DTO; BEGIN RR, phân xử key và tra attempt trước state/deadline lần mới. Key mới lock Order, kiểm owner/policy/reservation và DB clock sau lock; amount lấy snapshot. Không giữ transaction qua thao tác người dùng | FR-09/10/13 |
 | M-04 | — | Mock evaluate cục bộ không I/O cho SUCCEEDED. Cùng transaction ghi attempt success, PAID/version/paidAt, consume kho/CAS, entry/User points. Chỉ trả sau commit; lỗi ghi rollback. FAILED đi A-05. PAYMENT_FAILED → PENDING → kết quả cuối trong cùng transaction nếu A-06, không commit trung gian | FR-09/10/14/16 |
 | M-05 | Xem kết quả hoặc mở xác nhận/lịch sử | UI GET Order hiện tại đúng chủ; thông báo trạng thái và tổng chính thức. PAID/PREPARING/READY/COMPLETED mới dọn đúng owner/order/revision/snapshot còn khớp. GET lỗi giữ binding/recovery; response cũ không ghi đè CANCELLED hoặc phiên mới | FR-03/11/12 |
+
+### 3.1. Ranh giới của sequence chính
+
+Hình sequence chính Task 2.2 hiển thị khung chuẩn bị UC-08 trước ranh giới “Bắt đầu UC-09”, gồm transaction tạo Order và optimistic locking/giữ kho. Khung này đáp ứng nội dung mô hình hóa của đề, không thay tiền điều kiện Order đã tồn tại hoặc thêm bước tạo đơn vào M-01…M-05. Khi đã có Order, không tạo lại; retry payment dùng đúng Order và identity đã lưu.
 
 ## 4. Luồng thay thế
 
@@ -61,6 +65,8 @@ Luồng chính M-01…M-05 chỉ bao gồm thanh toán trên Order đã có. Cá
 | A-09 | Đến/sau deadline hoặc Order đã bị expiry/hủy: chặn payment mới; browser đếm về 0 chỉ khóa lần mới và đọc lại, không tự release | GET Order; CANCELLED thông báo hủy, chỉ mở khóa binding còn khớp. Expiry xem C-X01; replay đã commit vẫn A-07 | FR-10/13/14/17 |
 | A-10 | Order hiện tại đã PAID/PREPARING/READY/COMPLETED hoặc CANCELLED | Hiển thị hiện tại; không payment mới; dọn/mở khóa theo M-05 và policy. Yêu cầu hủy chủ động xem C-A08 trong ngữ cảnh hỗ trợ | FR-03/11/12/13 |
 
+Các mã A-xx/E-xx được giữ để truy vết và không nhất thiết liên tục. Bước C-xx, nhánh C-Axx/C-Exx và tác vụ C-Xxx được định danh riêng trong [ngữ cảnh hỗ trợ](checkout-supporting-flows.md).
+
 ## 5. Ngoại lệ và phục hồi
 
 | Nhánh | Điều kiện và xử lý | Điểm tiếp tục/kết thúc | FR/NFR |
@@ -72,7 +78,7 @@ Luồng chính M-01…M-05 chỉ bao gồm thanh toán trên Order đã có. Cá
 | E-06 | GET lỗi, owner/phiên đổi hoặc response cũ: giữ binding/giỏ/recovery, không dọn theo attempt lịch sử. Logout A9 không để phản hồi phiên cũ xóa phiên mới kể cả cùng owner | Đúng chủ chủ động đọc lại; version mới không bị kéo lùi | FR-03/11/12; NFR-03/05 |
 | E-07 | Đơn legacy thiếu policy/reservation hoặc attempt cũ PROCESSING/UNKNOWN: không đủ điều kiện payment mới, không tự coi FAILED để release | Theo kế hoạch rollout SRS O-04; không dựng worker mới hoặc chắp dữ liệu | FR-10/17; NFR-11 |
 
-Hai key đồng thời trên cùng Order không tạo hai success. Payment/expiry/cancel/advance cùng Order row lock. Request tới web trước hạn chưa đủ: phải được phân xử hợp lệ theo DB clock sau lock; commit có thể sau hạn. UI15s/BFF10s chỉ giới hạn chờ, không xác định kết quả transaction.
+Hai key đồng thời trên cùng Order không tạo hai success. Payment/expiry/cancel/advance cùng Order row lock. Việc yêu cầu đến web trước hạn chưa đủ để chấp nhận một lần thanh toán mới. Backend phải lấy được khóa Order và kiểm tra thời gian hiện tại của database so với deadline; yêu cầu được chấp nhận trước hạn có thể commit sau hạn. Timeout UI 15 giây / BFF 10 giây chỉ giới hạn thời gian chờ, không xác định kết quả transaction.
 
 ## 6. Quy tắc kế thừa
 
@@ -98,17 +104,17 @@ Các con số/cấu hình demo này chưa được cả nhóm chốt. Chi tiết
 | Lỗi ghi payment/kho/điểm rollback | E-05 | AC-FR-10-2, AC-NFR-04-1 |
 | Payment tranh expiry/hủy, chặn sau deadline | A-09/A-10; C-A08/C-X01 hỗ trợ | AC-FR-17-1, AC-FR-17-2, AC-FR-14-2 |
 | Đổi chủ, storage/GET lỗi, response cũ | E-02/E-06/M-05 | AC-FR-03-2, AC-FR-03-3, AC-FR-11-2, AC-NFR-03-1 |
+| Sai chủ, sai dữ liệu hoặc đơn không được phép thanh toán | M-03/E-01/A-09/A-10 | AC-FR-09-2, AC-FR-13-2 |
+| Thiếu/sai Origin, media type, marker; cookie và dữ liệu riêng tư | M-02/E-01/E-06 | AC-NFR-02-2, AC-NFR-03-2 |
+| Hai key payment cùng đơn, hoặc payment tranh hủy/hết hạn trên PostgreSQL nhiều kết nối | M-03/M-04/A-06/A-09/A-10; C-A08/C-X01 hỗ trợ | AC-FR-10-1, AC-FR-13-1, AC-FR-13-2, AC-NFR-04-2 |
 | Mạng/DB gián đoạn, recovery/legacy | E-04/E-05/E-06/E-07 | AC-NFR-05-1, AC-NFR-05-2, AC-NFR-11-1, AC-NFR-11-2 |
 
-FR-07/08/15 và phần reserve FR-14 thuộc ngữ cảnh tạo đơn, xem [C-01…C-06](checkout-supporting-flows.md). Chúng vẫn nằm trong SRS và [ma trận truy vết toàn hệ thống](../traceability-matrix.md); không bị bỏ khỏi A2 vì Task 1.3 chỉ chọn UC-09. Những dòng trên là thiết kế test, tất cả code/test thực tế vẫn CHỜ đối chiếu/chạy.
+FR-07/08/15 và phần reserve FR-14 thuộc ngữ cảnh tạo đơn, xem [C-01…C-06](checkout-supporting-flows.md). Ca tranh giữ kho khi tạo đơn (AC-FR-14-1, AC-NFR-04-2) được truy vết tại C-05/C-A04/C-X02 của tài liệu hỗ trợ. Chúng vẫn nằm trong SRS và [ma trận truy vết toàn hệ thống](../traceability-matrix.md); không bị bỏ khỏi A2 vì Task 1.3 chỉ chọn UC-09. Những dòng trên là thiết kế test, tất cả code/test thực tế vẫn CHỜ đối chiếu/chạy.
 
 ## 8. Review và lịch sử
 
 - [x] Chỉ một trọng tâm UC-09; actor/trigger, tiền/hậu điều kiện, luồng chính/thay thế/ngoại lệ và FR/AC.
 - [x] Sơ đồ Task 1.3 phân biệt UC-09 với ngữ cảnh; sequence payment là hình chính có đủ năm lifeline.
-- [ ] Nhóm review BR-01…06/O-01…05, đưa đủ tạo phẩm lên repo với lịch sử thật.
+- [x] Đặc tả và sơ đồ đã có trên repo, được review và merge qua PR #29.
+- [ ] Chốt các điểm còn mở BR-01…06/O-01…05 theo phản hồi và quyết định được ghi nhận; việc merge chưa thay xác nhận chính sách hoặc nghiệm thu.
 - [ ] Kiểm chứng code/schema và AC; tài liệu không thay nghiệm thu hoặc test.
-
-## Ranh giới của sequence chính
-
-Hình sequence chính Task 2.2 hiển thị khung chuẩn bị UC-08 trước ranh giới “Bắt đầu UC-09”, gồm transaction tạo Order và optimistic locking/giữ kho. Khung này đáp ứng nội dung mô hình hóa của đề, không thay tiền điều kiện Order đã tồn tại hoặc thêm bước tạo đơn vào M-01…M-05. Khi đã có Order, không tạo lại; retry payment dùng đúng Order và identity đã lưu.

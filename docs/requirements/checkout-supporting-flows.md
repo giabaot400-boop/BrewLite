@@ -1,6 +1,6 @@
 # Ngữ cảnh hỗ trợ checkout — A2
 
-**06/11/2026 · Thiết kế kế thừa Sprint 3.** Tài liệu hỗ trợ SRS và activity end-to-end, không phải đặc tả trọng tâm thứ hai của Task 1.3. [Đặc tả trọng tâm duy nhất: UC-09 Thanh toán không tiền mặt](use-case-checkout.md).
+**Cập nhật 09/11/2026 · Thiết kế kế thừa Sprint 3.** Tài liệu hỗ trợ SRS và activity end-to-end, không phải đặc tả trọng tâm thứ hai của Task 1.3. [Đặc tả trọng tâm duy nhất: UC-09 Thanh toán không tiền mặt](use-case-checkout.md).
 
 ## 1. Tạo đơn làm đầu vào cho UC-09
 
@@ -19,7 +19,7 @@ Giỏ không rỗng/hợp lệ, phiên đúng chủ, không pending chưa rõ ho
 
 ## 2. Nhánh ngữ cảnh và tác vụ liên quan
 
-Các mã C-Axx/C-Exx là mã nhánh hỗ trợ, không phải UC mới. Tham chiếu A-01/A-05…A-10, E-01/E-02/E-04…E-07 còn lại trong bảng thuộc đặc tả UC-09; C-A07 là replay tạo đơn mô tả ngay dưới bảng.
+C-xx là bước tạo đơn; C-Axx/C-Exx là nhánh hỗ trợ; C-Xxx là tác vụ/ngoại lệ hỗ trợ. Đây không phải mã UC mới hoặc mã ràng buộc CON-xx của Task 1.1. Các tham chiếu A-xx/E-xx thuộc đặc tả UC-09; C-A07 là replay tạo đơn mô tả ngay dưới bảng.
 
 | Nhánh | Điều kiện và hành vi | Điểm tiếp tục/kết thúc | FR |
 |---|---|---|---|
@@ -37,4 +37,4 @@ Các mã C-Axx/C-Exx là mã nhánh hỗ trợ, không phải UC mới. Tham chi
 
 ## 3. Nguồn và truy vết
 
-FR-07/08/14/15: C-01…C-06, C-A02/03/04/07 và C-E03; FR-17/16: C-A08 và C-X01. Nguồn/hình bổ trợ ở [sequence tạo đơn và hủy/expiry](../diagrams/sequence-checkout.md); activity vẫn mô tả end-to-end. Các con số, API và helper tuân [contract S3](../assignment2/CONTRACTS.md). Đây là thiết kế, chưa phải evidence code/test đã đạt.
+FR-07/08/14/15: C-01…C-06, C-A02/03/04/07 và C-E03. C-X02 bổ sung truy vết lỗi ghi/rollback/retry của FR-07/08/14 và NFR-04; ca tranh giữ kho AC-FR-14-1/AC-NFR-04-2 đối chiếu C-05/C-A04/C-X02. FR-17/16: C-A08 và C-X01. Nguồn/hình bổ trợ ở [sequence tạo đơn và hủy/expiry](../diagrams/sequence-checkout.md); activity vẫn mô tả end-to-end. Các con số, API và helper tuân [contract S3](../assignment2/CONTRACTS.md). Đây là thiết kế, chưa phải evidence code/test đã đạt.
