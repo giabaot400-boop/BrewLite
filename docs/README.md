@@ -4,7 +4,7 @@
 
 - [Sprint 3](sprint3/README.md): phạm vi, contract, phân công và kế hoạch kiểm thử Task 8–10 của Assignment 1.
 - [Assignment 2 Task 1–2](assignment2/README.md): phạm vi, SRS, use case, UML và ma trận truy vết.
-- [Kiến trúc frontend/BFF/PWA](architecture/frontend-bff-pwa.md): phần đóng góp của A cho Task 3.1; phân biệt code hiện có với phương án PWA chưa triển khai.
+- [Kiến trúc frontend/BFF/PWA](architecture/frontend-bff-pwa.md): phần đóng góp của A cho Task 3.1; phương án kiến trúc đã có qua PR #31 và PWA đã triển khai qua PR #33; xem [phạm vi kiểm tra PWA](assignment2/PWA.md).
 - [Quy trình Git](GIT_WORKFLOW.md): nhánh riêng, PR và review trước merge.
 
 Nền kế thừa là Sprint 2 tại a1a0e4ae92de681deac538685e24407b3190866b. Các hồ sơ Sprint 1–2 và sơ đồ lịch sử giữ nguyên; tài liệu Sprint 3 và Assignment 2 là thiết kế/kế hoạch, không xác nhận code Sprint 3 hoặc mọi AC đã đạt.

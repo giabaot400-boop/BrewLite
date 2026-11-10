@@ -1,12 +1,14 @@
 # BrewLite — Kế hoạch giao nhóm Assignment 2
 
-**06/11/2026 · Lịch và lead đề xuất để nhận việc; chưa ghi nhận capacity cam kết.**
+**Cập nhật 10/11/2026 · Giữ lịch và lead đề xuất ban đầu; chưa mặc định capacity cam kết.**
 
 Hạn cả A1/A2 là **15/11/2026 theo PO cung cấp**; PO kiểm tra giờ LMS, mục tiêu sẵn sàng nộp ngày 14/11. Dùng Sprint 3 cho A1 và gói A2 này cho Task 1–2. Cùng một sản phẩm/repo: kế thừa menu/auth/giỏ/đơn, checkout S3; A2 bổ sung đúng yêu cầu, kiến trúc, PWA, CI/CD, production và bằng chứng.
 
-## 1. Bắt đầu ngay
+## 1. Trạng thái và việc tiếp theo
 
-A/B phối hợp review tài liệu Task 1–2 trên PR #29; không vẽ lại bộ UML. C/D/E tiếp tục code S3, từng lead cung cấp evidence phần mình. B giữ board/checklist, E khảo sát deployment, C chuẩn bị health/log/secrets, A xác định môi trường PWA. Không đợi A1 hoàn tất mới chuẩn bị A2.
+Task 1–2 gốc đã merge qua PR #29; hiệu đính Task 1 ở PR #42 và lượt đồng bộ Task 2/matrix tiếp tục được review riêng. PR #30 đã chuyển source sang `apps/web` và `apps/api`; PR #31 đã bổ sung phần kiến trúc frontend/BFF/PWA của A; PR #33 đã triển khai PWA với [kết quả local và giới hạn](PWA.md). Chưa suy ra hoàn tất toàn bộ Task 3–5 từ các PR này.
+
+C/D/E tiếp tục tích hợp S3, từng lead cung cấp PR/SHA và evidence phần mình. B giữ board/checklist và CI; D chốt kiến trúc tổng thể/ADR; E phối hợp deployment; C chuẩn bị health/log/secrets; A đối chiếu PWA trên bản tích hợp và môi trường triển khai. Không đợi A1 hoàn tất mới chuẩn bị A2.
 
 ## 2. Một lead cho mỗi nhóm đầu ra
 
@@ -48,7 +50,7 @@ Nếu 06/11 chưa có phương án production dùng được hoặc 08/11 chưa 
 | Giờ LMS | A | 05/11 | Ghi giờ/link thông báo; hiện chưa biết giờ, không đoán 23:59 |
 | Browser/version PWA, môi trường/phép đo mẫu | A, C góp API/auth | 05/11 | Chọn browser hỗ trợ đang dùng, ghi version/máy/viewport trong SRS O-01/O-02 |
 | Nền tảng/tài khoản/chi phí/quyền deploy | E | 06/11 | Xác nhận tài nguyên thật, chưa tự mua; deployment diagram theo phương án đó |
-| apps/web–apps/api so với frontend–backend | B | 06/11 | Đề A2 nêu apps/web và apps/api. Lập PR di chuyển có kiểm soát, cập nhật workspace/import/CI/Docker/README; nếu muốn giữ layout cũ phải có xác nhận ngoại lệ của giảng viên trước nghiệm thu. Bảng ánh xạ không tự thay yêu cầu đề |
+| Layout source | B, A hỗ trợ chuyển layout | Đã merge PR #30 | Source hiện ở `apps/web` và `apps/api`; hướng dẫn chuyển cấu hình local ở README gốc. Khi tích hợp CI/Docker, dùng các đường dẫn mới. Việc đổi layout chưa tự nghiệm thu Task 4 |
 | Demo/legacy/storage | D, A/C/E đối chiếu phần mình | Trước writer S3 | Dùng S3 /contract A2; chỉ mở lại khi có mismatch cụ thể với code |
 
 ## 5. Theo dõi và DONE

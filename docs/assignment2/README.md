@@ -1,6 +1,6 @@
 # BrewLite Assignment 2 — Task 1–2
 
-**Bản giao nhóm · 06/11/2026 · Đồng bộ Sprint 3 / Sprint 2 a1a0e4a.** Tài liệu được đưa lên repo qua PR #29 để nhóm review; chưa xác nhận đã nghiệm thu Task 1–2, code đã đạt AC hoặc production đã triển khai.
+**Cập nhật 10/11/2026 · Thiết kế kế thừa Sprint 3 / nền Sprint 2 a1a0e4a.** Tài liệu gốc đã được merge qua PR #29; hiệu đính Task 1 nằm ở PR #42, còn lượt này đồng bộ Task 2 và truy vết; chưa xác nhận đã nghiệm thu Task 1–2, code đã đạt AC hoặc production đã triển khai.
 
 ## Đọc trước
 
@@ -26,9 +26,9 @@ Trong repo, đọc trực tiếp các liên kết bên dưới docs; mở SVG b�
 
 Giữ nguyên **17 FR, 12 NFR, 59 AC, 14 UC, 10 lớp domain**. Payment↔PaymentAttempt, LoyaltyTransaction↔LoyaltyEntry chỉ ánh xạ tên, không thêm bảng. Mock PaymentService có lifeline riêng bên trong NestJS. Giữ ba giản lược S3: không API quote, không API đọc payment riêng, chỉ kho Product; Topping vẫn chọn/tính giá/snapshot.
 
-Task 1–2 đã có tài liệu đồng bộ trên nhánh PR #29 để review. Bước kế tiếp là Task 3.1 kiến trúc/module/ADR và Task 3.2 deployment theo nền tảng thật. Bộ tài liệu này chưa hoàn thành Task 3, chưa di chuyển source hoặc triển khai production. A2 vẫn bắt buộc health endpoint, PWA, CI/CD, kiểm thử/truy vết và production HTTPS; Compose A1 không thay các đầu ra này.
+Task 1–2 đã có trên main qua PR #29. Source đã chuyển sang `apps/web` và `apps/api` qua PR #30; phần đóng góp A cho Task 3.1 ở [kiến trúc frontend/BFF/PWA](../architecture/frontend-bff-pwa.md) đã merge qua PR #31. PWA đã triển khai qua PR #33, với [kết quả và giới hạn kiểm tra local](PWA.md). Các mốc này chưa tự hoàn tất kiến trúc tổng thể/ADR, Task 3.2 deployment hoặc production. A2 vẫn bắt buộc health endpoint, PWA, CI/CD, kiểm thử/truy vết và production HTTPS; Compose A1 không thay các đầu ra này.
 
-Hạn **15/11/2026** do PO cung cấp; giờ LMS cần xác nhận. Lịch mục tiêu: 05/11 Task 1–2 trên repo, 06/11 Task 3, 07–08/11 cổng Task 4, 09–12/11 Task 5, 13–14/11 dự phòng/đóng gói. Lead và lịch là đề xuất nhận việc, chưa là capacity cam kết. Không chờ hoàn thành A1 mới chuẩn bị toàn bộ A2.
+Hạn **15/11/2026** do PO cung cấp; giờ LMS cần xác nhận. Lịch đề xuất ban đầu (không phải kết quả hoàn thành): 05/11 Task 1–2 trên repo, 06/11 Task 3, 07–08/11 cổng Task 4, 09–12/11 Task 5, 13–14/11 dự phòng/đóng gói. Lead và lịch là đề xuất nhận việc, chưa là capacity cam kết. Không chờ hoàn thành A1 mới chuẩn bị toàn bộ A2.
 
 Nguồn: Assignment2-BrewLite.pdf, hồ sơ S1/S2 lịch sử, Sprint 3 và nền S2 a1a0e4a, hồ sơ docs/SPRINT2_CLOSEOUT.md sau PR #24/#26/#28/#27. Tái sử dụng evidence S2 cần đối chiếu đúng AC/môi trường/commit; không tự ghi toàn bộ S2 hoặc A2 PASS. PR #29 chỉ chỉnh tài liệu và sơ đồ UML; không xác nhận đã chạy test ứng dụng. Kết quả review được ghi trên PR, không suy ra việc phê duyệt toàn bộ tài liệu từ một lần kiểm tra.
 

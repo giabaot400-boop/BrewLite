@@ -4,15 +4,15 @@
 
 | Thông tin | Giá trị |
 |---|---|
-| Ngày cập nhật | 06/11/2026 |
-| Trạng thái | Đang review; chưa là schema/migration hoặc xác nhận code/test đạt |
+| Ngày cập nhật | 10/11/2026 |
+| Trạng thái | Đã có trên main qua PR #29; chưa là schema/migration hoặc xác nhận code/test đạt |
 | Căn cứ | [SRS](../requirements/srs.md), [Task 1.3](../requirements/use-case-checkout.md), [activity](activity-checkout.md), [sequence](sequence-checkout.md) |
 | Đối chiếu dữ liệu | ERD Sprint 3 hiện hành và `docs/sprint3/DESIGN.md`, ngày 06/11/2026; kế thừa Sprint 2 v0.6 |
 | Nguồn và hình | [class-domain.puml](class-domain.puml) · [class-domain.svg](class-domain.svg) |
 
 ## Nền sử dụng và trạng thái
 
-Bản giao nhóm ngày 06/11/2026, đồng bộ **Sprint 3** và nền Sprint 2 main `a1a0e4ae92de681deac538685e24407b3190866b`. PO đã chọn phương án Sprint 3 làm cơ sở thực hiện; chưa thay xác nhận review của từng thành viên hoặc minh chứng kiểm thử Assignment 2. Giữ nguyên 17 FR, 12 NFR, 59 AC, 14 mã UC và 10 lớp domain.
+Tài liệu gốc được đưa lên repo qua PR #29 đã merge; lượt cập nhật này đồng bộ câu chữ và truy vết với Task 1 ở PR #42. Thiết kế kế thừa **Sprint 3** và nền Sprint 2 main `a1a0e4ae92de681deac538685e24407b3190866b`. PO đã chọn phương án Sprint 3 làm cơ sở thực hiện; chưa thay xác nhận review của từng thành viên hoặc minh chứng kiểm thử Assignment 2. Giữ nguyên 17 FR, 12 NFR, 59 AC, 14 mã UC và 10 lớp domain.
 
 Chi tiết kế thừa nằm tại [contract dùng chung](../assignment2/CONTRACTS.md). Hạn cả hai assignment là **15/11/2026 theo thông tin PO cung cấp**; giờ nộp LMS cần PO xác nhận. Xem [kế hoạch giao nhóm](../assignment2/TEAM_PLAN.md); lịch là mục tiêu đề xuất, chưa ghi nhận các bạn đã nhận việc.
 
@@ -122,7 +122,7 @@ Ràng buộc liên bảng và race không được coi đã bảo vệ chỉ vì
 | User | FR-04/05/12/16 | UC-06, UC-07, UC-11, UC-13; guard và ownership xuyên suốt | AC-NFR-02-1, AC-NFR-03-1 |
 | Order/OrderItem/OrderItemTopping | FR-07/08/11/12/13/15 | UC-08, UC-10, UC-11, UC-12; sequence tạo đơn, đọc xác nhận | AC-FR-07-1, AC-FR-08-1, AC-FR-11-2, AC-FR-13-1 |
 | Payment | FR-09/10/17 | UC-09; sequence payment và hủy | AC-FR-09-1, AC-FR-10-1, AC-FR-10-2, AC-FR-17-1 |
-| StockReservation | FR-14/17 | Tạo đơn/payment/hủy/expiry, C-A04/C-A08/A-09 | AC-FR-14-2, AC-FR-17-2, AC-NFR-04-2 |
+| StockReservation | FR-14/17 | Tạo đơn/payment/hủy/expiry, C-A04/C-A08/C-X01/C-X02 | AC-FR-14-2, AC-FR-17-2, AC-NFR-04-2 |
 | Promotion | FR-15 | UC-12 mở rộng UC-08; snapshot tại tạo đơn | AC-FR-15-1, AC-FR-15-2 |
 | LoyaltyTransaction và User balance | FR-16 | UC-13 mở rộng UC-09; SUCCEEDED/hủy PAID | AC-FR-16-1, AC-FR-16-2 |
 
@@ -135,9 +135,9 @@ Ràng buộc liên bảng và race không được coi đã bảo vệ chỉ vì
 - [x] Có nguồn PlantUML/SVG cùng phiên bản, đã kết xuất và xem hình.
 - [x] Có mapping Payment/PaymentAttempt, LoyaltyTransaction/LoyaltyEntry, FK/lớp không vẽ và các invariant ngoài multiplicity.
 - [ ] Nhóm review BR/O trong SRS, tên model/schema thực, ràng buộc, dữ liệu legacy và rollout.
-- [ ] Chốt đủ tài liệu Task 1–2 qua review/merge trên repo, theo thứ tự nghiệm thu của đề.
+- [x] Tài liệu Task 1–2 gốc đã được merge qua PR #29; hiệu đính Task 1 ở PR #42 và lượt đồng bộ này cần được review riêng.
 - [ ] Hiện thực và chạy các test AC có bằng chứng; chưa được ghi đạt từ đợt soạn này.
 
-Tài liệu **Task 2.1–2.3** đã có trên nhánh PR #29. Việc có tài liệu trên repo chưa tự xác nhận Task 2 đã được nghiệm thu; kết quả review và quyết định chốt được ghi trên PR. Bước thiết kế kế tiếp là Task 3 kiến trúc/module/ADR và deployment, vẫn dựa trên phạm vi hiện tại.
+Tài liệu **Task 2.1–2.3** đã được đưa vào main qua PR #29. Việc có tài liệu trên repo chưa tự xác nhận Task 2 đã được nghiệm thu; kết quả review và quyết định chốt được ghi trên PR. Task 3 tiếp tục đối chiếu kiến trúc/module/ADR và deployment trên cùng phạm vi; phần đóng góp frontend/BFF/PWA đã có trong [tài liệu kiến trúc](../architecture/frontend-bff-pwa.md), chưa thay kiến trúc tổng thể hoặc nghiệm thu Task 3.
 
 Không sửa ERD Sprint 3, tài liệu Sprint 2, schema/migration hoặc code trong thao tác vẽ class. Các phương án demo/snapshot/legacy vẫn ở trạng thái được SRS ghi rõ, chưa biến thành quyết định đã được cả nhóm chấp nhận.

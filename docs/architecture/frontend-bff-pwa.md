@@ -1,12 +1,15 @@
 # Kiến trúc frontend, BFF và PWA
 
-Ngày cập nhật: 07/11/2026. Đây là phần đóng góp của A cho Task 3.1 Assignment 2,
-đang chờ review; chưa xác nhận hoàn tất Task 3 hoặc đã triển khai PWA.
+Ngày cập nhật: 10/11/2026. Đây là phần đóng góp của A cho Task 3.1 Assignment 2,
+đã được đưa vào main qua PR #31. PWA được triển khai qua PR #33; chưa xác nhận
+hoàn tất kiến trúc tổng thể/ADR, Task 3 hoặc production HTTPS.
 
 Nền tài liệu và layout: main `82c7675` sau khi merge PR #29 và #30.
 PR #30 chốt tại `694b49f`, đã chuyển `frontend` → `apps/web`, `backend` → `apps/api`.
 Các đường dẫn `apps/*` dưới đây là đường dẫn hiện hành; hồ sơ Sprint 1–2 giữ
-đường dẫn lịch sử. Việc có tài liệu này không chứng minh code PWA đã đạt AC.
+đường dẫn lịch sử. Cập nhật trạng thái PWA đối chiếu main `84374c8` sau PR #33;
+giữ `82c7675` làm mốc layout, không dùng nó làm HEAD hiện tại. Kết quả và giới hạn
+kiểm tra được ghi trong [hướng dẫn PWA](../assignment2/PWA.md).
 
 ## 1. Ranh giới thành phần
 
@@ -49,21 +52,21 @@ trong code đối chiếu. Sprint 3 kế thừa kiến trúc BFF và bổ sung n
 hiện tại và binding còn khớp theo [delta giỏ](../assignment2/CONTRACTS.md#delta-giỏ-có-chủ-đích).
 Không âm thầm đổi hành vi dọn giỏ Sprint 2 trong PR PWA.
 
-## 3. Phương án PWA tối thiểu để triển khai
+## 3. PWA tối thiểu đã triển khai
 
-Đề xuất dùng khả năng manifest của Next.js và service worker nhỏ, không bổ sung
-thư viện PWA ở bước đầu. Phạm vi phục vụ [NFR-07](../requirements/srs.md#nfr-07-pwa),
+PR #33 triển khai manifest của Next.js và service worker nhỏ theo phương án này,
+không bổ sung thư viện PWA. Phạm vi phục vụ [NFR-07](../requirements/srs.md#nfr-07-pwa),
 không thêm push notification, background sync hoặc chức năng nghiệp vụ offline.
 
-| Hạng mục dự kiến | Phương án | Trạng thái |
+| Hạng mục | Phương án đã triển khai | Trạng thái |
 |---|---|---|
-| Manifest | `apps/web/src/app/manifest.ts`: tên BrewLite, icon 192/512, start URL `/`, scope `/`, display standalone | Chưa triển khai |
-| Icon | Ảnh PNG công khai trong `apps/web/public/`; không chứa thông tin người dùng | Chưa triển khai |
-| Đăng ký worker | Thành phần client đăng ký cùng origin, scope `/`; bật cho bản production hỗ trợ secure context | Chưa triển khai |
-| Worker | `apps/web/public/sw.js`; cache có tên/phiên bản riêng của BrewLite | Chưa triển khai |
-| Trang offline | `apps/web/public/offline.html`, nội dung chung, không dựng thông tin phiên/đơn | Chưa triển khai |
+| Manifest | `apps/web/src/app/manifest.ts`: tên BrewLite, icon 192/512, start URL `/`, scope `/`, display standalone | Đã merge PR #33 |
+| Icon | PNG 192/512 trong `apps/web/public/icons/`; không chứa thông tin người dùng | Đã merge PR #33 |
+| Đăng ký worker | `PwaSupport` đăng ký cùng origin, scope `/`; bật cho bản production hỗ trợ secure context | Đã merge PR #33 |
+| Worker | `apps/web/public/sw.js`; cache có tên/phiên bản riêng của BrewLite | Đã merge PR #33 |
+| Trang offline | `apps/web/public/offline.html`, nội dung chung, không dựng thông tin phiên/đơn | Đã merge PR #33 |
 
-**Chính sách cache đề xuất:** allowlist chỉ gồm trang offline và icon công khai.
+**Chính sách cache đã triển khai:** allowlist chỉ gồm trang offline và icon công khai.
 Navigation GET thử mạng trước; chỉ dùng trang offline khi fetch gặp lỗi mạng.
 HTTP 401/403/500 không được tự chuyển thành nội dung thành công hoặc kết quả đặt đơn.
 Không cache HTML ứng dụng, RSC, response API, dữ liệu catalog/giá hoặc dữ liệu cá nhân.
@@ -78,9 +81,9 @@ Cache của worker không cung cấp bản sao màn hình riêng tư cho tài kh
 Quy tắc hiển thị/ẩn dữ liệu trong giỏ vẫn do auth/cart bridge hiện có đảm nhiệm.
 
 Trade-off: cache ít giúp kiểm soát dữ liệu riêng tư và tránh giá cũ, nhưng không
-cho phép duyệt toàn bộ menu/chi tiết khi offline. Phương án này đáp ứng mức tối
-thiểu được SRS đề xuất bằng trang báo offline; khả năng cài/mở app và các AC vẫn
-phải được kiểm chứng. Nếu mở rộng cache sau này, cần review chính sách riêng.
+cho phép duyệt toàn bộ menu/chi tiết khi offline. Cài/mở app và trang báo offline
+đã được kiểm tra local theo [hướng dẫn PWA](../assignment2/PWA.md); chưa xác nhận
+hoàn tất AC trên production HTTPS. Nếu mở rộng cache sau này, cần review chính sách riêng.
 
 ## 4. Cấu hình và điểm phối hợp deployment
 
@@ -101,18 +104,23 @@ kết nối private và persistent storage theo đề. Nền tảng và chi phí
 theo tài nguyên thực tế của nhóm trước khi hoàn tất thiết kế deployment.
 
 HTTPS production là điều kiện kiểm chứng PWA; localhost phục vụ kiểm tra local.
-Chrome trên Windows, profile thường được đề xuất làm môi trường kiểm chứng đầu
-tiên. Ghi phiên bản thực tế và kết quả cài/mở app khi chạy; chưa coi O-01 đã chốt
-hoặc AC đạt chỉ từ đề xuất này. Cách cài đặt phụ thuộc hỗ trợ của browser.
+Lượt local đã dùng Chrome 156.0.8078.80 trên Windows, profile thường; kết quả
+cài/mở app nằm trong [hướng dẫn PWA](../assignment2/PWA.md#kết-quả-local-ngày-07112026).
+Viewport chưa được lưu kèm; môi trường O-01 và các AC còn phải đối chiếu trên
+bản tích hợp/production. Cách cài đặt phụ thuộc hỗ trợ của browser.
 
 ## 5. Kiểm tra và bàn giao
 
-| Phạm vi | Kiểm tra cần chạy khi có implementation | Trạng thái |
+| Phạm vi | Kiểm tra | Kết quả hiện có và phần còn chờ |
 |---|---|---|
-| AC-NFR-07-1 | Manifest/icon/worker, cài và mở ở browser đã ghi phiên bản; dùng luồng sản phẩm online | CHƯA CHẠY |
-| AC-NFR-07-2 | Navigation offline; lỗi mạng khi đặt; kết nối lại không tự gửi; cache không chứa dữ liệu riêng tư khi đổi chủ | CHƯA CHẠY |
-| AC-NFR-06-1/2 | UI liên quan tại viewport trong SRS; loading/error/offline không che thao tác chính | CHƯA CHẠY cho phần PWA |
-| Hồi quy | Unit liên quan, typecheck/lint/build; thử menu/auth/giỏ/tạo PENDING sau khi gắn worker | CHƯA CHẠY cho phần PWA |
+| AC-NFR-07-1 | Manifest/icon/worker, cài và mở app; dùng luồng sản phẩm online | Đã có quan sát local trên máy A; chưa kiểm chứng production HTTPS hoặc kết luận toàn AC đạt |
+| AC-NFR-07-2 | Offline, kết nối lại, cache và đổi chủ | Đã có kiểm tra local; nhánh đã gửi mutation rồi mất phản hồi dưới worker và race phiên còn chờ |
+| AC-NFR-06-1/2 | UI ở viewport trong SRS; loading/error/offline | Có quan sát offline local nhưng chưa ghi viewport; chưa kết luận đạt các AC này |
+| Hồi quy | Unit, typecheck/lint/build và luồng online có worker | PWA.md ghi 346/346 unit test, typecheck/lint/build và luồng cơ bản tới PENDING; không thay kiểm thử tích hợp Sprint 3 hoặc production |
+
+Chi tiết môi trường, phiên bản và giới hạn bằng chứng nằm trong [hướng dẫn PWA](../assignment2/PWA.md).
+Các kết quả trên thuộc lượt PWA đã ghi nhận, không phải một lượt chạy mới tại HEAD
+hoặc xác nhận mọi AC đã đạt.
 
 A thực hiện phần frontend/BFF/PWA; B đối chiếu component dùng chung và review.
 D dẫn kiến trúc tổng thể/ADR, C đối chiếu security/health, E đối chiếu môi trường
@@ -122,6 +130,8 @@ không ghi nghiệm thu Task 3–5 trước các cổng bắt buộc của đề
 
 Nguồn đối chiếu: [SRS](../requirements/srs.md), [kế hoạch nhóm](../assignment2/TEAM_PLAN.md),
 [contract A2](../assignment2/CONTRACTS.md), PR [#29](https://github.com/giabaot400-boop/BrewLite/pull/29),
-PR [#30](https://github.com/giabaot400-boop/BrewLite/pull/30) và guide PWA đi kèm
+PR [#30](https://github.com/giabaot400-boop/BrewLite/pull/30),
+PR [#31](https://github.com/giabaot400-boop/BrewLite/pull/31),
+PR [#33](https://github.com/giabaot400-boop/BrewLite/pull/33) và guide PWA đi kèm
 Next.js 16.4.2 tại `node_modules/next/dist/docs/01-app/02-guides/progressive-web-apps.md`.
 Guide kỹ thuật không thay yêu cầu đề; chỉ các phần PWA nêu trên nằm trong phương án này.

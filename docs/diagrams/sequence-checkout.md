@@ -4,15 +4,15 @@
 
 | Thông tin | Giá trị |
 |---|---|
-| Ngày cập nhật | 06/11/2026 |
-| Trạng thái | Đang review, mô tả thiết kế mục tiêu, chưa xác nhận code/test đạt |
+| Ngày cập nhật | 10/11/2026 |
+| Trạng thái | Đã có trên main qua PR #29; mô tả thiết kế mục tiêu, chưa xác nhận code/test đạt |
 | Căn cứ | [SRS](../requirements/srs.md), [Use case Task 1.3](../requirements/use-case-checkout.md), [Activity Task 2.1](activity-checkout.md) |
 | Nguồn | [sequence-checkout.puml](sequence-checkout.puml), ba khối sơ đồ của cùng luồng checkout |
 | Hình | [1 — Tạo đơn](sequence-checkout-order.svg) · [2 — Thanh toán](sequence-checkout-payment.svg) · [3 — Hủy/hết hạn](sequence-checkout-cancel-expiry.svg) |
 
 ## Nền sử dụng và trạng thái
 
-Bản giao nhóm ngày 06/11/2026, đồng bộ **Sprint 3** và nền Sprint 2 main `a1a0e4ae92de681deac538685e24407b3190866b`. PO đã chọn phương án Sprint 3 làm cơ sở thực hiện; chưa thay xác nhận review của từng thành viên hoặc minh chứng kiểm thử Assignment 2. Giữ nguyên 17 FR, 12 NFR, 59 AC, 14 mã UC và 10 lớp domain.
+Tài liệu gốc được đưa lên repo qua PR #29 đã merge; lượt cập nhật này đồng bộ câu chữ và truy vết với Task 1 ở PR #42. Thiết kế kế thừa **Sprint 3** và nền Sprint 2 main `a1a0e4ae92de681deac538685e24407b3190866b`. PO đã chọn phương án Sprint 3 làm cơ sở thực hiện; chưa thay xác nhận review của từng thành viên hoặc minh chứng kiểm thử Assignment 2. Giữ nguyên 17 FR, 12 NFR, 59 AC, 14 mã UC và 10 lớp domain.
 
 Chi tiết kế thừa nằm tại [contract dùng chung](../assignment2/CONTRACTS.md). Hạn cả hai assignment là **15/11/2026 theo thông tin PO cung cấp**; giờ nộp LMS cần PO xác nhận. Xem [kế hoạch giao nhóm](../assignment2/TEAM_PLAN.md); lịch là mục tiêu đề xuất, chưa ghi nhận các bạn đã nhận việc.
 
@@ -84,12 +84,12 @@ Lifeline API tự gọi tick thể hiện tác vụ trong backend; không thêm 
 |---|---|---|---|
 | Request/response, guard JWT/validate | 1/2/3, guard xuyên suốt | C-01…C-06 (ngữ cảnh) và M-01…M-05 (UC-09), A-01, E-01 | FR-05/07/09; AC-NFR-02-1, AC-NFR-02-2 |
 | Preview dự kiến, giá chính thức và xác nhận | 1 | C-02…C-04, C-A02/C-A03 | AC-FR-07-1, AC-FR-07-2, AC-FR-15-1, AC-FR-15-2 |
-| Tạo đơn và cập nhật kho trong transaction | 2 (ngữ cảnh trước UC-09), chi tiết 1 | C-05, C-A04, E-05 | AC-FR-14-1, AC-FR-14-2, AC-NFR-04-1, AC-NFR-04-2 |
-| Replay/conflict tạo đơn | 1 | C-A07, C-E03 | AC-FR-08-1, AC-FR-08-2 |
+| Tạo đơn và cập nhật kho trong transaction | 2 (ngữ cảnh trước UC-09), chi tiết 1 | C-05, C-A04/C-X02, E-05 | AC-FR-14-1, AC-FR-14-2, AC-NFR-04-1, AC-NFR-04-2 |
+| Replay/conflict tạo đơn và rollback/retry khi lỗi ghi | 1 | C-A07, C-E03/C-X02 | AC-FR-08-1, AC-FR-08-2 |
 | Alt payment thành công/thất bại | 2 | M-02…M-04, A-05/A-06 | AC-FR-09-1, AC-FR-09-2, AC-FR-16-1 |
 | Idempotency payment và mất response | 2 | A-07, E-04/E-05 | AC-FR-10-1, AC-FR-10-2 |
 | Thông báo cuối, giỏ và lịch sử | 1/2/3 | C-06/M-05, A-10, E-06 | AC-FR-03-3, AC-FR-11-1, AC-FR-11-2, AC-FR-12-1 |
-| Hủy, hoàn mock/kho/điểm và expiry | 3 | C-A08/A-09 | AC-FR-17-1, AC-FR-17-2, AC-FR-16-2 |
+| Hủy, hoàn mock/kho/điểm và expiry | 3 | C-A08/C-X01; A-09 của UC-09 | AC-FR-17-1, AC-FR-17-2, AC-FR-16-2 |
 | Recovery/storage/legacy | 1/2/3 | E-02/C-E03/E-04/E-07 | AC-NFR-05-1, AC-NFR-05-2, AC-NFR-11-1, AC-NFR-11-2 |
 
 Ma trận này là đối chiếu thiết kế, chưa là kết quả test. Các test đồng thời/rollback phải chạy trên PostgreSQL nhiều kết nối theo SRS; hình COMMIT/ROLLBACK không thay bằng chứng chạy thật.
@@ -100,8 +100,8 @@ Ma trận này là đối chiếu thiết kế, chưa là kết quả test. Các
 - [x] Có đủ lifeline tối thiểu trong hình payment, request/response, guard/validate, transaction, alt và replay.
 - [x] Có liên kết với SRS, Task 1.3 và activity; đồng bộ chính sách, giữ master 14 UC.
 - [ ] Nhóm review BR-01…06/O-01…05, lock/CAS/schema và rollout trước hiện thực.
-- [ ] Chốt tài liệu qua review/merge trên repo; kiểm chứng AC khi triển khai, nghiệm thu theo thứ tự đề.
+- [x] Tài liệu gốc đã được merge qua PR #29; hiệu đính Task 1 ở PR #42 và lượt đồng bộ này cần được review riêng.
 - [x] Có tài liệu [Task 2.3 — class diagram](class-domain.md) và đối chiếu mô hình dữ liệu.
 - [ ] Nhóm review/chốt đủ Task 2; sequence riêng lẻ chưa tự hoàn thành toàn bộ Task 2.
 
-Tài liệu mô tả thiết kế Task 2.2 trên nhánh PR #29; chưa xác nhận Task 2 đã được nghiệm thu. Thay đổi chỉ có tài liệu, không sửa code, migration hoặc hồ sơ Sprint 2. Nguồn sơ đồ và SVG được đối chiếu với nội dung thiết kế. Lịch sử thay đổi trên repo theo commit/PR.
+Tài liệu Task 2.2 đã được đưa vào main qua PR #29; việc merge tài liệu không tự xác nhận đã nghiệm thu Task 2 hoặc chạy đạt AC. Thay đổi chỉ có tài liệu, không sửa code, migration hoặc hồ sơ Sprint 2. Nguồn sơ đồ và SVG được đối chiếu với nội dung thiết kế. Lịch sử thay đổi trên repo theo commit/PR.

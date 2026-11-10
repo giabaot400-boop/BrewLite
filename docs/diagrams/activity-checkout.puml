@@ -194,7 +194,7 @@ legend bottom
   Lần mới sau FAILED dùng key mới trên cùng orderId, không gia hạn giữ hàng.
   Deadline kiểm tra sau lock; request đến UI trước hạn chưa đủ điều kiện.
   Payment đã hợp lệ trước hạn có thể commit sau hạn; GET chỉ đọc.
-  Hủy / expiry là nhánh A-08/A-09, phân xử nguyên tử với payment và PREPARING.
+  Hủy / expiry: C-A08/C-X01, phân xử nguyên tử với payment và PREPARING.
   Legacy PROCESSING/UNKNOWN chặn lần mới / release chưa xác minh.
   Mock PaymentService thuộc NestJS, không có actor gateway bên ngoài.
   UI 15 giây / BFF 10 giây là giới hạn chờ, không chứng minh FAILED.
