@@ -2,54 +2,22 @@ import "reflect-metadata";
 import "dotenv/config";
 
 import { NestFactory } from "@nestjs/core";
-import { ValidationPipe, BadRequestException } from "@nestjs/common";
+import { ValidationPipe } from "@nestjs/common";
 import { json } from "express";
 
 import { AppModule } from "./app.module.js";
+import { createOrderValidationException } from "./common/order-validation.js";
+
 import type { Request, Response, NextFunction } from "express";
-import type { ValidationError } from "class-validator";
 
-function collectFieldErrors(
-  errors: ValidationError[],
-): Record<string, string[]> {
-  const fieldErrors: Record<string, string[]> = {};
-
-  function visit(error: ValidationError, parentPath = ""): void {
-    const property = error.property;
-
-    // Bieu dien chi so mang bang [index]
-    const path = /^\d+$/.test(property)
-      ? `${parentPath}[${property}]`
-      : parentPath
-        ? `${parentPath}.${property}`
-        : property;
-
-    // Luu cac thong bao loi duoi dang mang chuoi
-    if (error.constraints) {
-      const messages = Object.values(error.constraints);
-
-      fieldErrors[path] = [...(fieldErrors[path] ?? []), ...messages];
-    }
-
-    // Duyet cac thuoc tinh con
-    for (const child of error.children ?? []) {
-      visit(child, path);
-    }
-  }
-
-  for (const error of errors) {
-    visit(error);
-  }
-
-  return fieldErrors;
-}
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bodyParser: false,
   });
 
-  // Giới hạn JSON request body tối đa 32 KiB.
+  // Gioi han JSON request body toi da 32 KiB.
   app.use(json({ limit: "32kb" }));
+
   app.use(
     (error: unknown, _req: Request, res: Response, next: NextFunction) => {
       const bodyError = error as {
@@ -70,7 +38,7 @@ async function bootstrap() {
     },
   );
 
-  // Kiểm tra dữ liệu DTO trước khi vào controller.
+  // Kiem tra DTO truoc khi vao controller.
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -79,14 +47,7 @@ async function bootstrap() {
       transformOptions: {
         enableImplicitConversion: false,
       },
-      exceptionFactory: (errors) =>
-        new BadRequestException({
-          error: {
-            code: "VALIDATION_ERROR",
-            message: "Dữ liệu gửi lên không hợp lệ.",
-            fieldErrors: collectFieldErrors(errors),
-          },
-        }),
+      exceptionFactory: createOrderValidationException,
     }),
   );
 
