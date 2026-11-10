@@ -1,0 +1,91 @@
+@startuml
+title BrewLite Sprint 2\nSequence đăng nhập và cookie
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #5B4636
+skinparam noteBackgroundColor #FFF6DA
+skinparam noteBorderColor #B89551
+skinparam roundcorner 10
+hide footbox
+skinparam sequenceMessageAlign center
+skinparam maxMessageSize 210
+skinparam ParticipantBackgroundColor #F6EEE4
+skinparam ParticipantBorderColor #80644F
+skinparam LifeLineBorderColor #9B8B7D
+skinparam sequenceGroupBackgroundColor #FFFFFF
+skinparam sequenceGroupBorderColor #9B8B7D
+skinparam sequenceDividerBackgroundColor #EAF0F6
+participant "Trình duyệt\nNext.js UI" as UI
+participant "Next.js\nRoute Handler" as BFF
+participant "NestJS\nAPI" as API
+database "PostgreSQL" as DB
+
+note over UI : Khách nhập email / mật khẩu\nvà bấm Đăng nhập
+UI -> BFF : POST /api/auth/login\nJSON + Origin + X-BrewLite-Request
+BFF -> BFF : Kiểm tra Origin / JSON / header
+alt Yêu cầu không được phép
+  BFF --> UI : 403 REQUEST_FORBIDDEN
+else Yêu cầu hợp lệ
+  BFF -> API : POST /auth/login\nemail, password
+  API -> API : Validate DTO / chuẩn hóa email
+  break DTO không hợp lệ
+    API --> BFF : 400 VALIDATION_ERROR
+    BFF --> UI : Hiển thị lỗi trường, giữ giỏ
+  end
+  API -> DB : Tìm User theo email chuẩn hóa
+  DB --> API : User / không có tài khoản
+  API -> API : Đối chiếu bcrypt
+  alt Thông tin đăng nhập sai
+    API --> BFF : 401 INVALID_CREDENTIALS
+    BFF --> UI : Email hoặc mật khẩu không đúng
+  else Xác thực thành công
+    API -> DB : Tạo AuthSession\nexpiresAt = iat + 3600 giây
+    DB --> API : Phiên đã lưu
+    API --> BFF : 200 accessToken, user, expiresAt
+    BFF -> BFF : Set cookie HttpOnly\nHạn không vượt exp; no-store
+    BFF --> UI : 200 user, expiresAt\nKhông trả JWT cho JavaScript
+    UI -> UI : Giữ giỏ khách / cùng owner;\nkhác owner xóa cart, giữ pending cũ
+    note over UI : Về giỏ nếu đi từ đặt hàng;\nmở login trực tiếp thì về Menu.\nKhông tự gửi đơn.
+  end
+end
+note over API,DB
+  Lỗi DB / hệ thống trả 5xx; UI giữ giỏ.
+  UC-06 đăng ký theo luồng đặc tả riêng;
+  không tự cấp phiên hoặc tạo đơn.
+end note
+
+newpage Khôi phục phiên sau chuyển trang hoặc tải lại
+UI -> BFF : GET /api/auth/me\nCookie được browser gửi tự động
+alt Không có cookie
+  BFF --> UI : 401 AUTH_REQUIRED
+else Có cookie
+  BFF -> API : GET /auth/me\nAuthorization: Bearer JWT
+  API -> API : Xác minh chữ ký, HS256, iss, aud, exp
+  alt JWT sai hoặc hết hạn
+    API --> BFF : 401 SESSION_INVALID / SESSION_EXPIRED
+    BFF --> UI : 401; giữ cart / pending theo owner
+  else JWT hợp lệ
+    API -> DB : Tìm AuthSession theo sid\nKiểm tra sub, expiresAt, revokedAt
+    DB --> API : Kết quả phiên / lỗi DB
+    alt Phiên hợp lệ
+      API --> BFF : 200 user, expiresAt ban đầu
+      BFF --> UI : 200 user, expiresAt; no-store
+      UI -> UI : Khôi phục trạng thái tài khoản\nKhông tự gửi pending
+    else Phiên không hợp lệ hoặc hết hạn
+      API --> BFF : 401 SESSION_INVALID / SESSION_EXPIRED
+      BFF --> UI : Yêu cầu đăng nhập lại\nKhông tự xóa cart vì lỗi phiên
+    else Lỗi database
+      API --> BFF : 500 INTERNAL_ERROR
+      BFF --> UI : Lỗi hệ thống; không kết luận hết hạn
+    end
+  end
+end
+note over UI,BFF
+  Cookie HttpOnly, Path=/, không Domain, Lax.
+  Secure trên HTTPS; local HTTP dùng false.
+  Gọi me không gia hạn phiên. BFF timeout 10 s,
+  UI timeout 15 s; 504/502 giữ cart và pending.
+end note
+@enduml

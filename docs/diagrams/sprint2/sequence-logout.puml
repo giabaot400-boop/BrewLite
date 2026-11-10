@@ -1,0 +1,64 @@
+@startuml
+title BrewLite Sprint 2\nSequence đăng xuất phiên hiện tại
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #5B4636
+skinparam noteBackgroundColor #FFF6DA
+skinparam noteBorderColor #B89551
+skinparam roundcorner 10
+hide footbox
+skinparam sequenceMessageAlign center
+skinparam maxMessageSize 210
+skinparam ParticipantBackgroundColor #F6EEE4
+skinparam ParticipantBorderColor #80644F
+skinparam LifeLineBorderColor #9B8B7D
+skinparam sequenceGroupBackgroundColor #FFFFFF
+skinparam sequenceGroupBorderColor #9B8B7D
+skinparam sequenceDividerBackgroundColor #EAF0F6
+participant "Trình duyệt\nNext.js UI" as UI
+participant "Next.js\nRoute Handler" as BFF
+participant "NestJS\nAPI" as API
+database "PostgreSQL" as DB
+
+note over UI : Có món: hỏi xác nhận.\nHủy / đóng hộp thoại thì dừng.
+UI -> BFF : POST /api/auth/logout\nJSON + Origin + custom header
+BFF -> BFF : Kiểm tra yêu cầu theo P04
+break Origin / JSON / header sai
+  BFF --> UI : 403 REQUEST_FORBIDDEN; giữ giỏ
+end
+alt Không có cookie
+  BFF --> UI : 204 + Logout-Scope: local\nKhông xác nhận thu hồi server
+else Có cookie
+  BFF -> API : POST /auth/logout + Bearer JWT
+  API -> API : Guard logout riêng: xác minh token;\nchỉ bỏ điều kiện còn exp để thu hồi
+  alt Chữ ký / nhận diện không hợp lệ
+    API --> BFF : 401 SESSION_INVALID
+  else Nhận diện hợp lệ
+    API -> DB : Kiểm tra sid / sub;\nthu hồi đúng phiên, idempotent
+    DB --> API : Đã thu hồi / đã có kết quả / lỗi
+    API --> BFF : 204 nếu hoàn tất hoặc không còn phiên;\n401 nếu owner sai; 500 nếu lỗi DB
+  end
+  alt Backend xác nhận 204
+    BFF -> BFF : Xóa cookie đúng Path / phạm vi
+    BFF --> UI : 204 + Logout-Scope: session
+  else Backend trả 401 SESSION_INVALID
+    BFF -> BFF : Xóa cookie hỏng; không nhận là đã thu hồi
+    BFF --> UI : 204 + Logout-Scope: local
+  else Chưa xác nhận hoàn tất
+    BFF --> UI : Lỗi tương ứng; giữ giỏ
+  end
+end
+opt UI nhận 204
+  UI -> UI : Xóa cart, badge 0, về Menu;\ngiữ pending theo owner
+end
+note over UI,DB
+  Token hết hạn chỉ được dùng để nhận diện thao tác thu hồi;
+  me / orders vẫn đòi token và phiên còn hạn, chưa thu hồi.
+  Thiếu / sai token: dọn local; không xác nhận đã thu hồi server.
+  Header đầy đủ: X-BrewLite-Logout-Scope = session hoặc local.
+  BFF timeout 10 s; UI timeout 15 s. Lỗi DB / mạng giữ cookie và cart.
+  Logout không hủy Order, không xóa pending, không ảnh hưởng phiên khác.
+end note
+@enduml

@@ -1,4 +1,13 @@
-# Sơ đồ BrewLite — đối chiếu Sprint 1
+# Sơ đồ BrewLite theo sprint
+
+- [Sprint 1](#sprint-1): bộ chỉnh lý và nguồn gốc lưu ở bên dưới.
+- [Sprint 2](sprint2/README.md): giỏ, auth/session, tạo đơn PENDING và ERD tại thời điểm bàn giao.
+- [Sprint 3](sprint3/README.md): bộ thiết kế checkout/payment và trạng thái đơn.
+
+Mỗi bộ phản ánh phạm vi tại mốc của mình. Kết quả triển khai và nghiệm thu
+đọc trong hồ sơ sprint; không dùng hình thiết kế để suy ra kiểm thử đã đạt.
+
+## Sprint 1
 
 Bộ sơ đồ chỉnh lý **r2, ngày 27/10/2026**, dựa trên hồ sơ
 `BrewLite_Sprint1_Analysis_Design_v1.1.docx`, bốn đoạn PlantUML A cung cấp

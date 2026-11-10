@@ -1,0 +1,116 @@
+@startuml
+!pragma layout smetana
+title BrewLite Sprint 2\nERD dự kiến theo hồ sơ v0.6
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #5B4636
+skinparam noteBackgroundColor #FFF6DA
+skinparam noteBorderColor #B89551
+skinparam roundcorner 10
+
+hide circle
+skinparam nodesep 30
+skinparam ranksep 45
+skinparam entityBorderColor #80644F
+entity Product <<S1 giữ>> #EAF4EB {
+  * id <<PK>>
+  --
+  name
+  description
+  price
+  imageUrl
+}
+entity Topping <<S1 giữ>> #EAF4EB {
+  * id <<PK>>
+  --
+  name
+  price
+}
+entity ProductTopping <<S1 giữ>> #EAF4EB {
+  * productId <<PK,FK>>
+  * toppingId <<PK,FK>>
+}
+entity User <<S2 mới>> #FFF3D6 {
+  * id <<PK>>
+  --
+  email <<UK>>
+  passwordHash
+  createdAt
+}
+entity AuthSession <<S2 mới>> #FFF3D6 {
+  * id <<PK>>
+  --
+  userId <<FK>>
+  createdAt
+  expiresAt
+  revokedAt <<nullable>>
+}
+entity Order <<S2 mới>> #FFF3D6 {
+  * id <<PK>>
+  --
+  userId <<FK>>
+  status = PENDING
+  total
+  createdAt
+  requestKey
+  requestHash
+}
+entity OrderItem <<S2 mới>> #FFF3D6 {
+  * id <<PK>>
+  --
+  orderId <<FK>>
+  productId <<FK>>
+  productName
+  size
+  basePrice
+  sizeExtraPrice
+  unitPrice
+  qty
+  lineTotal
+}
+entity OrderItemTopping <<S2 mới>> #FFF3D6 {
+  * orderItemId <<PK,FK>>
+  * toppingId <<PK,FK>>
+  --
+  name
+  price
+}
+entity OrderRequest <<S2 mới>> #FFF3D6 {
+  * id <<PK>>
+  --
+  userId <<FK>>
+  requestKey
+  requestHash
+  canonicalVersion = 1
+  state
+  orderId <<FK,UK,nullable>>
+  httpStatus
+  responseJson
+  createdAt
+}
+Product ||--o{ ProductTopping : cho phép
+Topping ||--o{ ProductTopping : được gắn
+User ||--o{ AuthSession : có phiên
+User ||--o{ Order : đặt
+User ||--o{ OrderRequest : gửi
+Order ||--|{ OrderItem : chứa
+Product ||--o{ OrderItem : tham chiếu
+OrderItem ||--o{ OrderItemTopping : chọn
+Topping ||--o{ OrderItemTopping : tham chiếu
+OrderRequest ||--o| Order : kết quả
+legend bottom
+  Đây là thiết kế dự kiến, chưa là schema / migration đã triển khai.
+  Unique(userId,requestKey) trên Order và OrderRequest; canonicalVersion=1.
+  SUCCEEDED: orderId khác null. REJECTED: orderId null; lưu phản hồi nghiệp vụ.
+  Mỗi Order được tạo cùng OrderRequest SUCCEEDED trong một transaction.
+  Hai bản ghi phải cùng userId, requestKey và requestHash; test lỗi phải rollback.
+  OrderRequest là nguồn replay; các trường Order là bản sao có ràng buộc nhất quán.
+  ID là string; tiền là Int VND không âm; thời gian dùng DateTime phía server.
+  ProductTopping và OrderItemTopping dùng PK ghép; dấu nullable thể hiện trường tùy chọn.
+  Snapshot tên / giá giữ lịch sử; không Cascade từ Product / Topping vào đơn cũ.
+  imageUrl ánh xạ image_url; Product/Topping/ProductTopping giữ bảng Sprint 1.
+  Không thêm bảng Size, Payment, stock, promotion hoặc loyalty trong Sprint 2.
+endlegend
+@enduml

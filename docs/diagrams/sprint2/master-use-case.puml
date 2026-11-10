@@ -1,0 +1,94 @@
+@startuml
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #5B4636
+skinparam roundcorner 12
+skinparam packageStyle rectangle
+skinparam noteBackgroundColor #FFF6DA
+skinparam noteBorderColor #B89551
+skinparam actorBorderColor #5B4636
+skinparam actorFontColor #382A23
+skinparam rectangleBorderColor #80644F
+skinparam usecaseBorderColor #80644F
+skinparam entityBorderColor #80644F
+skinparam activityBorderColor #80644F
+skinparam activityBackgroundColor #F9F2E9
+skinparam activityDiamondBackgroundColor #FFF6DA
+skinparam activityDiamondBorderColor #80644F
+skinparam swimlaneBorderColor #C9B9A9
+top to bottom direction
+title BrewLite — Master Use Case\nCập nhật theo Sprint 2 v0.6 — thiết kế Sprint 2
+skinparam usecaseBackgroundColor #FFFFFF
+skinparam nodesep 35
+skinparam ranksep 55
+
+actor "Khách hàng" as Customer
+actor "Cổng thanh toán giả lập\n[Sprint 3]" as Gateway
+
+rectangle "Hệ thống BrewLite" {
+  package "Sprint 1" as S1 #EAF4EB {
+    usecase "UC-01: Xem menu" as UC01
+    usecase "UC-02: Xem chi tiết\nsản phẩm" as UC02
+    usecase "UC-03: Chọn size\nvà topping" as UC03
+    usecase "UC-04: Tính và\nhiển thị giá" as UC04
+  }
+  package "Sprint 2" as S2 #FFF3D6 {
+    usecase "UC-05: Quản lý giỏ hàng" as UC05
+    usecase "UC-06: Đăng ký\ntài khoản" as UC06
+    usecase "UC-07: Đăng nhập" as UC07
+    usecase "UC-08: Đặt hàng" as UC08
+    usecase "S2-UC-LOGOUT: Đăng xuất" as Logout
+  }
+  package "Sprint 3" as S3 #E8EEF9 {
+    usecase "UC-09: Thanh toán\nkhông tiền mặt" as UC09
+    usecase "UC-10: Xem\nxác nhận đơn" as UC10
+    usecase "UC-11: Xem lịch sử\nvà trạng thái đơn" as UC11
+    usecase "UC-12: Áp mã giảm giá" as UC12
+    usecase "UC-13: Tích lũy\nđiểm thưởng" as UC13
+  }
+}
+
+Customer -- UC01
+Customer -- UC02
+Customer -- UC03
+Customer -- UC05
+Customer -- UC06
+Customer -- UC07
+Customer -- UC08
+Customer -- Logout
+Customer -- UC09
+Customer -- UC10
+Customer -- UC11
+Customer -- UC12
+
+UC03 .down.> UC04 : <<include>>
+UC10 .up.> UC09 : <<extend>>
+UC12 .left.> UC08 : <<extend>>
+UC13 .up.> UC09 : <<extend>>
+UC09 -right- Gateway
+UC01 -[hidden]right-> UC05
+UC05 -[hidden]right-> UC09
+UC01 -[hidden]down-> UC02
+UC02 -[hidden]down-> UC03
+UC05 -[hidden]down-> UC06
+UC06 -[hidden]down-> UC07
+UC07 -[hidden]down-> UC08
+UC08 -[hidden]down-> Logout
+UC09 -[hidden]down-> UC10
+UC10 -[hidden]down-> UC11
+UC11 -[hidden]down-> UC12
+UC12 -[hidden]down-> UC13
+
+legend bottom
+  S2-UC-LOGOUT bổ sung luồng đăng xuất; giữ nguyên UC-01 đến UC-13.
+  Đăng nhập là tiền điều kiện tạo đơn, không include thao tác login mỗi lần.
+  Sprint 2: POST /orders tạo đơn PENDING, không bắt buộc thực hiện UC-09.
+  Sprint 3: Thanh toán đơn đã tạo; xác nhận / lịch sử và các nghiệp vụ tiếp theo.
+  Extend theo bản nền: UC-10 khi xem xác nhận sau thanh toán; UC-12 khi áp mã;
+  UC-13 khi thanh toán thành công và đủ điều kiện. Đây không là thứ tự thực thi.
+  Luồng mở rộng Sprint 3 được làm rõ khi lập kế hoạch Sprint 3.
+endlegend
+
+@enduml
