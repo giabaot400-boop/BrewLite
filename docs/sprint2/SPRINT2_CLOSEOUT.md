@@ -156,7 +156,7 @@ Runtime chuyển sang bcrypt native 6.0.0, giữ cost 12. JSON ghi thời điể
 | GET /auth/me | 5 | 3,561 | 4,037 | 4,416 | 5/5 đạt |
 | POST /auth/logout | 5 | 4,211 | 6,361 | 13,011 | 5/5 đạt |
 
-V12 xác nhận đăng ký lưu hash cost 12, hash cũ vẫn đăng nhập được mà không ghi lại, TTL/expiration giữ nguyên qua /me và logout thu hồi phiên. Chi tiết số đo từng lần được ghi trong `docs/SPRINT2_AUTH_PERFORMANCE.md` của PR #26.
+V12 xác nhận đăng ký lưu hash cost 12, hash cũ vẫn đăng nhập được mà không ghi lại, TTL/expiration giữ nguyên qua /me và logout thu hồi phiên. Chi tiết số đo từng lần được ghi trong `docs/sprint2/SPRINT2_AUTH_PERFORMANCE.md` của PR #26.
 
 V11 và V12 là hai lượt đo riêng; kết quả sau sửa áp dụng cho 20 mẫu auth của V12. Các số đo Product API và Orders ở bảng V11 thuộc phiên bản trước bản sửa nhất quán Order/ledger. Hai lượt đo không phải kiểm thử tải hoặc thời gian BFF/UI.
 

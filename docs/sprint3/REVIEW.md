@@ -32,7 +32,7 @@ Auth/logout và invariant Order/ledger đã có sửa/evidence ở nền S2 ch�
 
 Đã đối chiếu năm endpoint; DTO/hash giữ fixture v2;27AC/mộtlead cùng nội dung giữa Word và Markdown;13model/14mãUC/haiextend/chíncạnhstate. Render và xem đầy đủ Word cùng chín hình; kiểm cấu trúc/CRC và byte tham chiếu haiZIP. Đây là kiểm tra tài liệu. Chưa chạy unit/integration/E2E, DB hoặc migration của ứng dụng.
 
-Nguồn: đề BrewLite-CongNghePhanMem Task8–10/sơ đồ9.1; Sprint1 v1.1, Sprint2 v0.6 và diagram v0.6; nền triển khai hiện hành https://github.com/giabaot400-boop/BrewLite/tree/a1a0e4ae92de681deac538685e24407b3190866b và docs/SPRINT2_CLOSEOUT.md; snapshot fcb473a là nguồn lịch sử trước khi chốt S2. Các quyết định nghiệp vụ được trình bày trong DESIGN.md và CONTRACTS.md.
+Nguồn: đề BrewLite-CongNghePhanMem Task8–10/sơ đồ9.1; Sprint1 v1.1, Sprint2 v0.6 và diagram v0.6; nền triển khai hiện hành https://github.com/giabaot400-boop/BrewLite/tree/a1a0e4ae92de681deac538685e24407b3190866b và docs/sprint2/SPRINT2_CLOSEOUT.md; snapshot fcb473a là nguồn lịch sử trước khi chốt S2. Các quyết định nghiệp vụ được trình bày trong DESIGN.md và CONTRACTS.md.
 
 ## 6 Đồng bộ nền Sprint 2 đã chốt ngày 04/11/2026
 

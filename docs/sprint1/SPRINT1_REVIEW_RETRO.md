@@ -25,7 +25,7 @@ scripts ở đầu PR #11 (`c96a7eb`) khớp main `b599076`; PR này chỉ sửa
 | Kiểm thử bổ sung | D: 12 nhóm ca, 18 ảnh; giữ giới hạn commit/cấu hình chưa xác định theo báo cáo D |
 
 Nguồn chi tiết: [checklist và 24 AC](SPRINT1_CHECKLIST.md),
-[báo cáo D](Testing/MEMBER_D_TEST_RESULTS.md),
+[báo cáo D](testing/MEMBER_D_TEST_RESULTS.md),
 [bàn giao và kết quả máy E](SPRINT1_E_DATABASE.md).
 
 ### 1.2 Sprint Backlog đối chiếu để chốt hồ sơ

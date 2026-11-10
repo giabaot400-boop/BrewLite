@@ -1,4 +1,7 @@
-# BrewLite
+# BrewLite — Assignment 1
+
+Repository A1: https://github.com/giabaot400-boop/BrewLite.
+Assignment 2 có [repo và bộ source riêng](https://github.com/giabaot400-boop/BrewLite-Assignment2).
 
 Ứng dụng BrewLite sử dụng Next.js, TypeScript, Tailwind CSS và backend
 NestJS, Prisma, PostgreSQL.
@@ -136,13 +139,13 @@ không coi đây là chế độ chạy backend độc lập khi chưa có Postg
 
 Bản production bổ sung manifest, icon và trang offline chung. Service worker chỉ
 cache tài nguyên công khai đã chọn; dữ liệu API, phiên và giao dịch không được
-cache hoặc tự gửi lại. Xem [hướng dẫn kiểm tra PWA](docs/assignment2/PWA.md)
+cache hoặc tự gửi lại. Hướng dẫn A2 được duy trì ở [repo A2](https://github.com/giabaot400-boop/BrewLite-Assignment2)
 để build/start đúng môi trường, kiểm tra cài đặt và thử mất mạng. Các AC PWA cần
 bằng chứng browser/production riêng, không suy ra từ build thành công.
 
 ## Nhánh và review
 
-Repository chung: https://github.com/giabaot400-boop/BrewLite
+Repository A1: https://github.com/giabaot400-boop/BrewLite
 
 main chứa bản tích hợp đã được review. Mỗi task làm trên nhánh riêng,
 có ít nhất một thành viên khác review trước khi merge.
@@ -158,7 +161,7 @@ git switch -c feature/ten-cong-viec
 
 Thay tên nhánh ví dụ bằng tên phù hợp với phần việc thực tế.
 
-Xem docs/GIT_WORKFLOW.md để cập nhật nhánh và xử lý tích hợp.
+Xem docs/guides/GIT_WORKFLOW.md để cập nhật nhánh và xử lý tích hợp.
 Các hướng dẫn tạo repository/remote lần đầu trong tài liệu đó
 chỉ áp dụng khi khởi tạo repository mới.
 
@@ -176,8 +179,9 @@ chỉ áp dụng khi khởi tạo repository mới.
 
 ### Chuyển từ frontend/backend sang apps/web và apps/api
 
-Hai ứng dụng được chuyển đường dẫn để dùng cấu trúc Assignment 2 trong cùng
-repository A1/A2. Tên package `@brewlite/frontend`, `@brewlite/backend` và các
+Hai ứng dụng đã được chuyển sang `apps/web` và `apps/api` qua PR #30.
+Sau khi tách A1/A2 thành hai repo, A1 tiếp tục giữ layout này; không cần chuyển ngược.
+Tên package `@brewlite/frontend`, `@brewlite/backend` và các
 lệnh gốc `dev:frontend`, `dev:backend` được giữ để hạn chế đổi cách chạy.
 Khi dùng đường dẫn workspace trực tiếp, thay `--workspace frontend` bằng
 `--workspace apps/web`, và `--workspace backend` bằng `--workspace apps/api`.
@@ -209,7 +213,11 @@ kiểm tra. Khi chạy lại hiện nay, đổi tiền tố `frontend/` thành `
 Các script kiểm thử nằm ngoài repo cũng cần đổi đường dẫn nếu ghi cứng
 hai thư mục cũ. Việc đổi layout chưa xác nhận Task 3–5 A2 đã nghiệm thu.
 
-## Sơ đồ thiết kế
+## Tài liệu và sơ đồ thiết kế
+
+Xem [mục lục tài liệu A1](docs/README.md): hồ sơ được gom theo Sprint 1–2–3,
+hướng dẫn kỹ thuật và sơ đồ. Tài liệu Task 1–5 A2 nằm ở repo A2 riêng.
+
 
 Xem [bộ sơ đồ và mã PlantUML](docs/diagrams/README.md): bối cảnh hệ thống,
 master use case, activity Sprint 1, ERD tổng thể và logical architecture. Tài liệu phân biệt phần
@@ -234,9 +242,9 @@ npm run build
 ```
 
 Các lệnh trên không thay cho kiểm thử kết nối PostgreSQL và migration/seed thực tế.
-Xem [checklist và đối chiếu 24 AC](docs/SPRINT1_CHECKLIST.md),
-[tổng hợp Review/Retrospective và backlog](docs/SPRINT1_REVIEW_RETRO.md)
-và [nội dung đồng bộ báo cáo](docs/SPRINT1_BAO_CAO_DONG_BO.md).
+Xem [checklist và đối chiếu 24 AC](docs/sprint1/SPRINT1_CHECKLIST.md),
+[tổng hợp Review/Retrospective và backlog](docs/sprint1/SPRINT1_REVIEW_RETRO.md)
+và [nội dung đồng bộ báo cáo](docs/sprint1/SPRINT1_BAO_CAO_DONG_BO.md).
 Hồ sơ phân biệt kết quả chức năng đã kiểm tra với quyết định chấp nhận của PO.
 
 ## Tài liệu tham khảo

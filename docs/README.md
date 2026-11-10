@@ -1,18 +1,30 @@
-# Tài liệu BrewLite
+# Tài liệu BrewLite — Assignment 1
 
-## Thiết kế đang dùng
+Repository này phục vụ Assignment 1 với ba Sprint BrewLite. Assignment 2 có
+[bộ source và tài liệu riêng](https://github.com/giabaot400-boop/BrewLite-Assignment2).
+Các tạo phẩm Task 1–5 A2 được duy trì tại repo A2; bản sao không còn nằm trong
+cây tài liệu A1 hiện hành. Lịch sử commit trước khi tách vẫn được giữ.
 
-- [Sprint 3](sprint3/README.md): phạm vi, contract, phân công và kế hoạch kiểm thử Task 8–10 của Assignment 1.
-- [Assignment 2 Task 1–2](assignment2/README.md): phạm vi, SRS, use case, UML và ma trận truy vết.
-- [Kiến trúc frontend/BFF/PWA](architecture/frontend-bff-pwa.md): phần đóng góp của A cho Task 3.1; phân biệt code hiện có với phương án PWA chưa triển khai.
-- [Quy trình Git](GIT_WORKFLOW.md): nhánh riêng, PR và review trước merge.
+## Bắt đầu theo nhu cầu
 
-Nền kế thừa là Sprint 2 tại a1a0e4ae92de681deac538685e24407b3190866b. Các hồ sơ Sprint 1–2 và sơ đồ lịch sử giữ nguyên; tài liệu Sprint 3 và Assignment 2 là thiết kế/kế hoạch, không xác nhận code Sprint 3 hoặc mọi AC đã đạt.
+| Nhóm | Đọc từ đâu | Phạm vi |
+|---|---|---|
+| Sprint 1 | [Mục lục Sprint 1](sprint1/README.md) | Menu, chi tiết, size/topping, Product API và hồ sơ kiểm thử/Review/Retro |
+| Sprint 2 | [Mục lục Sprint 2](sprint2/README.md) | Giỏ, auth/session, tạo đơn PENDING và hồ sơ closeout |
+| Sprint 3 | [Thiết kế và phân công](sprint3/README.md) | Task 8–10, contract, AC/test, board và phần việc đang tích hợp |
+| Hướng dẫn kỹ thuật | [API sản phẩm](guides/API_CONTRACT.md), [UI dùng chung](guides/UI_SHARED_COMPONENTS.md), [Git](guides/GIT_WORKFLOW.md) | Hướng dẫn phục vụ code A1; kết quả lịch sử có giới hạn riêng |
+| Sơ đồ | [Sprint 1](diagrams/README.md), [Sprint 3](diagrams/sprint3/README.md) | Nguồn PlantUML/SVG theo phạm vi từng mốc |
+| Chạy source | [README gốc](../README.md) | apps/web, apps/api, cấu hình và lệnh chạy |
 
-Repo giữ nguồn Markdown, PlantUML và SVG để review trực tiếp. Việc dùng chung code A1/A2 là phương án nhóm chọn; A2 nghiệm thu Task 1→5 theo tạo phẩm và lịch sử thật. Hai ứng dụng dùng đường dẫn `apps/web` và `apps/api` theo PR #30; xem [README chạy dự án](../README.md) để thiết lập và chuyển cấu hình local. Đổi layout không tự xác nhận hoàn tất kiến trúc, CI/CD hoặc nghiệm thu Task 4. Đường dẫn trong hồ sơ Sprint 1–2 được giữ theo thời điểm ghi nhận.
+## Cách hiểu hồ sơ
 
-## Phân biệt các bộ sơ đồ
+Việc chuyển file vào thư mục sprint chỉ thay đường dẫn và liên kết, không đổi
+kết quả, ngày kiểm thử, quyết định PO hay tiêu chí nghiệm thu đã ghi. Đường dẫn
+frontend/backend trong log và lệnh lịch sử giữ ý nghĩa ở thời điểm đó; code hiện
+ở apps/web và apps/api. Liên kết code Sprint 1 dùng commit nguồn khi đường dẫn
+cũ không còn trong cây hiện hành.
 
-- [Sơ đồ Sprint 1](diagrams/README.md) là hồ sơ lịch sử: master có 13 UC ở thời điểm Sprint 1.
-- [Master Assignment 2](diagrams/master-use-case.puml) và [master Sprint 3](diagrams/sprint3/master-use-case.puml) cùng giữ **14 UC = UC-01 đến UC-13 và S2-UC-LOGOUT**. UC đăng xuất kế thừa Sprint 2 dùng mã riêng, không đổi thành UC-14.
-- Danh mục Sprint 1 không phải mục lục của các sơ đồ hiện hành. Nguồn/hình Assignment 2 nằm tại các liên kết trong [bảng tạo phẩm](assignment2/README.md); nguồn/hình Sprint 3 được liệt kê trong [danh mục Sprint 3](diagrams/sprint3/README.md).
+Giữ đường dẫn các file trong `docs/sprint3/` đang được PR code tham chiếu.
+Không suy ra Sprint 3 đã đạt AC từ việc có thiết kế hoặc từ kết quả Sprint 2.
+Master Sprint 1 có 13 UC tại mốc đó; master Sprint 3 có 14 mã gồm S2-UC-LOGOUT.
+Không sửa hình lịch sử để làm chúng giống nhau.
