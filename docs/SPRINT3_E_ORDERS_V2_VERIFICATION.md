@@ -13,7 +13,7 @@ Nhánh nguồn: integration/sprint3-orders-ce.
 ## Kết quả
 - Typecheck frontend/backend: PASS.
 - Nhóm unit test đã chạy: 70/70 PASS.
-- PostgreSQL: 4/4 PASS.
+- PostgreSQL: 6/6 PASS
   - Tạo đơn V2, snapshot, ledger SUCCEEDED và giữ kho ACTIVE.
   - Replay trả cùng đơn, không giữ kho thêm.
   - Hết kho lưu REJECTED, không tạo thêm đơn hoặc thay đổi kho.
@@ -33,9 +33,17 @@ npm.cmd exec --workspace apps/api -- tsx prisma/check-orders-v2-postgres.ts
 - Hai ledger V2: một SUCCEEDED và một REJECTED.
 - Fixture riêng đã được dọn.
 - Dùng barrier kiểm thử; giữ nguyên timeout/retry của service.
+## Promotion trên PostgreSQL
+- Mã chữ thường được chuẩn hóa và áp dụng đúng.
+- Subtotal 35.000, giảm 10% nhưng cap 2.000: total 33.000.
+- Snapshot promotion và loyaltyPointsExpected = 3 được lưu đúng.
+- Tắt promotion rồi replay: trả cùng đơn, total và snapshot không đổi.
+- Fixture promotion riêng đã được dọn.
+
 ## Chưa xác nhận
 - Các tình huống retry exhaustion, timeout và tranh chấp khác.
-- Promotion trong bài kiểm thử PostgreSQL này.
+- Các trường hợp promotion hết hạn, chưa bắt đầu, không tồn tại
+  và không đạt minimumSubtotal trên PostgreSQL.
 - HTTP/BFF, auth và frontend tích hợp.
 - Payment, loyalty award/reversal, cancel và expiry.
 - Chưa xác nhận hoàn thành toàn bộ Sprint 3.
