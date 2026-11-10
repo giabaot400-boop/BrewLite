@@ -4,19 +4,23 @@
 |---|---|
 | Tạo phẩm | Task 1.1 — Bối cảnh, stakeholder và phạm vi |
 | Đường dẫn trên repository | `docs/requirements/context-and-scope.md` |
-| Ngày cập nhật | 06/11/2026 |
-| Trạng thái | Đang review trên PR #29; chưa là baseline yêu cầu được phê duyệt |
+| Ngày cập nhật | 09/11/2026 |
+| Trạng thái | Đã merge tài liệu qua PR #29; còn điểm mở, chưa xác nhận nghiệm thu Task 1 |
 | Phạm vi của tệp | Bối cảnh và ranh giới sản phẩm; làm đầu vào cho SRS và đặc tả use case |
 
 BrewLite giúp khách hàng chọn đồ uống, đặt đơn, thanh toán không tiền mặt mô phỏng và theo dõi đơn để nhận đồ tại quầy. Assignment 2 tiếp tục phát triển cùng sản phẩm của Assignment 1, đồng thời yêu cầu quản lý tài liệu, mô hình, kiến trúc, kiểm thử, CI/CD và bàn giao một phiên bản production truy cập được.
 
-Tài liệu này xác định phạm vi mục tiêu, không ghi nhận các chức năng đã triển khai hoặc kiểm thử đạt. Các chính sách chi tiết kế thừa từ thiết kế Sprint 3 được tách riêng tại mục 6 để nhóm review trước khi đưa thành yêu cầu chính thức. Tài liệu hiện có trên nhánh PR #29; việc soạn xong Task 1.1 chưa đồng nghĩa toàn bộ Task 1 đã được nghiệm thu.
+Tài liệu này xác định phạm vi mục tiêu, không ghi nhận các chức năng đã triển khai hoặc kiểm thử đạt. Các chính sách chi tiết kế thừa từ thiết kế Sprint 3 được tách riêng tại mục 6 để nhóm review trước khi đưa thành yêu cầu chính thức. Tài liệu đã được review và merge qua [PR #29](https://github.com/giabaot400-boop/BrewLite/pull/29). Việc merge tài liệu không thay xác nhận các chính sách còn mở hoặc nghiệm thu toàn bộ Task 1.
 
 ## Nền sử dụng và trạng thái
 
-Bản giao nhóm ngày 06/11/2026, đồng bộ **Sprint 3** và nền Sprint 2 main `a1a0e4ae92de681deac538685e24407b3190866b`. PO đã chọn phương án Sprint 3 làm cơ sở thực hiện; chưa thay xác nhận review của từng thành viên hoặc minh chứng kiểm thử Assignment 2. Giữ nguyên 17 FR, 12 NFR, 59 AC, 14 mã UC và 10 lớp domain.
+Bản ban đầu ngày 06/11/2026 kế thừa thiết kế Sprint 3 và nền Sprint 2 main `a1a0e4ae92de681deac538685e24407b3190866b`. PO đã chọn phương án Sprint 3 làm cơ sở thực hiện; việc hiệu đính ngày 09/11/2026 không thay phạm vi, chính sách nghiệp vụ hoặc kết quả kiểm thử. Các điểm còn cần chốt được ghi tại mục 10 và trong SRS.
 
 Chi tiết kế thừa nằm tại [contract dùng chung](../assignment2/CONTRACTS.md). Hạn cả hai assignment là **15/11/2026 theo thông tin PO cung cấp**; giờ nộp LMS cần PO xác nhận. Xem [kế hoạch giao nhóm](../assignment2/TEAM_PLAN.md); lịch là mục tiêu đề xuất, chưa ghi nhận các bạn đã nhận việc.
+
+### Quan hệ Assignment 1 và Assignment 2
+
+A2 tiếp tục sử dụng đề tài BrewLite của A1. Nhóm chọn dùng chung repository/code và đối chiếu các chính sách S3 để tránh hai thiết kế mâu thuẫn; đề không yêu cầu phải hoàn tất A1 mới bắt đầu A2, cũng không tự biến mọi lựa chọn chi tiết của A1 thành yêu cầu bắt buộc A2. Chuẩn bị A1/A2 song song theo phân công; A2 chỉ nghiệm thu Task sau khi đủ tạo phẩm bắt buộc Task trước trên repo, theo thứ tự Task 1→5 và lịch sử thật. Hai Sprint A2 là các mốc Task 4/5, không đổi nhãn ba Sprint A1 để thay nghiệm thu. Giữ giới hạn tái sử dụng code/evidence theo đúng phiên bản, môi trường và AC; không tạo lịch sử ngược.
 
 ## 1. Bối cảnh nghiệp vụ và vấn đề cần giải quyết
 
@@ -83,6 +87,8 @@ Các mã IN dưới đây dùng để thảo luận phạm vi, chưa thay cho m�
 | IN-09 | Tồn kho đồng thời | Kiểm soát tồn kho Product theo số ly khi nhiều khách đặt; Topping chỉ kiểm tra cấu hình/giá và lưu snapshot; giữ/trừ/giải phóng kho với transaction và optimistic locking, kế thừa phạm vi nghiệp vụ Assignment 1 |
 | IN-10 | Khuyến mãi và điểm thưởng | Áp một mã hợp lệ và ghi điểm sau thanh toán thành công; xử lý lặp và bù trừ theo chính sách được nhóm review; chưa có đổi điểm |
 
+Quản lý trạng thái đơn thuộc IN-08 và [FR-13 của SRS](srs.md#fr-13-state-machine-đơn). Giao diện quầy đầy đủ vẫn ngoài MVP; phương án CLI nội bộ có cờ bật phục vụ demo/test không cấp quyền chuyển bước pha chế cho khách. SRS là nguồn mô tả chi tiết cơ chế và tiêu chí kiểm chứng; chưa ghi nhận cơ chế này đã chạy đạt.
+
 ### 5.2. Chất lượng và đầu ra bàn giao trong phạm vi Assignment 2
 
 - Giao diện mobile-first/PWA theo đề. Mức hỗ trợ PWA cụ thể phải có tiêu chí kiểm chứng trong SRS; không tự suy ra việc cho phép đặt đơn hoặc thanh toán offline.
@@ -124,27 +130,29 @@ Không cần đưa tên bảng, trường vật lý, toàn bộ mã lỗi hoặc
 
 ## 7. Giả định
 
+Mã AS-xx nhận diện giả định; CON-xx ở mục 8 nhận diện ràng buộc. Các mã này tách khỏi mã luồng A-xx và bước tạo đơn C-xx trong đặc tả checkout.
+
 | Mã | Giả định làm cơ sở soạn thảo | Cách xác minh hoặc xử lý khi thay đổi |
 |---|---|---|
-| A-01 | MVP mô phỏng một cửa hàng, nhận đồ tại quầy; danh mục và tồn kho dùng dữ liệu mẫu có kiểm soát | Nhóm review với phạm vi đề; nếu có nhiều chi nhánh/giao hàng phải đánh giá thay đổi |
-| A-02 | Người dùng có kết nối mạng khi đặt và thanh toán; trình duyệt có thể mất phản hồi hoặc tải lại | Có ca lỗi mạng và phục hồi; không coi timeout là thanh toán thất bại chắc chắn |
-| A-03 | Payment Service mô phỏng thành công/thất bại, không gọi nhà cung cấp tiền thật | Đối chiếu thiết kế và demo; nếu chuyển sang dịch vụ ngoài phải thiết kế lại ranh giới và recovery |
-| A-04 | Nhóm tiếp tục dùng repository BrewLite, dữ liệu và chức năng đã xây trong Assignment 1 | Kiểm tra tương thích trước tích hợp; không xây một bộ auth/schema song song hoặc xóa lịch sử để làm lại bài |
-| A-05 | PO đã chọn chính sách Sprint 3 làm cơ sở giao việc; chưa có xác nhận review của toàn nhóm cho SRS A2 | Các bạn kiểm tra phần phụ trách theo bản giao này; phản hồi cụ thể bằng mã FR/AC/contract, lưu kết quả review trên repo |
-| A-06 | Bối cảnh và kỳ vọng hiện dựa trên đề/tài liệu nội bộ, chưa phải kết quả khảo sát cửa hàng thực tế | Nếu có phỏng vấn hoặc phản hồi mới, ghi nguồn, ngày và tác động đến phạm vi |
+| AS-01 | MVP mô phỏng một cửa hàng, nhận đồ tại quầy; danh mục và tồn kho dùng dữ liệu mẫu có kiểm soát | Nhóm review với phạm vi đề; nếu có nhiều chi nhánh/giao hàng phải đánh giá thay đổi |
+| AS-02 | Người dùng có kết nối mạng khi đặt và thanh toán; trình duyệt có thể mất phản hồi hoặc tải lại | Có ca lỗi mạng và phục hồi; không coi timeout là thanh toán thất bại chắc chắn |
+| AS-03 | Payment Service mô phỏng thành công/thất bại, không gọi nhà cung cấp tiền thật | Đối chiếu thiết kế và demo; nếu chuyển sang dịch vụ ngoài phải thiết kế lại ranh giới và recovery |
+| AS-04 | Nhóm tiếp tục dùng repository BrewLite, dữ liệu và chức năng đã xây trong Assignment 1 | Kiểm tra tương thích trước tích hợp; không xây một bộ auth/schema song song hoặc xóa lịch sử để làm lại bài |
+| AS-05 | PO đã chọn chính sách Sprint 3 làm cơ sở giao việc; chưa có xác nhận review của toàn nhóm cho SRS A2 | Các bạn kiểm tra phần phụ trách theo bản giao này; phản hồi cụ thể bằng mã FR/AC/contract, lưu kết quả review trên repo |
+| AS-06 | Bối cảnh và kỳ vọng hiện dựa trên đề/tài liệu nội bộ, chưa phải kết quả khảo sát cửa hàng thực tế | Nếu có phỏng vấn hoặc phản hồi mới, ghi nguồn, ngày và tác động đến phạm vi |
 
 ## 8. Ràng buộc
 
 | Mã | Ràng buộc | Căn cứ / ảnh hưởng |
 |---|---|---|
-| C-01 | Dùng Next.js, NestJS và PostgreSQL; Docker phục vụ đóng gói/chạy theo yêu cầu bài | Assignment 2 mục 1.1, 6–7; không thay ba thành phần bắt buộc |
-| C-02 | Frontend theo hướng mobile-first/PWA | Assignment 2 mục 1.1; phải làm rõ tiêu chí PWA trong SRS và kiểm chứng khi triển khai |
-| C-03 | Năm task được hoàn thành theo thứ tự; task sau chỉ được nghiệm thu khi tạo phẩm bắt buộc task trước đã có trên repo, có lịch sử thay đổi | Assignment 2 mục 1, 6.2 và 8; tài liệu hiện tại chưa xác nhận Task 1 đã được nghiệm thu |
-| C-04 | Giữ nguyên hồ sơ lịch sử và migration đã áp dụng; thay đổi tiếp theo dùng phiên bản/commit mới và có lý do | Kế thừa Sprint 1–2 và yêu cầu quản lý tài liệu của Assignment 2; kiểm chứng chuyển đổi dữ liệu trước khi tích hợp |
-| C-05 | Xác thực, validate và quyền sở hữu được kiểm tra ở backend; mật khẩu được băm, JWT không đưa cho JavaScript theo contract BFF kế thừa; không đưa secret vào repo/log | Assignment 1 mục 4/Task 7 và Sprint 2 P04/P05; Assignment 2 mục 7.4 |
-| C-06 | Kế thừa mục tiêu API dưới 500 ms với dữ liệu mẫu từ Assignment 1; môi trường, phép đo và ngưỡng của từng NFR phải được đặc tả tiếp | Chưa có kết quả đo Assignment 2. Timeout UI/BFF là giới hạn dừng chờ, không thay bằng chứng đạt hiệu năng |
-| C-07 | Có CI quality gate, kiểm thử, production HTTPS, database production không public trực tiếp và khả năng tái tạo/rollback theo đề | Assignment 2 Task 4–5; không nghiệm thu production chỉ từ Compose local hoặc deployment diagram |
-| C-08 | Dùng năm vị trí A–E hiện có; hạn cả hai assignment 15/11/2026 do PO cung cấp, chưa xác nhận giờ LMS | Kế hoạch A2 đi song song phần A1, có cổng nghiệm thu Task 1→5; không sao chép tên ba Sprint A1 thành hai Sprint A2. Mục tiêu đóng gói ngày 14/11 |
+| CON-01 | Dùng Next.js, NestJS và PostgreSQL; Docker phục vụ đóng gói/chạy theo yêu cầu bài | Assignment 2 mục 1.1, 6–7; không thay ba thành phần bắt buộc |
+| CON-02 | Frontend theo hướng mobile-first/PWA | Assignment 2 mục 1.1; phải làm rõ tiêu chí PWA trong SRS và kiểm chứng khi triển khai |
+| CON-03 | Năm task được hoàn thành theo thứ tự; task sau chỉ được nghiệm thu khi tạo phẩm bắt buộc task trước đã có trên repo, có lịch sử thay đổi | Assignment 2 mục 1, 6.2 và 8; tài liệu hiện tại chưa xác nhận Task 1 đã được nghiệm thu |
+| CON-04 | Giữ nguyên hồ sơ lịch sử và migration đã áp dụng; thay đổi tiếp theo dùng phiên bản/commit mới và có lý do | Kế thừa Sprint 1–2 và yêu cầu quản lý tài liệu của Assignment 2; kiểm chứng chuyển đổi dữ liệu trước khi tích hợp |
+| CON-05 | Xác thực, validate và quyền sở hữu được kiểm tra ở backend; mật khẩu được băm, JWT không đưa cho JavaScript theo contract BFF kế thừa; không đưa secret vào repo/log | Assignment 1 mục 4/Task 7 và Sprint 2 P04/P05; Assignment 2 mục 7.4 |
+| CON-06 | Kế thừa mục tiêu API dưới 500 ms với dữ liệu mẫu từ Assignment 1; môi trường, phép đo và ngưỡng của từng NFR phải được đặc tả tiếp | Chưa có kết quả đo Assignment 2. Timeout UI/BFF là giới hạn dừng chờ, không thay bằng chứng đạt hiệu năng |
+| CON-07 | Có CI quality gate, kiểm thử, production HTTPS, database production không public trực tiếp và khả năng tái tạo/rollback theo đề | Assignment 2 Task 4–5; không nghiệm thu production chỉ từ Compose local hoặc deployment diagram |
+| CON-08 | Dùng năm vị trí A–E hiện có; hạn cả hai assignment 15/11/2026 do PO cung cấp, chưa xác nhận giờ LMS | Kế hoạch A2 đi song song phần A1, có cổng nghiệm thu Task 1→5; không sao chép tên ba Sprint A1 thành hai Sprint A2. Mục tiêu đóng gói ngày 14/11 |
 
 ## 9. Rủi ro ban đầu
 
@@ -178,10 +186,10 @@ Không bổ sung chức năng chỉ để trả lời các câu hỏi trên; n�
 - [x] Có ranh giới hệ thống, bảng in-scope và out-of-scope.
 - [x] Có bảng giả định, ràng buộc và rủi ro ban đầu.
 - [x] Có nguồn kế thừa và phân biệt chính sách đang đề xuất với yêu cầu đã được chốt.
-- [ ] Nhóm review và ghi nhận điểm đồng ý/chưa đồng ý.
-- [ ] Chốt phiên bản sau review và merge PR #29 theo quy trình nhóm; giữ lịch sử commit/PR và lý do thay đổi.
+- [x] Tài liệu đã được review và merge qua PR #29; lịch sử và phản hồi được giữ trên PR.
+- [ ] Chốt các điểm còn mở tại mục 10; không coi việc merge là toàn nhóm đã phê duyệt từng chính sách.
 
-Nhánh PR #29 đã có tài liệu Task 1.2 (SRS/FR/NFR/MoSCoW/AC/master) và Task 1.3 (đặc tả duy nhất UC-09 Thanh toán không tiền mặt), cùng các mô hình Task 2. Chỉ nghiệm thu toàn bộ Task 1 khi đủ các tạo phẩm bắt buộc và lịch sử trên repo. Task 2 phải truy vết từ baseline yêu cầu đó; không coi bộ sơ đồ Assignment 1 là tự động hoàn thành Task 2.
+Các tạo phẩm Task 1 và mô hình Task 2 đã được đưa vào repository qua PR #29; xem [mục lục Assignment 2](../assignment2/README.md). Chỉ nghiệm thu toàn bộ Task 1 khi đủ các tạo phẩm bắt buộc và lịch sử trên repo. Task 2 phải truy vết từ baseline yêu cầu đó; không coi bộ sơ đồ Assignment 1 là tự động hoàn thành Task 2.
 
 ## 12. Nguồn tham chiếu
 
@@ -190,13 +198,5 @@ Nhánh PR #29 đã có tài liệu Task 1.2 (SRS/FR/NFR/MoSCoW/AC/master) và Ta
 | `Assignment2-BrewLite.pdf`, mục 1–4, 6–9 | Mục tiêu tiếp nối dự án, Task 1.1, các đầu ra yêu cầu/mô hình, thứ tự nghiệm thu, CI/CD và bàn giao |
 | `BrewLite-CongNghePhanMem.pdf`, mục 3–6, Task 8–10/mục 9 | Vision nhận đồ tại quầy, stakeholder, chức năng tối thiểu, thanh toán mock, trạng thái đơn, tồn kho và ưu đãi/điểm |
 | `BrewLite_Sprint1_Analysis_Design_v1.1.docx.pdf`, mục 1, 3, 8–10 | Danh mục/size/topping, giá do backend kiểm tra, phạm vi barista và vai trò A–E |
-| `BrewLite_Sprint2_Phan_Tich_Thiet_Ke_v0.6(2).docx`, P01–P10 | Phạm vi giỏ/auth/tạo đơn, phiên/cookie/BFF, yêu cầu bất biến, replay và tương thích nền |
+| `BrewLite_Sprint2_Phan_Tich_Thiet_Ke_v0.6.docx`, P01–P10 | Phạm vi giỏ/auth/tạo đơn, phiên/cookie/BFF, yêu cầu bất biến, replay và tương thích nền |
 | `docs/sprint3/DESIGN.md`, phiên bản ngày 06/11/2026 | Chính sách đề xuất giỏ–kho–hủy, mock, ưu đãi/điểm và tạo/xem đơn v2; dùng làm đầu vào review, không làm bằng chứng triển khai |
-
-## Phạm vi quản lý trạng thái đơn
-
-FR-13 và state machine chín cạnh thuộc phạm vi bắt buộc. Ba bước PAID → PREPARING → READY → COMPLETED được thực hiện qua CLI nội bộ gọi cùng service và assertTransition, chỉ bật khi DEMO_WORKFLOW_ENABLED=true; CLI phục vụ vận hành demo/test, không cấp quyền cho khách tự đổi trạng thái và không cập nhật status trực tiếp bằng SQL. D16 của baseline Sprint 1 chỉ đặt Barista UI/giao diện quầy đầy đủ ngoài MVP; không loại chức năng quản lý trạng thái khỏi phạm vi. Master giữ 14 UC; FR-13 được truy vết qua UC-08, UC-09, UC-11 và S3-ORD-01/02, không thêm actor/UC quầy trong lần hiệu đính này. Cơ chế này cần được hiện thực và kiểm thử; tài liệu chưa xác nhận đã chạy đạt.
-
-## Quan hệ A1 và A2
-
-A2 tiếp tục sử dụng đề tài BrewLite của A1. Nhóm chọn dùng chung repository/code và đối chiếu các chính sách S3 để tránh hai thiết kế mâu thuẫn; đề không yêu cầu phải hoàn tất A1 mới bắt đầu A2, cũng không tự biến mọi lựa chọn chi tiết của A1 thành yêu cầu bắt buộc A2. Chuẩn bị A1/A2 song song theo phân công; A2 chỉ nghiệm thu Task sau khi đủ tạo phẩm bắt buộc Task trước trên repo, theo thứ tự Task 1→5 và lịch sử thật. Hai Sprint A2 là các mốc Task 4/5, không đổi nhãn ba Sprint A1 để thay nghiệm thu. Giữ giới hạn tái sử dụng code/evidence theo đúng phiên bản, môi trường và AC; không tạo lịch sử ngược.
