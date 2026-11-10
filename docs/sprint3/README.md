@@ -86,3 +86,32 @@ Khung đơn trong checkout và hộp xác nhận lần thanh toán mới dùng O
 Môi trường triển khai đã chạy 912/912 frontend unit test, typecheck, lint, build và diff check đạt. Trong đó có 23 test bổ sung cho snapshot giá, quyền đọc theo phiên, DTO/version không khớp, mở lại panel, retry giữ mã/key/body và đơn đổi sau khi mở xác nhận. Tests vẫn dùng network/storage/khóa giả lập; A đã xác nhận UI fixture hiển thị đúng giá DEMO10, hộp xác nhận cùng số tiền, quay lại không gửi PAYMENT và mở lại giữ giá chính thức. Chưa kiểm tra E2E với backend Sprint 3.
 
 Kiểm tra UI tại `/dev/checkout`: tạo hai Cappuccino M với DEMO10, xem tạm tính 100.000đ, giảm 10.000đ, tổng 90.000đ; ẩn/mở panel vẫn giữ giá/mã chính thức; mở xác nhận thanh toán rồi quay lại chưa thêm PAYMENT vào dấu vết. Không dùng kết quả fixture để đánh dấu AC backend đạt. Layout hiện tại vẫn là v1, bước kích hoạt v2 chờ DEP-05/06.
+
+## Kiểm tra tổng hợp sau bản sửa recovery
+
+Ngày 10/11/2026, đối chiếu source tại `8299e7b` (PR #41), đã nhận bản sửa
+binding rỗng từ `bde50f2` (PR #35). Các số 889/912 ở trên là kết quả tại từng
+mốc trước; không thay lại kết quả lịch sử bằng số tổng mới.
+
+Trong môi trường review Linux, Node 24.22.1:
+
+- Chạy `node --test "src/**/*.test.mjs"` từ `apps/web`: **914/914 đạt**,
+  không fail hoặc skip. Đây là cùng phạm vi với script `npm test` của web.
+- Nhóm tạo đơn/payment/cancel coordinator và payment recovery: **149/149 đạt**;
+  nhóm này nằm trong 914 test trên, không cộng thêm vào tổng.
+- Hai file `cookie-options.test.ts` và `csrf.test.ts` chạy riêng bằng
+  `node --import tsx --test src/lib/server/auth/cookie-options.test.ts src/lib/server/auth/csrf.test.ts`
+  từ `apps/web`: **7/7 đạt**, ngoài phạm vi script test `.mjs`.
+
+Đã đọc bổ sung ba coordinator, các bước ghi bền/đối chiếu kết quả và cổng
+điều phối chung của runtime. Nhánh chưa có PaymentAttempt của CONTRACTS 7.2
+vẫn giữ UNRESOLVED; các reason đề xuất chưa được coi là hợp đồng đã chốt.
+Bản sửa binding rỗng không công bố Order cũ hoặc mở lần thanh toán mới khi
+không có settlement binding phù hợp. Ba file coordinator giống nhau ở HEAD
+PR #37 (`29c536f`) và bản tích hợp trên; core recovery của #37 chưa chứa fix
+`bde50f2`, nên không dùng riêng HEAD #37 làm bản phát hành cuối.
+
+Các test dùng auth/network/storage/khóa giả lập. Chưa chạy E2E với backend
+Sprint 3/PostgreSQL; lượt review này không chạy lại lint/typecheck/build,
+không bật provider v2 và không đổi trạng thái AC. Trước khi phát hành, kiểm
+tra source đã merge có fix recovery và tiếp tục DEP-05/06 cùng kiểm thử thật.
