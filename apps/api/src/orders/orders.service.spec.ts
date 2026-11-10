@@ -49,23 +49,48 @@ type MockOptions = {
   product?: ReturnType<typeof createProduct> | null;
   existing?: Record<string, unknown> | null;
   storedCorruption?: string;
+  stock?: number;
 };
 
 function createMock(options: MockOptions = {}) {
   const calls = {
     ordersCreated: [] as unknown[],
     requestsCreated: [] as unknown[],
+    stockUpdates: [] as unknown[],
+    reservationsCreated: [] as unknown[],
   };
 
   let storedRequest: Record<string, unknown> | null = null;
   let storedOrder: Record<string, unknown> | null = null;
 
   const tx = {
-    $queryRaw: async () => [{ acquired: options.acquired ?? true }],
+    $queryRaw: async (strings: TemplateStringsArray) => {
+      const sql = strings.join("");
+
+      if (sql.includes("clock_timestamp()")) {
+        return [{ now: new Date("2026-11-10T10:00:00.000Z") }];
+      }
+
+      return [{ acquired: options.acquired ?? true }];
+    },
 
     product: {
       findUnique: async () =>
         options.product === undefined ? createProduct() : options.product,
+
+      findMany: async () => [
+        {
+          id: "coffee-milk",
+          stock: options.stock ?? 100,
+          reservedStock: 0,
+          stockVersion: 0,
+        },
+      ],
+
+      updateMany: async (args: { where: any; data: any }) => {
+        calls.stockUpdates.push(args);
+        return { count: 1 };
+      },
     },
 
     orderRequest: {
@@ -88,13 +113,54 @@ function createMock(options: MockOptions = {}) {
     order: {
       create: async (args: { data: Record<string, unknown> }) => {
         calls.ordersCreated.push(args);
-        storedOrder = { ...args.data, id: "order-001", total: 94000 };
+
+        storedOrder = {
+          ...args.data,
+          id: "order-001",
+          total: 94000,
+        };
+
         for (const field of ["userId", "requestKey", "requestHash"]) {
           if (options.storedCorruption === `order.${field}`) {
             storedOrder[field] = "unexpected-value";
           }
         }
+
         return storedOrder;
+      },
+
+      findUnique: async () => {
+        if (!storedOrder) {
+          return null;
+        }
+
+        const data = storedOrder as {
+          items?: {
+            create?: Array<{
+              productId: string;
+              qty: number;
+            }>;
+          };
+        };
+
+        return {
+          ...storedOrder,
+
+          items:
+            data.items?.create?.map((item) => ({
+              productId: item.productId,
+              qty: item.qty,
+            })) ?? [],
+
+          reservations: [],
+        };
+      },
+    },
+
+    stockReservation: {
+      create: async (args: { data: Record<string, unknown> }) => {
+        calls.reservationsCreated.push(args.data);
+        return args.data;
       },
     },
   };
@@ -138,6 +204,53 @@ test("UT-S01: Create order successfully - HTTP 201", async () => {
   assert.equal(result.body.total, 94000);
   assert.equal(calls.ordersCreated.length, 1);
   assert.equal(calls.requestsCreated.length, 1);
+  // Kiểm tra V1 đã thực hiện cập nhật giữ kho.
+  assert.equal(calls.stockUpdates.length, 1);
+
+  // Kiểm tra V1 đã tạo một bản ghi StockReservation.
+  assert.equal(calls.reservationsCreated.length, 1);
+
+  // Kiểm tra số lượng sản phẩm được giữ đúng bằng số lượng đặt.
+  const reservation = calls.reservationsCreated[0] as {
+    orderId: string;
+    productId: string;
+    qty: number;
+    state: string;
+  };
+
+  assert.equal(reservation.orderId, "order-001");
+  assert.equal(reservation.productId, "coffee-milk");
+  assert.equal(reservation.qty, 2);
+  assert.equal(reservation.state, "ACTIVE");
+});
+test("UT-S09: V1 out of stock saves rejected ledger", async () => {
+  const { service, calls } = createMock({ stock: 1 });
+
+  await expectHttpError(
+    () => service.createOrder(USER_ID, REQUEST_KEY, createDto()),
+    409,
+    "OUT_OF_STOCK",
+  );
+
+  assert.equal(calls.ordersCreated.length, 0);
+  assert.equal(calls.stockUpdates.length, 0);
+  assert.equal(calls.reservationsCreated.length, 0);
+
+  assert.equal(calls.requestsCreated.length, 1);
+
+  const ledger = calls.requestsCreated[0] as {
+    data: {
+      canonicalVersion: number;
+      state: string;
+      httpStatus: number;
+      orderId: string | null;
+    };
+  };
+
+  assert.equal(ledger.data.canonicalVersion, 1);
+  assert.equal(ledger.data.state, "REJECTED");
+  assert.equal(ledger.data.httpStatus, 409);
+  assert.equal(ledger.data.orderId, null);
 });
 
 test("UT-S02: Price changed - HTTP 409", async () => {
@@ -228,8 +341,41 @@ test("UT-S04: Same key and hash - replay HTTP 200", async () => {
   assert.equal(result.httpStatus, 200);
   assert.equal(result.body.id, "existing-order");
   assert.equal(calls.ordersCreated.length, 0);
-});
+  // Replay không được cập nhật tồn kho.
+  assert.equal(calls.stockUpdates.length, 0);
 
+  // Replay không được tạo StockReservation mới.
+  assert.equal(calls.reservationsCreated.length, 0);
+
+  // Replay không được ghi thêm ledger.
+  assert.equal(calls.requestsCreated.length, 0);
+});
+test("UT-S10: V1 create then replay reserves stock only once", async () => {
+  const { service, calls } = createMock();
+  const dto = createDto();
+
+  // Lần 1: Tạo đơn hàng mới.
+  const first = await service.createOrder(USER_ID, REQUEST_KEY, dto);
+
+  assert.equal(first.httpStatus, 201);
+  assert.equal(calls.ordersCreated.length, 1);
+  assert.equal(calls.requestsCreated.length, 1);
+  assert.equal(calls.stockUpdates.length, 1);
+  assert.equal(calls.reservationsCreated.length, 1);
+
+  // Lần 2: Gửi lại cùng user, key và nội dung.
+  const second = await service.createOrder(USER_ID, REQUEST_KEY, dto);
+
+  // Phải trả về kết quả đã lưu.
+  assert.equal(second.httpStatus, 200);
+  assert.deepEqual(second.body, first.body);
+
+  // Không được tạo đơn hoặc giữ kho thêm lần nữa.
+  assert.equal(calls.ordersCreated.length, 1);
+  assert.equal(calls.requestsCreated.length, 1);
+  assert.equal(calls.stockUpdates.length, 1);
+  assert.equal(calls.reservationsCreated.length, 1);
+});
 test("UT-S05: Same key with different hash - HTTP 409", async () => {
   const { service, calls } = createMock({
     existing: {

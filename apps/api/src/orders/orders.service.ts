@@ -56,18 +56,23 @@ type OrderErrorResponse = {
     code: string;
     message: string;
     fieldErrors?: Record<string, string[]>;
-    details?: {
-      items: {
-        productId: string;
-        size: string;
-        toppingIds: string[];
-        qty: number;
-        expectedUnitPrice: number;
-        currentUnitPrice: number;
-        currentLineTotal: number;
-      }[];
-      currentTotal: number;
-    };
+    details?:
+      | {
+          items: {
+            productId: string;
+            size: string;
+            toppingIds: string[];
+            qty: number;
+            expectedUnitPrice: number;
+            currentUnitPrice: number;
+            currentLineTotal: number;
+          }[];
+          currentTotal: number;
+        }
+      | {
+          reason: "INSUFFICIENT_STOCK";
+          resources: OutOfStock["resources"];
+        };
   };
 };
 
@@ -359,10 +364,8 @@ export class OrdersService {
               },
             });
 
-            // Giữ hàng trong cùng transaction.
             await reserveStock(tx, order.id, stockPlan, at);
 
-            // Chuẩn bị phản hồi thành công.
             const body: OrderResponse = {
               id: order.id,
               status: "PENDING",
@@ -906,16 +909,77 @@ export class OrdersService {
                 body,
               );
             }
+            // Kiểm tra tồn kho cho request V1 mới.
+            const needs = aggregateNeeds(
+              checked.snapshots.map((item) => ({
+                productId: item.productId,
+                qty: item.qty,
+              })),
+            );
+
+            let stockPlan: Awaited<ReturnType<typeof precheckStock>>;
+
+            try {
+              stockPlan = await precheckStock(tx, needs);
+            } catch (error) {
+              if (!(error instanceof OutOfStock)) {
+                throw error;
+              }
+
+              const body: OrderErrorResponse = {
+                error: {
+                  code: "OUT_OF_STOCK",
+                  message: "Không đủ hàng trong kho.",
+                  details: {
+                    reason: "INSUFFICIENT_STOCK",
+                    resources: error.resources,
+                  },
+                },
+              };
+
+              return this.saveRejectedRequest(
+                tx,
+                userId,
+                requestKey,
+                requestHash,
+                409,
+                body,
+              );
+            }
 
             // 3. Tạo Order và snapshot trong cùng transaction.
+            // Lấy thời gian PostgreSQL để tính deadline cho V1 mới.
+            const dbTimeRows = await tx.$queryRaw<{ now: Date }[]>`
+  SELECT clock_timestamp() AS now
+`;
+
+            const dbNow = dbTimeRows[0]?.now;
+
+            if (!(dbNow instanceof Date)) {
+              throw new Error("DATABASE_TIME_UNAVAILABLE");
+            }
+
+            // Đơn hàng có 15 phút để thanh toán.
+            const paymentDeadline = new Date(dbNow.getTime() + 15 * 60 * 1000);
             const order = await tx.order.create({
               data: {
                 userId,
                 requestKey,
                 requestHash,
                 status: "PENDING",
-                total: checked.total,
+                checkoutPolicyVersion: 2,
+                paymentDeadline,
+
                 subtotal: checked.total,
+                discountTotal: 0,
+                total: checked.total,
+
+                loyaltyPolicySnapshot: {
+                  version: 1,
+                  divisor: 10_000,
+                },
+                loyaltyPointsExpected: Math.floor(checked.total / 10_000),
+
                 items: {
                   create: checked.snapshots.map((item) => ({
                     productId: item.productId,
@@ -937,6 +1001,8 @@ export class OrdersService {
                 },
               },
             });
+            // Giữ kho cho đơn V1 mới theo chính sách Sprint 3.
+            await reserveStock(tx, order.id, stockPlan, dbNow);
 
             const body: OrderResponse = {
               id: order.id,
