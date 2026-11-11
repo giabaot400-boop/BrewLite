@@ -263,6 +263,9 @@ export async function priceOrder(
       "CHECKOUT_CHANGED",
       "Giá hoặc tổng đơn hàng đã thay đổi.",
       {
+        reason: priceChanged
+          ? "PRODUCT_PRICE_CHANGED"
+          : "EXPECTED_TOTAL_MISMATCH",
         currentSubtotal: subtotal,
         currentDiscountTotal: discountTotal,
         currentTotal: total,

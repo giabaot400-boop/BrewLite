@@ -1,14 +1,14 @@
-﻿import { test } from "node:test";
+import { test } from "node:test";
 import assert from "node:assert/strict";
 import { priceOrder, PriceOrderError } from "./price-order.js";
 
 const now = new Date("2026-11-09T10:00:00.000Z");
 
-function createTx(promotion: any = null) {
+function createTx(promotion: any = null, productPrice = 40_000) {
   const product = {
     id: "p1",
     name: "Latte",
-    price: 40_000,
+    price: productPrice,
     toppings: [
       {
         toppingId: "t1",
@@ -147,5 +147,82 @@ test("Promotion: từ chối mã không tồn tại", async () => {
     (error: unknown) =>
       error instanceof PriceOrderError &&
       error.code === "PROMOTION_NOT_APPLICABLE",
+  );
+});
+
+// C phân biệt nguyên nhân để backend trả đúng CHECKOUT_CHANGED.details.reason.
+test("V2 CHECKOUT_CHANGED: reason PRODUCT_PRICE_CHANGED takes priority", async () => {
+  await assert.rejects(
+    priceOrder(
+      createTx(null, 41_000),
+      {
+        schemaVersion: 2,
+        items: [{
+          productId: "p1",
+          size: "M",
+          toppingIds: ["t1"],
+          qty: 2,
+          expectedUnitPrice: 50_000,
+        }],
+        promotionCode: null,
+        expectedTotal: 100_000,
+      },
+      now,
+    ),
+    (error: unknown) => {
+      assert.ok(error instanceof PriceOrderError);
+      assert.equal(error.code, "CHECKOUT_CHANGED");
+      assert.deepEqual(error.details, {
+        reason: "PRODUCT_PRICE_CHANGED",
+        currentSubtotal: 102_000,
+        currentDiscountTotal: 0,
+        currentTotal: 102_000,
+        items: [{
+          productId: "p1",
+          size: "M",
+          toppingIds: ["t1"],
+          currentUnitPrice: 51_000,
+        }],
+      });
+      return true;
+    },
+  );
+});
+
+test("V2 CHECKOUT_CHANGED: reason EXPECTED_TOTAL_MISMATCH when unit prices match", async () => {
+  await assert.rejects(
+    priceOrder(
+      createTx(),
+      {
+        schemaVersion: 2,
+        items: [{
+          productId: "p1",
+          size: "M",
+          toppingIds: ["t1"],
+          qty: 2,
+          expectedUnitPrice: 50_000,
+        }],
+        promotionCode: null,
+        expectedTotal: 99_000,
+      },
+      now,
+    ),
+    (error: unknown) => {
+      assert.ok(error instanceof PriceOrderError);
+      assert.equal(error.code, "CHECKOUT_CHANGED");
+      assert.deepEqual(error.details, {
+        reason: "EXPECTED_TOTAL_MISMATCH",
+        currentSubtotal: 100_000,
+        currentDiscountTotal: 0,
+        currentTotal: 100_000,
+        items: [{
+          productId: "p1",
+          size: "M",
+          toppingIds: ["t1"],
+          currentUnitPrice: 50_000,
+        }],
+      });
+      return true;
+    },
   );
 });
