@@ -4,6 +4,8 @@ import { SkipLink } from "@/components/layout/skip-link";
 import { ToastProvider } from "@/components/ui/toast";
 import { AuthProvider } from "@/features/auth/auth-provider";
 import { CartProvider } from "@/features/cart/cart-provider";
+import { CartProviderV2 } from "@/features/cart/cart-provider-v2";
+import { checkoutV2IntegrationEnabled } from "@/lib/server/checkout-integration";
 import { PwaSupport } from "@/features/pwa/pwa-support";
 import "./globals.css";
 
@@ -20,6 +22,7 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const ActiveCartProvider = checkoutV2IntegrationEnabled() ? CartProviderV2 : CartProvider;
   return (
     <html lang="vi">
       <body>
@@ -27,10 +30,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <PwaSupport />
         <ToastProvider>
           <AuthProvider>
-            <CartProvider>
+            <ActiveCartProvider>
               <Header />
               {children}
-            </CartProvider>
+            </ActiveCartProvider>
           </AuthProvider>
         </ToastProvider>
       </body>

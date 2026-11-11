@@ -115,3 +115,58 @@ Các test dùng auth/network/storage/khóa giả lập. Chưa chạy E2E với b
 Sprint 3/PostgreSQL; lượt review này không chạy lại lint/typecheck/build,
 không bật provider v2 và không đổi trạng thái AC. Trước khi phát hành, kiểm
 tra source đã merge có fix recovery và tiếp tục DEP-05/06 cùng kiểm thử thật.
+
+## Kiểm thử tích hợp tạo và đọc đơn — 11/11/2026
+
+Nhánh `integration/sprint3-checkout-e2e`, source `5c41899`, ghép frontend
+`9c4658b` với backend `ad797f4`. A cung cấp kết quả trên Windows, Node 24.16.0,
+PostgreSQL 17, database riêng `brewlite_s3_demo`:
+
+- Frontend unit test: 945/945, không fail/skip; backend typecheck, frontend
+  lint/build và diff check đều thành công.
+- `BrewLite_S3_Order_HTTP_Check.cjs`: 15/15 qua HTTP trực tiếp NestJS cổng 3002.
+- `BrewLite_S3_BFF_Order_Check.cjs`: 18/18 qua Next.js cổng 3000 và NestJS 3002.
+
+Hai lượt HTTP kiểm tra tạo đơn v2, DEMO10, đọc chi tiết/lịch sử qua parser
+frontend, replay/conflict và phân quyền; đối chiếu ledger/giữ kho trong
+PostgreSQL. Lượt BFF kiểm thêm cookie/binding, Origin, expected owner và
+đăng xuất. Báo cáo JSON đang được A giữ ở `%TEMP%`, chưa đính kèm repo:
+`BrewLite_S3_Order_HTTP_Result_1794388409565.json` và
+`BrewLite_S3_BFF_Order_Result_1794389047234.json`. Đây là kết quả do A cung cấp,
+không phải toàn bộ ma trận AC đã nghiệm thu. Không chạy lại chỉ để đổi tên báo cáo.
+
+### Bật giao diện v2 để thử trên máy phát triển
+
+Đặt `CHECKOUT_V2_INTEGRATION_ENABLED=1` trong cửa sổ chạy `next dev`, rồi khởi
+động lại frontend. Cờ phía server chọn đồng thời đúng một provider và panel
+v2 tại layout và `/cart`. Không có cờ, giá trị khác `1`, hoặc production vẫn
+dùng v1. Cờ này khác `CHECKOUT_PREVIEW_ENABLED` của trang fixture `/dev/checkout`.
+
+Chỉ thử bằng một cửa sổ ẩn danh mới, giữ các tab của profile đó ở cùng phiên
+bản. Mở ứng dụng với cờ sẽ đọc/migrate envelope v1 sang v2 dưới Web Lock;
+không tự POST và không tự đổi pending key/body. Migration storage là một chiều:
+không quay lại writer v1 trên profile đã migrate; không xóa storage để hạ cấp.
+
+Phạm vi lượt thử hiện tại là tạo/đọc đơn, giữ giỏ và khôi phục bằng GET sau F5.
+Thanh toán/hủy/expiry và hai lỗi V1 ở PR #52 còn chờ backend; không thao tác
+thanh toán/hủy trong lượt này và không dùng các kết quả trên để công bố các
+luồng đó đạt. Production rollout vẫn chờ đóng phụ thuộc DEP-05/06 và nghiệm thu.
+
+Trong môi trường chuẩn bị patch, 945/945 unit test, lint và build frontend
+đạt. Đã build với cờ bằng `1` và kiểm tra HTML production vẫn chọn provider/
+panel v1. Môi trường này không khởi động được server/trình duyệt để chạy lượt
+thử development nên không cung cấp bằng chứng tương tác trình duyệt.
+
+A đã xác nhận lượt UI trên máy Windows với cờ integration, Next.js 3000,
+NestJS 3002 và PostgreSQL `brewlite_s3_demo`:
+
+- Thêm một Americano S, không topping; giỏ khách có một ly, tổng 40.000đ.
+  Đăng ký/đăng nhập tài khoản test rồi quay lại vẫn giữ món.
+- Mở xác nhận rồi chọn quay lại: không có POST tạo đơn.
+- Xác nhận một lần: POST `/api/orders` trả 201, GET chi tiết trả 200; hiển thị
+  chờ thanh toán, tổng chính thức 40.000đ; giữ một ly và khóa sửa giỏ.
+- F5: đọc lại đúng mã đơn cũ, giữ món/giá và không phát sinh POST tạo đơn mới.
+
+Đây là kết quả thao tác và Network do A xác nhận, chưa có ảnh/log trình duyệt
+đính kèm. Chưa kiểm chứng bằng lượt này: nhiều tab, tranh chấp kho, payment,
+hủy/refund/expiry hoặc production. Không mở rộng kết luận sang toàn bộ AC/DoD.
