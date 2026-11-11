@@ -85,20 +85,13 @@ Chỉ điền số thật từng ngày; ô chưa có số để trống, **khôn
 
 Nếu cuối 08/11 chưa có E2E đầu tiên: A/B ghi rủi ro với ticket/owner/ngày mới trong ngày đó, cập nhật capacity và giảm việc ngoài phạm vi. Không bỏ Task 10 để đạt ngày.
 
-## 5A. Assignment 2: mục theo dõi (nguồn `docs/assignment2/TEAM_PLAN.md`)
+## 5A. Đầu mối Assignment 2 sau khi tách repo
 
-Chỉ ghi điều có bằng chứng trên repo tại 07/11/2026 (main `82c7675`). Ô không có bằng chứng ghi `chưa cập nhật`. Mốc dưới đây là mục tiêu của kế hoạch, không phải xác nhận.
-
-| Mã | Lead / reviewer | Mốc kế hoạch | Tình trạng ghi nhận | Bằng chứng |
-|---|---|---|---|---|
-| A2-REQ, A2-UML | A / B, B / D | 05/11 Task 1–2 trên repo | Tài liệu Task 1–2 đã có trên main | PR #29 (merge) |
-| A2-REPO-CI | B / E | 07–08/11 cổng Task 4 | **Một phần:** đã đổi layout `apps/web`, `apps/api`. **Chưa có CI**: main không có `.github/` | PR #30 (merge); `git ls-tree` main |
-| A2-ARCH | D / E | 06/11 Task 3.1 | Phần BFF/PWA của A ở PR #31 (đã review; chưa thấy trên main ngày 08/11). Phần kiến trúc tổng thể và ADR của D: chưa thấy trên main | PR #31; `git log` main 08/11 |
-| A2-MENU-PWA | A / B | Task 5 (PWA) | Tài liệu phương án ở PR #31. Phần triển khai (manifest, service worker, trang offline) ở PR #33, B đã review 08/11 (lint/typecheck/346 test/build và Chromium offline đạt; chưa merge lúc ghi). Cài app trên máy thật và HTTPS production chưa có bằng chứng | PR #31, PR #33 |
-| A2-DEPLOY-DESIGN | E / C | 06/11 Task 3.2 | chưa cập nhật | |
-| A2-HEALTH-SECURITY, A2-CHECKOUT-TEST, A2-CD-PRODUCTION, A2-HANDOVER | C, D, E, B | 09–14/11 | chưa cập nhật | |
-
-Mốc 06/11 của Task 3.1/3.2 đã qua mà chưa có đủ tạo phẩm trên main: ghi BLOCKED/owner/mốc mới trong ngày (xem mục 5).
+Task 1–5 A2 được theo dõi trong [repo A2](https://github.com/giabaot400-boop/BrewLite-Assignment2),
+tại `docs/assignment2/TEAM_PLAN.md` của repo đó. Bảng A2 cũ ngày 07/11 được giữ
+trong [commit nguồn](https://github.com/giabaot400-boop/BrewLite/blob/69b801165fc0b199ac70fdc3afa75932a82601c9/docs/sprint3/B_BOARD_SPRINT3.md).
+Các dòng rủi ro có ngày ở mục 5 là lịch sử ghi nhận, không phải xác nhận tiến độ
+A2 hiện tại. Board này tiếp tục phục vụ Sprint 3 A1.
 
 ## 6. Phiếu nhận bàn giao mỗi ticket (TEAM_PLAN mục 6)
 

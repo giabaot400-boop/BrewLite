@@ -20,7 +20,7 @@ loading dùng `role="status"`.
 
 ## Thành phần dùng chung cho đơn hàng (Sprint 3)
 
-Nằm ở `apps/web/src/features/orders/`, mô tả đầy đủ trong [SPRINT3_B_UI.md](SPRINT3_B_UI.md).
+Nằm ở `apps/web/src/features/orders/`, mô tả đầy đủ trong [SPRINT3_B_UI.md](../sprint3/SPRINT3_B_UI.md).
 
 | Thành phần | Dùng để |
 |---|---|
@@ -53,4 +53,4 @@ Hồ sơ ghi mốc desktop là 1024 px; nếu nhóm muốn khớp chính xác, �
 
 - Chưa thử bằng trình đọc màn hình thật (NVDA, VoiceOver).
 - Chưa kiểm tra Safari và Firefox; đã chạy thử trên Chromium ở 390, 768 và 1280 px.
-- Chưa tick mục "B rà layout..." trong `docs/SPRINT1_CHECKLIST.md`; tick sau khi có người review.
+- Chưa tick mục "B rà layout..." trong `docs/sprint1/SPRINT1_CHECKLIST.md`; tick sau khi có người review.

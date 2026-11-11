@@ -52,7 +52,7 @@ Các API sản phẩm hiện chỉ đọc; migration/seed ghi dữ liệu trong 
 
 ## Phạm vi đã triển khai và phạm vi dự kiến
 
-Schema đối chiếu: [`backend/prisma/schema.prisma`](../../backend/prisma/schema.prisma)
+Schema đối chiếu: [`backend/prisma/schema.prisma`](https://github.com/giabaot400-boop/BrewLite/blob/b5990767892453a8eceb8435070a9a3f12dce7c4/backend/prisma/schema.prisma)
 tại mốc `b5990767892453a8eceb8435070a9a3f12dce7c4`.
 Sprint 1 có `Product`, `Topping`, `ProductTopping`, ánh xạ tới `products`,
 `toppings`, `product_toppings`. `imageUrl` trong Prisma ánh xạ sang `image_url`.
@@ -107,18 +107,18 @@ thư mục sprint sau nếu nghiệp vụ/schema thay đổi.
 
 ## Liên kết tài liệu hiện có
 
-- [API contract](../API_CONTRACT.md)
-- [Checklist Sprint 1](../SPRINT1_CHECKLIST.md)
-- [Báo cáo kiểm thử của D](../Testing/MEMBER_D_TEST_RESULTS.md)
-- [Bàn giao database Sprint 1](../SPRINT1_E_DATABASE.md)
+- [API contract](../guides/API_CONTRACT.md)
+- [Checklist Sprint 1](../sprint1/SPRINT1_CHECKLIST.md)
+- [Báo cáo kiểm thử của D](../sprint1/testing/MEMBER_D_TEST_RESULTS.md)
+- [Bàn giao database Sprint 1](../sprint1/SPRINT1_E_DATABASE.md)
 
 
 ## Nguồn đối chiếu logical architecture r2
 
 - Bản gốc v0.9: [logical-architecture.puml](sprint1/originals/logical-architecture.puml),
   A cung cấp ngày 27/10/2026; không tự thay hình lịch sử trong báo cáo Word.
-- Code tại `b599076`: [AppModule](../../backend/src/app.module.ts),
-  [Product service](../../backend/src/products/products-prisma.service.ts),
-  [API client](../../frontend/src/features/products/api.ts),
-  [Menu](../../frontend/src/features/products/components/menu.tsx) và
-  [trang chi tiết](../../frontend/src/app/products/[id]/page.tsx).
+- Code tại `b599076`: [AppModule](https://github.com/giabaot400-boop/BrewLite/blob/b5990767892453a8eceb8435070a9a3f12dce7c4/backend/src/app.module.ts),
+  [Product service](https://github.com/giabaot400-boop/BrewLite/blob/b5990767892453a8eceb8435070a9a3f12dce7c4/backend/src/products/products-prisma.service.ts),
+  [API client](https://github.com/giabaot400-boop/BrewLite/blob/b5990767892453a8eceb8435070a9a3f12dce7c4/frontend/src/features/products/api.ts),
+  [Menu](https://github.com/giabaot400-boop/BrewLite/blob/b5990767892453a8eceb8435070a9a3f12dce7c4/frontend/src/features/products/components/menu.tsx) và
+  [trang chi tiết](https://github.com/giabaot400-boop/BrewLite/blob/b5990767892453a8eceb8435070a9a3f12dce7c4/frontend/src/app/products/[id]/page.tsx).

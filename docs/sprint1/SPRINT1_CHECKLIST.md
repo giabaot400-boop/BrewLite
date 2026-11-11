@@ -109,9 +109,9 @@ không phải cam kết mọi lần gọi đều có cùng thời gian phản h�
 - [x] PR #10 đã merge; main có phần sửa retry() ở trang chi tiết.
 - [x] PR #9 đã merge; README, API contract và tài liệu liên quan đã cập nhật.
 - [x] PR #8 đã merge cùng commit hiệu đính 2ad9a0d của A.
-      [Báo cáo D](Testing/MEMBER_D_TEST_RESULTS.md) giữ kết quả lần đầu,
+      [Báo cáo D](testing/MEMBER_D_TEST_RESULTS.md) giữ kết quả lần đầu,
       retest, đối chiếu AC và các giới hạn bằng chứng.
-- [x] Đã liên kết [18 ảnh do D nộp](Testing/evidence/).
+- [x] Đã liên kết [18 ảnh do D nộp](testing/evidence/).
       Kết quả API đo trên máy D khoảng 57,6 ms và 67,0 ms,
       đạt ngưỡng dưới 500 ms trong hai lần đo đã ghi nhận.
 
@@ -135,19 +135,19 @@ Chữ “Đạt” dưới đây chỉ áp dụng trong phạm vi dữ liệu m�
 đã ghi nhận; quyết định chấp nhận Increment thuộc PO.
 
 Nguồn đối chiếu đã có:
-- [README](../README.md), [workflow Git](GIT_WORKFLOW.md), package.json
+- [README](../../README.md), [workflow Git](../guides/GIT_WORKFLOW.md), package.json
   của hai ứng dụng và các file env mẫu, gitignore trong repository.
 - Các kết quả API/PostgreSQL và UI trên máy A trong checklist này;
   mốc tích hợp 5d6e058/7df9f61, phần sửa retry tại 2ed30b3.
 - [Các đợt kiểm thử giao diện trước đó](KIEM_TRA_BAN_KHOI_DONG.md):
   fixture, tính giá, giá không hợp lệ, responsive và thao tác bàn phím.
-- [Báo cáo D](Testing/MEMBER_D_TEST_RESULTS.md) và
-  [ảnh D](Testing/evidence/), với giới hạn commit/nguồn dữ liệu đã nêu.
-- Code [đọc và kiểm tra Product API](../frontend/src/features/products/api.ts),
-  [menu](../frontend/src/features/products/components/menu.tsx),
-  [tùy chọn và giá](../frontend/src/features/products/components/product-options.tsx),
-  [trang chi tiết](../frontend/src/app/products/[id]/page.tsx) và
-  [Product service](../backend/src/products/products-prisma.service.ts).
+- [Báo cáo D](testing/MEMBER_D_TEST_RESULTS.md) và
+  [ảnh D](testing/evidence/), với giới hạn commit/nguồn dữ liệu đã nêu.
+- Code [đọc và kiểm tra Product API](https://github.com/giabaot400-boop/BrewLite/blob/b5990767892453a8eceb8435070a9a3f12dce7c4/frontend/src/features/products/api.ts),
+  [menu](https://github.com/giabaot400-boop/BrewLite/blob/b5990767892453a8eceb8435070a9a3f12dce7c4/frontend/src/features/products/components/menu.tsx),
+  [tùy chọn và giá](https://github.com/giabaot400-boop/BrewLite/blob/b5990767892453a8eceb8435070a9a3f12dce7c4/frontend/src/features/products/components/product-options.tsx),
+  [trang chi tiết](https://github.com/giabaot400-boop/BrewLite/blob/b5990767892453a8eceb8435070a9a3f12dce7c4/frontend/src/app/products/[id]/page.tsx) và
+  [Product service](https://github.com/giabaot400-boop/BrewLite/blob/b5990767892453a8eceb8435070a9a3f12dce7c4/backend/src/products/products-prisma.service.ts).
 
 | Mã AC | Nội dung đối chiếu | Kết quả và căn cứ hiện có |
 |---|---|---|
