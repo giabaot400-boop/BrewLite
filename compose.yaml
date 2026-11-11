@@ -1,0 +1,75 @@
+name: brewlite-sprint3
+
+services:
+  db:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_DB: brewlite_s3_demo
+      POSTGRES_USER: brewlite
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Missing POSTGRES_PASSWORD}
+      TZ: UTC
+    command: ["postgres", "-c", "timezone=UTC"]
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U brewlite -d brewlite_s3_demo"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    image: brewlite-api:sprint3
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      NODE_ENV: production
+      TZ: UTC
+      PORT: "3001"
+      DATABASE_URL: postgresql://brewlite:${POSTGRES_PASSWORD:?Missing POSTGRES_PASSWORD}@db:5432/brewlite_s3_demo?schema=public
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:?Missing AUTH_JWT_SECRET}
+      FRONTEND_ORIGIN: http://localhost:3000
+      DEMO_MODE: "false"
+      DEMO_SEED_ENABLED: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://localhost:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  frontend:
+    image: brewlite-web:sprint3
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    environment:
+      NODE_ENV: production
+      TZ: UTC
+      BACKEND_INTERNAL_URL: http://backend:3001
+      APP_ORIGIN: http://localhost:3000
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://localhost:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+volumes:
+  postgres_data:

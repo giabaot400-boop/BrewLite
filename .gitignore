@@ -17,3 +17,6 @@ apps/web/next-env.d.ts
 frontend/next-env.d.ts
 
 /db-backups/
+
+# Local database backups
+backups/

@@ -1,0 +1,111 @@
+{
+  "dateUtc": "2026-11-10T00:44:35.850Z",
+  "database": "brewlite_s2_a_auth_test",
+  "method": "Actual OrdersService from apps/api/dist; actual Prisma/PostgreSQL. Fault injection changes writes inside the real transaction. Two Prisma clients plus one pg control connection hold a private advisory gate before try-lock evaluation; no mocked database errors and no increased transaction timeout. No HTTP/browser or API performance conclusion.",
+  "checks": [
+    {
+      "name": "ORDER-08: matching pair commits and replays one order",
+      "passed": true
+    },
+    {
+      "name": "ORDER-08: between-writes rolls back order, snapshots and ledger",
+      "passed": true
+    },
+    {
+      "name": "ORDER-08: order.userId rolls back order, snapshots and ledger",
+      "passed": true
+    },
+    {
+      "name": "ORDER-08: order.requestKey rolls back order, snapshots and ledger",
+      "passed": true
+    },
+    {
+      "name": "ORDER-08: order.requestHash rolls back order, snapshots and ledger",
+      "passed": true
+    },
+    {
+      "name": "ORDER-08: ledger.userId rolls back order, snapshots and ledger",
+      "passed": true
+    },
+    {
+      "name": "ORDER-08: ledger.requestKey rolls back order, snapshots and ledger",
+      "passed": true
+    },
+    {
+      "name": "ORDER-08: ledger.requestHash rolls back order, snapshots and ledger",
+      "passed": true
+    },
+    {
+      "name": "ORDER-10: stale first try-lock snapshot retries SUCCEEDED",
+      "passed": true,
+      "attempts": 2,
+      "realDatabaseErrors": [
+        {
+          "code": "P2002",
+          "sqlState": "23505"
+        }
+      ]
+    },
+    {
+      "name": "ORDER-10: stale first try-lock snapshot retries REJECTED",
+      "passed": true,
+      "attempts": 2,
+      "realDatabaseErrors": [
+        {
+          "code": "P2002",
+          "sqlState": "23505"
+        }
+      ]
+    }
+  ],
+  "fixture": {
+    "users": [
+      "0f23e20a-ff1d-4603-bc76-d2657dd024cd",
+      "1e28a526-3d5c-4903-910b-c11ea43bfc77"
+    ],
+    "product": "s2-orders-closeout-67dcda38-e88e-4799-898f-5d0d1a2350cd",
+    "topping": "s2-orders-closeout-topping-67dcda38-e88e-4799-898f-5d0d1a2350cd"
+  },
+  "races": [
+    {
+      "state": "SUCCEEDED",
+      "timeout": 2000,
+      "maxWait": 1000,
+      "attempts": 2,
+      "databaseErrors": [
+        {
+          "code": "P2002",
+          "sqlState": "23505"
+        }
+      ],
+      "observedWaitingGate": true,
+      "firstLockAcquired": true,
+      "firstLedgerMissing": true
+    },
+    {
+      "state": "REJECTED",
+      "timeout": 2000,
+      "maxWait": 1000,
+      "attempts": 2,
+      "databaseErrors": [
+        {
+          "code": "P2002",
+          "sqlState": "23505"
+        }
+      ],
+      "observedWaitingGate": true,
+      "firstLockAcquired": true,
+      "firstLedgerMissing": true
+    }
+  ],
+  "environment": {
+    "platform": "win32",
+    "node": "v24.22.1",
+    "cpu": "Intel(R) Core(TM) i5-6300U CPU @ 2.40GHz"
+  },
+  "ordersDistSha256": "5c2f15a9a7e53e8bd25ca2433361b7cc27685b1517ab7305f82d2245f8d3752f",
+  "ordersSourceSha256": "4791df6d5036606ac1d9aa7ee628dd0c6cb69d0063bfb4459fa48939245af583",
+  "sourceHead": "22119e23e0ba0ae866ba30c13510f2f091137eec",
+  "postgresVersion": "18.6",
+  "functionalPassed": true
+}
