@@ -8,6 +8,7 @@ import type { CreateOrderDto } from "./dto/create-order.dto.js";
 import { canonicalizeOrder } from "./order-canonical.js";
 import type { CreateOrderV2Dto } from "./dto/create-order-v2.dto.js";
 import { canonicalizeOrderV2 } from "./order-canonical-v2.js";
+import { StockConflict } from "../database/stock.js";
 
 const USER_ID = "user-001";
 const REQUEST_KEY = "550e8400-e29b-41d4-a716-446655440000";
@@ -50,6 +51,9 @@ type MockOptions = {
   existing?: Record<string, unknown> | null;
   storedCorruption?: string;
   stock?: number;
+
+  // Số lần transaction giả lập gặp StockConflict.
+  transactionConflictAttempts?: number;
 };
 
 function createMock(options: MockOptions = {}) {
@@ -165,15 +169,31 @@ function createMock(options: MockOptions = {}) {
     },
   };
 
+  let transactionAttempts = 0;
+
   const prisma = {
     $transaction: async (
       callback: (transaction: typeof tx) => Promise<unknown>,
-    ) => callback(tx),
+    ) => {
+      transactionAttempts++;
+
+      if (transactionAttempts <= (options.transactionConflictAttempts ?? 0)) {
+        throw new StockConflict();
+      }
+
+      return callback(tx);
+    },
   };
 
   const service = new OrdersService(prisma as unknown as PrismaService);
 
-  return { service, calls };
+  return {
+    service,
+    calls,
+    get transactionAttempts() {
+      return transactionAttempts;
+    },
+  };
 }
 
 async function expectHttpError(
@@ -193,7 +213,92 @@ async function expectHttpError(
     return true;
   });
 }
+test("UT-S11: V1 exhausts StockConflict retries - HTTP 503", async () => {
+  // Giả lập 3 transaction liên tiếp gặp StockConflict.
+  const mock = createMock({
+    transactionConflictAttempts: 3,
+  });
 
+  // Sau 3 lần retry thất bại, V1 phải trả HTTP 503.
+  await expectHttpError(
+    () => mock.service.createOrder(USER_ID, REQUEST_KEY, createDto()),
+    503,
+    "TRANSACTION_RETRY_EXHAUSTED",
+  );
+
+  // Không được thực hiện transaction lần thứ tư.
+  assert.equal(mock.transactionAttempts, 3);
+
+  // Không được tạo đơn hàng hoặc ghi ledger.
+  assert.equal(mock.calls.ordersCreated.length, 0);
+  assert.equal(mock.calls.requestsCreated.length, 0);
+
+  // Không được cập nhật hoặc giữ tồn kho.
+  assert.equal(mock.calls.stockUpdates.length, 0);
+  assert.equal(mock.calls.reservationsCreated.length, 0);
+});
+test("UT-S12: V1 rejects zero-total order and saves rejected ledger", async () => {
+  // Tạo sản phẩm có giá bằng 0.
+  const product = {
+    ...createProduct(),
+    price: 0,
+  };
+
+  const { service, calls } = createMock({ product });
+
+  // Không chọn topping, sử dụng size S.
+  const dto: CreateOrderDto = {
+    items: [
+      {
+        productId: "coffee-milk",
+        size: "S",
+        toppingIds: [],
+        qty: 2,
+        expectedUnitPrice: 0,
+      },
+    ],
+  };
+
+  // V1 phải từ chối đơn hàng có tổng tiền bằng 0.
+  await expectHttpError(
+    () => service.createOrder(USER_ID, REQUEST_KEY, dto),
+    400,
+    "VALIDATION_ERROR",
+  );
+
+  // Không được tạo Order hoặc giữ tồn kho.
+  assert.equal(calls.ordersCreated.length, 0);
+  assert.equal(calls.stockUpdates.length, 0);
+  assert.equal(calls.reservationsCreated.length, 0);
+
+  // Phải lưu đúng một ledger REJECTED.
+  assert.equal(calls.requestsCreated.length, 1);
+
+  const ledger = calls.requestsCreated[0] as {
+    data: {
+      canonicalVersion: number;
+      state: string;
+      httpStatus: number;
+      orderId: string | null;
+    };
+  };
+
+  assert.equal(ledger.data.canonicalVersion, 1);
+  assert.equal(ledger.data.state, "REJECTED");
+  assert.equal(ledger.data.httpStatus, 400);
+  assert.equal(ledger.data.orderId, null);
+
+  // Gửi lại cùng request: phải replay lỗi đã lưu.
+  await expectHttpError(
+    () => service.createOrder(USER_ID, REQUEST_KEY, dto),
+    400,
+    "VALIDATION_ERROR",
+  );
+
+  // Replay không được ghi thêm ledger hoặc tạo Order.
+  assert.equal(calls.requestsCreated.length, 1);
+  assert.equal(calls.ordersCreated.length, 0);
+});
 test("UT-S01: Create order successfully - HTTP 201", async () => {
   const { service, calls } = createMock();
 
