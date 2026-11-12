@@ -1,0 +1,52 @@
+COMPOSE API PERFORMANCE START: 2026-11-12T11:47:57.230Z
+Warmup: 5 full iterations; measured: 30 full iterations; sequential requests, no load concurrency.
+WARMUP 1/5 complete
+WARMUP 2/5 complete
+WARMUP 3/5 complete
+WARMUP 4/5 complete
+WARMUP 5/5 complete
+MEASURED 1/30 complete
+MEASURED 2/30 complete
+MEASURED 3/30 complete
+MEASURED 4/30 complete
+MEASURED 5/30 complete
+MEASURED 6/30 complete
+MEASURED 7/30 complete
+MEASURED 8/30 complete
+MEASURED 9/30 complete
+MEASURED 10/30 complete
+MEASURED 11/30 complete
+MEASURED 12/30 complete
+MEASURED 13/30 complete
+MEASURED 14/30 complete
+MEASURED 15/30 complete
+MEASURED 16/30 complete
+MEASURED 17/30 complete
+MEASURED 18/30 complete
+MEASURED 19/30 complete
+MEASURED 20/30 complete
+MEASURED 21/30 complete
+MEASURED 22/30 complete
+MEASURED 23/30 complete
+MEASURED 24/30 complete
+MEASURED 25/30 complete
+MEASURED 26/30 complete
+MEASURED 27/30 complete
+MEASURED 28/30 complete
+MEASURED 29/30 complete
+MEASURED 30/30 complete
+Performance fixture cleanup completed; demo inventory unchanged.
+Endpoint | n | errors | p50 ms | p95 ms | max ms | <500ms
+POST /api/auth/register | 30 | 0 | 305.76 | 325.72 | 331.88 | 30/30
+POST /api/auth/login | 30 | 0 | 304.48 | 317.06 | 322.59 | 30/30
+GET /api/auth/me | 30 | 0 | 13.18 | 19.32 | 24.57 | 30/30
+GET /api/products | 30 | 0 | 11.2 | 13.19 | 14.06 | 30/30
+POST /api/orders | 30 | 0 | 47.45 | 56.49 | 62.48 | 30/30
+POST /api/payments | 30 | 0 | 50.2 | 64.2 | 67.96 | 30/30
+POST /api/payments (exact-key replay) | 30 | 0 | 23.82 | 26.66 | 27.94 | 30/30
+GET /api/orders/:id | 30 | 0 | 20.22 | 24.66 | 25.37 | 30/30
+GET /api/orders/me | 30 | 0 | 22.97 | 25.09 | 28.47 | 30/30
+POST /api/orders/:id/cancel | 30 | 0 | 58.36 | 72.02 | 72.83 | 30/30
+POST /api/auth/logout | 30 | 0 | 17.93 | 20.35 | 24.97 | 30/30
+REPORT: E:\download\BrewLite_A1_Compose_Performance_2026-11-12T11-47-57-227Z
+COMPOSE_API_PERFORMANCE_PASSED

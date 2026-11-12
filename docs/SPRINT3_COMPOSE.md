@@ -1,5 +1,9 @@
 # Chạy BrewLite bằng Docker Compose
 
+## Kết quả trên bản tích hợp ngày 12/11/2026
+
+Máy A đã chạy theo hướng dẫn trên source `88f5f35`: build/deploy/seed trên volume Docker mới, ba service healthy, workflow Compose 8/8 nhóm và browser 9/9 bước. Lượt đo riêng sau warmup có 330/330 mẫu dưới 500 ms, max 331,88 ms. Xem [báo cáo và giới hạn](sprint3/A1_COMPOSE_PERFORMANCE_QA.md). Kết quả của E ở mục bằng chứng bên dưới giữ nguyên phạm vi lượt trước; hai môi trường/bản kiểm tra được ghi riêng.
+
 ## Yêu cầu
 - Docker Desktop đang chạy Linux containers, có Docker Compose.
 - Chạy các lệnh tại thư mục gốc repository.

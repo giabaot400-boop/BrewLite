@@ -137,7 +137,7 @@ Docker: theo [../SPRINT3_COMPOSE.md](../SPRINT3_COMPOSE.md). Cờ frontend phả
 
 Các kết quả kiểm thử được dùng để review từng AC theo [B_AC_LINKS.md](B_AC_LINKS.md). Việc nghiệm thu còn các đầu ra sau:
 
-1. Lưu báo cáo gốc Windows vào repo và ghi SHA commit tích hợp. Kết quả đã cung cấp gồm backend 181/181, frontend 955/955, PostgreSQL 28/28, HTTP/BFF/CLI 9/9 nhóm và browser 9/9 bước.
-2. Kiểm tra frontend, backend và DB trong Docker Compose với bản tích hợp này. Kết quả ngoài container được ghi riêng với kết quả Docker.
-3. Ghi tên và phiên bản trình duyệt cho từng lượt kiểm tra. Linux đã chạy Chromium 153; phiên bản Windows lấy từ JSON báo cáo. Chưa có kết quả Firefox, Safari hoặc Edge trong các lượt này.
-4. Review AC, hoàn thiện Review/Retrospective, backlog và gói bàn giao Assignment 1. Lịch sử kiểm thử và trạng thái review được cập nhật theo sự việc thực tế.
+1. Source tích hợp đã commit tại `88f5f35f3bb921bd68be2d0f8c70bd6736ab101e`; bằng chứng Windows ngoài container đã được lưu trong thư mục `testing/a1-workflow-2026-11-12/windows`. Kết quả 181/955/28 và HTTP/browser giữ đúng phạm vi ở trên.
+2. Máy A đã kiểm tra Compose 8/8 nhóm, browser 9/9 bước; lượt đo riêng 330/330 mẫu API sau warmup dưới 500 ms. Xem [báo cáo Compose và hiệu năng](A1_COMPOSE_PERFORMANCE_QA.md); hoàn thiện log/ảnh gốc và commit/push hồ sơ QA.
+3. Browser Docker được xác nhận là Chromium 158.0.8127.18; Linux và Windows ngoài container giữ phiên bản theo JSON của từng lượt. Chưa có kết quả Firefox, Safari hoặc Edge trong các lượt này.
+4. Review từng AC/DoD, hoàn thiện Review/Retrospective, backlog và gói bàn giao Assignment 1. Lịch sử kiểm thử và trạng thái review được cập nhật theo sự việc thực tế.

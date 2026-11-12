@@ -68,11 +68,14 @@ Vị trí lưu trong repo:
 
 Các liên kết trên chỉ có bằng chứng tương ứng sau khi file gốc được sao chép vào repo. Không lưu `.env`, cookie, token hoặc profile đăng nhập trong hồ sơ kiểm thử.
 
+## Kết quả Docker và hiệu năng bổ sung
+
+Lượt Compose và hiệu năng chạy sau commit trên source `88f5f35f3bb921bd68be2d0f8c70bd6736ab101e`, tách riêng với các lượt ngoài container ở trên. Compose 8/8 nhóm, Chromium 158.0.8127.18 chạy 9/9 bước và không page error; lượt hiệu năng riêng đạt 330/330 mẫu dưới 500 ms. Cả hai cleanup thành công, cùng image ID và kho demo giữ nguyên. Xem [báo cáo đầy đủ và JSON gốc](A1_COMPOSE_PERFORMANCE_QA.md).
+
 ## Công việc còn lại
 
-1. Đính kèm báo cáo gốc, commit/push source và QA lên nhánh tích hợp; ghi SHA thực tế.
-2. Kiểm tra bản tích hợp trong Docker Compose với đủ frontend, backend và DB theo Task 9.
-3. Đo riêng thời gian phản hồi API với dữ liệu mẫu theo ngưỡng dưới 500 ms. Thời gian chạy bộ test không phải độ trễ của một API; số đo Sprint 2 giữ nguyên phạm vi đã báo cáo.
-4. Review từng AC/DoD, cập nhật Review/Retrospective, backlog và gói bàn giao. Trạng thái review được ghi theo sự việc thực tế.
+1. Hoàn thiện việc lưu log/ảnh gốc cho lượt Compose và hiệu năng, kiểm tra checksum và commit/push hồ sơ QA; source ứng dụng đã kiểm tra là `88f5f35`.
+2. Đối chiếu từng AC/DoD với assertion và bằng chứng tương ứng; kết quả Compose/hiệu năng không tự thay review AC.
+3. Cập nhật Review/Retrospective, backlog và gói bàn giao theo sự việc thực tế. Giữ kết quả Sprint 2, ngoài container và Docker riêng theo môi trường/phạm vi.
 
 Assignment 1 mục 4.2 yêu cầu phù hợp trên các trình duyệt web. Các lượt hiện tại cung cấp bằng chứng Chromium; browser khác và trình đọc màn hình trong backlog UI cần được kiểm tra riêng.

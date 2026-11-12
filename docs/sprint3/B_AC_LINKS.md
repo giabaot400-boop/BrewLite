@@ -1,6 +1,8 @@
 # S3-B-02: Liên kết 27 AC với ticket, lead, reviewer và bằng chứng
 
-Cập nhật ngày 12/11/2026: [hồ sơ tích hợp](A1_WORKFLOW_HANDOVER.md) và [báo cáo Windows](A1_WORKFLOW_WINDOWS_QA.md) bổ sung source, lệnh kiểm tra và bằng chứng PostgreSQL/HTTP/browser. Trạng thái trong bảng được cập nhật sau khi đối chiếu SHA, báo cáo và review từng AC.
+Cập nhật ngày 12/11/2026: [hồ sơ tích hợp](A1_WORKFLOW_HANDOVER.md), [báo cáo Windows](A1_WORKFLOW_WINDOWS_QA.md) và [báo cáo Compose/hiệu năng](A1_COMPOSE_PERFORMANCE_QA.md) bổ sung source, lệnh kiểm tra và bằng chứng thật. Compose đạt 8/8 nhóm, browser 9/9 bước; 330/330 mẫu API sau warmup dưới 500 ms trên `88f5f35`. Các kết quả này cần được nối với từng assertion/fixture của AC khi review; không chuyển cả 27 dòng sang PASS từ một lượt tổng hợp.
+
+Bảng trạng thái bên dưới giữ snapshot khi lập hồ sơ, chưa cập nhật thành kết quả nghiệm thu mới. Các dòng CHƯA CHẠY không phủ nhận những lượt test đã được ghi trong báo cáo tổng hợp; việc cập nhật từng dòng cần SHA, bằng chứng và kết quả review tương ứng.
 
 
 Phiên bản 1.0 ngày 06/11/2026. Nguồn: `docs/sprint3/TEST_MATRIX.md` v1.3 (lead của từng AC) và

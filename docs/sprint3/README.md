@@ -4,7 +4,9 @@
 
 [Hồ sơ tích hợp workflow](A1_WORKFLOW_HANDOVER.md) ghi phạm vi hiện thực, cấu hình và lệnh kiểm tra. [Báo cáo Windows](A1_WORKFLOW_WINDOWS_QA.md) ghi kết quả backend 181/181, frontend 955/955, PostgreSQL 28/28, HTTP/BFF/CLI 9/9 nhóm và browser 9/9 bước do A cung cấp. Các báo cáo kiểm thử được quản lý riêng theo môi trường và phiên bản.
 
-Công việc bàn giao còn lại gồm lưu báo cáo gốc và SHA, kiểm tra Compose, đo độ trễ API và review từng AC. Các mục bên dưới giữ nguyên nhật ký tại từng mốc; trạng thái "chờ backend" trong nhật ký được hiểu theo thời điểm ghi nhận.
+[Báo cáo Compose và hiệu năng Windows](A1_COMPOSE_PERFORMANCE_QA.md) bổ sung lượt kiểm tra trên SHA `88f5f35`: 8/8 nhóm Compose, browser 9/9 bước; 330/330 mẫu API sau warmup dưới 500 ms, không lỗi HTTP, cleanup thành công. Ba JSON gốc và các helper đã dùng nằm trong thư mục bằng chứng được liên kết tại báo cáo.
+
+Công việc bàn giao còn lại là hoàn thiện file log/ảnh gốc trong hồ sơ, review từng AC/DoD, Review/Retrospective/backlog và gói nộp. Các mục bên dưới giữ nguyên nhật ký tại từng mốc; trạng thái "chờ backend" hoặc "CHƯA CHẠY" trong nhật ký được hiểu theo thời điểm ghi nhận, không thay kết quả mới trong báo cáo tổng hợp.
 
 
 Cập nhật ngày 07/11/2026. Thiết kế triển khai Task 8–10 của Assignment 1 trên nền Sprint 2 tại a1a0e4a. Bộ tài liệu xác định phạm vi, contract, phân công và kiểm thử dự kiến; chưa xác nhận code hoặc AC Sprint 3 đã đạt.
