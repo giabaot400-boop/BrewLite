@@ -815,8 +815,25 @@ export class OrdersService {
 
     let result: OrderTransactionResult | undefined;
 
+    // Ghi nhận thời gian bắt đầu để giới hạn retry tối đa 8 giây.
+    const startedAt = Date.now();
+
     // Tối đa 3 transaction độc lập.
     for (let attempt = 1; attempt <= 3; attempt++) {
+      if (attempt > 1 && Date.now() - startedAt >= 8000) {
+        throw new HttpException(
+          {
+            error: {
+              code: "TRANSACTION_RETRY_EXHAUSTED",
+              message: "Không thể xử lý đơn hàng lúc này. Vui lòng thử lại.",
+              details: {
+                reason: "RETRY_EXHAUSTED",
+              },
+            },
+          },
+          503,
+        );
+      }
       try {
         result = await this.prisma.$transaction(
           async (tx): Promise<OrderTransactionResult> => {
@@ -906,6 +923,25 @@ export class OrdersService {
                 requestKey,
                 requestHash,
                 409,
+                body,
+              );
+            }
+            // V1 mới sử dụng checkoutPolicyVersion = 2.
+            // Tổng tiền phải lớn hơn 0 trước khi tạo Order.
+            if (checked.total === 0) {
+              const body: OrderErrorResponse = {
+                error: {
+                  code: "VALIDATION_ERROR",
+                  message: "Tổng tiền đơn hàng phải lớn hơn 0.",
+                },
+              };
+
+              return this.saveRejectedRequest(
+                tx,
+                userId,
+                requestKey,
+                requestHash,
+                400,
                 body,
               );
             }
@@ -1048,8 +1084,25 @@ export class OrdersService {
 
         break;
       } catch (error) {
-        if (attempt === 3 || !this.shouldRetry(error)) {
+        // Lỗi không thuộc nhóm được phép retry thì trả ngay.
+        if (!this.shouldRetry(error)) {
           throw error;
+        }
+
+        // Lỗi retryable nhưng đã hết lượt hoặc hết thời gian.
+        if (attempt === 3 || Date.now() - startedAt > 8000) {
+          throw new HttpException(
+            {
+              error: {
+                code: "TRANSACTION_RETRY_EXHAUSTED",
+                message: "Không thể xử lý đơn hàng lúc này. Vui lòng thử lại.",
+                details: {
+                  reason: "RETRY_EXHAUSTED",
+                },
+              },
+            },
+            503,
+          );
         }
       }
     }
