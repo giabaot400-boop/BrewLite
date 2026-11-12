@@ -170,3 +170,64 @@ NestJS 3002 và PostgreSQL `brewlite_s3_demo`:
 Đây là kết quả thao tác và Network do A xác nhận, chưa có ảnh/log trình duyệt
 đính kèm. Chưa kiểm chứng bằng lượt này: nhiều tab, tranh chấp kho, payment,
 hủy/refund/expiry hoặc production. Không mở rộng kết luận sang toàn bộ AC/DoD.
+
+## Kiểm thử lại bản tích hợp — 12/11/2026
+
+A cung cấp kết quả tại source `c290c57017e3f6be34cd72f9ac9a332817a01a93`,
+nhánh `integration/sprint3-checkout-e2e`, sau khi nhận bản sửa D `e70a9e4`
+và reason pricing của C `25ff9a8`. Môi trường Windows, Node 24.16.0,
+PostgreSQL 17; giữ profile `apps/api/.env.sprint3-test` trỏ
+`localhost:5432/brewlite_s3_demo`, NestJS 3002 và Next.js dev 3000.
+
+| Phạm vi | Kết quả A cung cấp |
+|---|---|
+| Backend typecheck/build và năm file spec pricing/service V1/V2/controller/HTTP mock | Mã thoát 0; 49/49 test đạt, không fail/skip |
+| `BrewLite_S3_Order_HTTP_Check.cjs` | 15/15, mã thoát 0 |
+| `BrewLite_S3_BFF_Order_Check.cjs` | Lượt chạy lại 18/18, mã thoát 0 |
+
+A đã đọc metadata cả hai báo cáo: `sourceSha` đúng SHA đầy đủ trên,
+`passed=true`, `checks` lần lượt 15/18 và không có check thất bại.
+Báo cáo JSON nằm ở `%TEMP%` trên máy A, chưa đính kèm repo:
+
+- `BrewLite_S3_Order_HTTP_Result_1794455808567.json`.
+- `BrewLite_S3_BFF_Order_Result_1794456397999.json`.
+
+Lượt BFF đầu dừng trước check đầu tiên: `Check stopped: 23`, 0/1,
+mã thoát 1; báo cáo `BrewLite_S3_BFF_Order_Result_1794456087859.json`.
+Sau đó GET không cookie tới `/api/auth/me` trả 401 AUTH_REQUIRED và
+`/api/products` trả 200, rồi A chủ động chạy lại script. Không tăng timeout
+hoặc đổi code để nhận kết quả 18/18; chưa đủ log kết luận chắc nguyên nhân
+lượt đầu là biên dịch route. Giữ lịch sử lượt thất bại cùng lượt đạt.
+
+Helper môi trường dùng chế độ `check` rồi `start`; không setup/seed/reset.
+Trước kiểm thử, coffee-milk stock 10/reserved 5, americano 10/1. Script HTTP
+giữ thêm 3 ly và BFF giữ thêm 2 ly coffee-milk; đơn/ledger/reservation được
+giữ làm bằng chứng, các phiên thử được logout. Không chạy lặp để đổi tên
+báo cáo hoặc đặt lại kho/version về ban đầu.
+
+Hai lượt HTTP/BFF kiểm chứng hồi quy tạo/đọc đơn V2, giá/DEMO10,
+replay/conflict, quyền và giữ kho trên PostgreSQL. Không chứng minh riêng
+retry exhaustion/zero-total V1 trên DB, lỗi giá/kho ở UI, tranh chấp kho,
+payment, cancel/refund/expiry, trình duyệt hoặc toàn bộ AC/DoD.
+Đây là bằng chứng cho source c290c57 trước patch frontend bên dưới,
+không tự chuyển thành bằng chứng chạy backend/DB sau patch hoặc của A2.
+
+### Nối hai reason giá đã chốt vào frontend
+
+Runtime checkout v2 mặc định nhận PRODUCT_PRICE_CHANGED và
+EXPECTED_TOTAL_MISMATCH theo CONTRACTS mục 3, kèm đối chiếu số tiền và
+cấu hình món với pending đã lưu. Giá dòng đổi ưu tiên PRODUCT_PRICE_CHANGED;
+chỉ lệch tổng mới nhận EXPECTED_TOTAL_MISMATCH. Khi từ chối hợp lệ, chỉ
+kết thúc pending tương ứng, giữ nguyên giỏ và chờ khách xác nhận yêu cầu mới.
+Reason lạ, nhãn không khớp dữ liệu và hai tên kho chưa chốt vẫn giữ UNKNOWN.
+
+Kiểm tra khi chuẩn bị patch: ba file spec frontend rejection/runtime/client
+đạt 92/92 trên Node 24.22.1, storage/network giả lập; không kết nối DB.
+A xác nhận sau khi áp dụng patch trên nền c290c57, trước commit: full frontend
+suite đạt 951/951, không fail/skip; test, typecheck, lint và build đều mã thoát 0.
+Diff vẫn đúng sáu file (168 dòng thêm, 13 dòng xóa trước cập nhật ghi nhận này).
+Đây là kết quả A cung cấp trên máy Windows, không phải lượt chạy full suite
+trong môi trường chuẩn bị patch. HTTP/BFF 15/15 và 18/18 ở trên vẫn gắn với
+source c290c57 trước patch; chưa chạy lại HTTP/BFF hoặc thử UI lỗi giá sau patch.
+Không thay DTO/canonical, backend, schema/migration, profile, timeout hoặc
+cơ chế giữ kho; không dùng kết quả này để kết luận toàn bộ Sprint 3 đạt.

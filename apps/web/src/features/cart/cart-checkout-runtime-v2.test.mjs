@@ -28,7 +28,7 @@ async function fixture({ ownerId = "A", start = true } = {}) {
   let raw = encodeCartEnvelopeV2(initial(ownerId)), held = false, writes = 0, keys = 0, current = null, tail = Promise.resolve();
   let memorySession = session(), serverSession = session();
   const calls = [], created = new Map(), payments = new Map();
-  const mode = { payment: "SUCCEEDED", lostCreate: false, lostPayment: false, lostCancel: false,
+  const mode = { orderError: null, payment: "SUCCEEDED", lostCreate: false, lostPayment: false, lostCancel: false,
     failNextOrderRead: false, minimalCancelReply: false, terminalWithoutAttempt: false, meGate: null, before: null };
   const storage = createCartStorage({ locks: { request(name, options, work) {
     assert.equal(name, CART_LOCK_NAME);
@@ -65,6 +65,7 @@ async function fixture({ ownerId = "A", start = true } = {}) {
       const pending = JSON.parse(raw).pendingRequests.A;
       assert.equal(pending.phase, "SUBMITTING"); assert.equal(pending.requestKey, call.key);
       assert.equal(call.body, JSON.stringify(pending.payload));
+      if (mode.orderError) return Response.json({ error: mode.orderError(pending) }, { status: 409 });
       const replay = created.has(call.key);
       if (!replay) {
         current = { ...fixtureOrders(NOW)[0], id: ID, total: pending.payload.expectedTotal ?? 100000,
@@ -152,6 +153,56 @@ test("lost create response publishes pending; explicit retry keeps the same save
   const posts = f.calls.filter(c => c.url === "/api/orders");
   assert.equal(posts.length, 2); assert.equal(posts[0].key, posts[1].key); assert.equal(posts[0].body, posts[1].body);
   assert.equal(f.created.size, 1); assert.equal(f.keys(), 1); f.stop();
+});
+
+for (const reason of ["PRODUCT_PRICE_CHANGED", "EXPECTED_TOTAL_MISMATCH"]) {
+  test(`default runtime accepts ${reason}, keeps choices and unlocks only after confirmed rejection`, async () => {
+    const f = await fixture(), before = structuredClone(f.saved().cart);
+    f.mode.orderError = pending => {
+      const unitPrice = reason === "PRODUCT_PRICE_CHANGED" ? 55000 : 50000;
+      const currentSubtotal = pending.payload.items.reduce((sum, item) => sum + item.qty * unitPrice, 0);
+      const currentDiscountTotal = reason === "PRODUCT_PRICE_CHANGED" ? 10000 : 5000;
+      return { code: "CHECKOUT_CHANGED", message: "Review the current prices.", details: { reason,
+        currentSubtotal, currentDiscountTotal, currentTotal: currentSubtotal - currentDiscountTotal,
+        items: pending.payload.items.map(item => ({ productId: item.productId, size: item.size,
+          toppingIds: item.toppingIds, currentUnitPrice: unitPrice })) } };
+    };
+    try {
+      const result = await f.create({ promotionCode: "DEMO10" });
+      assert.equal(result.kind, "REJECTED");
+      assert.equal(result.settlement.outcome.kind, "CHECKOUT_CHANGED");
+      assert.equal(result.settlement.outcome.details.reason, reason);
+      assert.deepEqual(f.saved().cart, before);
+      assert.equal(f.saved().pendingRequests.A, undefined);
+      assert.equal(f.controller.getView().canMutate, true);
+      assert.equal(f.keys(), 1); assert.equal(f.created.size, 0);
+      const posts = f.calls.filter(call => call.method === "POST");
+      assert.equal(posts.length, 1);
+      assert.deepEqual(JSON.parse(posts[0].body), result.request.payload);
+      assert.equal(f.calls.some(call => call.url.startsWith("/api/orders/")), false);
+    } finally { f.stop(); }
+  });
+}
+
+test("default runtime keeps unknown price and unagreed stock responses pending without another POST", async () => {
+  for (const reason of ["PRICE_OR_TOTAL_CHANGED", "INSUFFICIENT_STOCK", "INSUFFICIENT_PRODUCT_STOCK"]) {
+    const f = await fixture(), before = structuredClone(f.saved().cart);
+    f.mode.orderError = pending => reason === "PRICE_OR_TOTAL_CHANGED"
+      ? { code: "CHECKOUT_CHANGED", message: "Review.", details: { reason, currentSubtotal: 110000,
+        currentDiscountTotal: 10000, currentTotal: 100000,
+        items: pending.payload.items.map(item => ({ productId: item.productId, size: item.size,
+          toppingIds: item.toppingIds, currentUnitPrice: 55000 })) } }
+      : { code: "OUT_OF_STOCK", message: "Review.", details: { reason,
+        resources: [{ kind: "PRODUCT", id: "cappuccino", requested: 2, available: 1 }] } };
+    try {
+      assert.equal((await f.create({ promotionCode: "DEMO10" })).kind, "UNKNOWN");
+      assert.equal(f.saved().pendingRequests.A.phase, "UNKNOWN");
+      assert.deepEqual(f.saved().cart, before);
+      assert.equal(f.controller.getView().canMutate, false);
+      assert.equal(f.keys(), 1); assert.equal(f.created.size, 0);
+      assert.equal(f.calls.filter(call => call.method === "POST").length, 1);
+    } finally { f.stop(); }
+  }
 });
 
 test("FAILED permits an explicit new payment with a new key on the same order", async () => {

@@ -3,7 +3,7 @@ import test from "node:test";
 import { CartStorageError } from "./cart-envelope.ts";
 import { createEmptyCartEnvelopeV2, encodeCartEnvelopeV2 } from "./cart-envelope-v2.ts";
 import { applyCartCheckoutV2 } from "./cart-checkout-v2.ts";
-import { settleCartRejectionV2 } from "./cart-order-rejection-v2.ts";
+import { ORDER_REJECTION_REASONS_V2, settleCartRejectionV2 } from "./cart-order-rejection-v2.ts";
 import { cartReducer } from "./cart-reducer.ts";
 import { CART_LOCK_NAME, CART_STORAGE_KEY, createCartStorage } from "./cart-storage.ts";
 
@@ -119,6 +119,44 @@ test("checkout price hints match every original configuration despite row/toppin
   assert.equal(result.outcome.details.currentSubtotal, 165000);
   details.items[0].currentUnitPrice = 1;
   assert.equal(result.outcome.details.items[0].currentUnitPrice, 55000);
+});
+
+test("agreed backend price reasons release only the rejected pending without repricing its cart", () => {
+  for (const reason of ["PRODUCT_PRICE_CHANGED", "EXPECTED_TOTAL_MISMATCH"]) {
+    const value = fixture(), before = JSON.stringify(value);
+    const details = checkout(value, { reason });
+    if (reason === "EXPECTED_TOTAL_MISMATCH") {
+      details.items[0].currentUnitPrice = 50000;
+      Object.assign(details, { currentSubtotal: 50000, currentDiscountTotal: 4000, currentTotal: 46000 });
+    }
+    const result = settle(value, reply("CHECKOUT_CHANGED", details), ORDER_REJECTION_REASONS_V2);
+    assert.equal(result.outcome.kind, "CHECKOUT_CHANGED");
+    assert.equal(result.outcome.details.reason, reason);
+    assert.equal(result.requiresConfirmation, true);
+    assert.deepEqual(result.envelope.cart, value.cart);
+    assert.deepEqual(result.envelope.pendingRequests, {});
+    assert.equal(JSON.stringify(value), before);
+  }
+});
+
+test("agreed price reason must match the saved request and line-price precedence", () => {
+  const value = fixture();
+  const totalOnly = checkout(value, { reason: "PRODUCT_PRICE_CHANGED", currentSubtotal: 50000,
+    currentDiscountTotal: 4000, currentTotal: 46000 });
+  totalOnly.items[0].currentUnitPrice = 50000;
+  unknown(value, reply("CHECKOUT_CHANGED", totalOnly), ORDER_REJECTION_REASONS_V2);
+  unknown(value, reply("CHECKOUT_CHANGED", checkout(value, { reason: "EXPECTED_TOTAL_MISMATCH" })), ORDER_REJECTION_REASONS_V2);
+  const unchanged = { ...totalOnly, reason: "EXPECTED_TOTAL_MISMATCH", currentDiscountTotal: 5000, currentTotal: 45000 };
+  unknown(value, reply("CHECKOUT_CHANGED", unchanged), ORDER_REJECTION_REASONS_V2);
+  const compensated = checkout(value, { reason: "PRODUCT_PRICE_CHANGED", currentDiscountTotal: 10000, currentTotal: 45000 });
+  assert.equal(settle(value, reply("CHECKOUT_CHANGED", compensated), ORDER_REJECTION_REASONS_V2).outcome.kind, "CHECKOUT_CHANGED");
+});
+
+test("price agreement does not enable old proposed reasons or unagreed stock reasons", () => {
+  unknown(fixture(), reply("CHECKOUT_CHANGED", checkout(fixture(), { reason: "PRICE_OR_TOTAL_CHANGED" })), ORDER_REJECTION_REASONS_V2);
+  for (const reason of ["INSUFFICIENT_STOCK", "INSUFFICIENT_PRODUCT_STOCK"]) {
+    unknown(fixture(), reply("OUT_OF_STOCK", stock({ reason })), ORDER_REJECTION_REASONS_V2);
+  }
 });
 
 test("checkout subtotal, discount, positive total and all line arithmetic must agree", () => {

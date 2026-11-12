@@ -8,8 +8,8 @@ import type { OrderReply, OrderReplyOutcome } from "./cart-order-response";
 
 /**
  * Pin these lists from the agreed C/D response contract, never from a response.
- * The baseline specifies reason:string for CHECKOUT_CHANGED/OUT_OF_STOCK but
- * does not enumerate their reasons. Empty defaults therefore keep them UNKNOWN.
+ * CONTRACTS section 3 pins the two CHECKOUT_CHANGED reasons from C (25ff9a8).
+ * OUT_OF_STOCK still awaits agreement; the assembled runtime keeps it UNKNOWN.
  * Promotion reasons below are already enumerated by CONTRACTS section 3.
  */
 export type OrderRejectionReasonsV2 = {
@@ -17,6 +17,10 @@ export type OrderRejectionReasonsV2 = {
   outOfStock: readonly string[];
 };
 const NO_REASONS: OrderRejectionReasonsV2 = { checkoutChanged: [], outOfStock: [] };
+export const ORDER_REJECTION_REASONS_V2: OrderRejectionReasonsV2 = Object.freeze({
+  checkoutChanged: Object.freeze(["PRODUCT_PRICE_CHANGED", "EXPECTED_TOTAL_MISMATCH"]),
+  outOfStock: Object.freeze([] as string[]),
+});
 export type CheckoutChangedDetails = {
   reason: string; currentSubtotal: number; currentDiscountTotal: number; currentTotal: number;
   items: readonly { productId: string; size: "S" | "M" | "L"; toppingIds: readonly string[]; currentUnitPrice: number }[];
@@ -49,7 +53,8 @@ function checkoutDetails(raw: unknown, pending: PendingCartRequestV2): CheckoutC
     || !Array.isArray(raw.items) || raw.items.length !== pending.payload.items.length) return null;
   const requested = new Map(pending.payload.items.map(item => [getCartLineKey(item), item]));
   const seen = new Set<string>(); const items: CheckoutChangedDetails["items"][number][] = [];
-  let subtotal = 0, changed = "schemaVersion" in pending.payload && pending.payload.expectedTotal !== raw.currentTotal;
+  let subtotal = 0, priceChanged = false;
+  const totalChanged = "schemaVersion" in pending.payload && pending.payload.expectedTotal !== raw.currentTotal;
   for (const item of raw.items) {
     if (!record(item) || !exact(item, ["productId", "size", "toppingIds", "currentUnitPrice"])
       || !text(item.productId) || !["S", "M", "L"].includes(item.size as string)
@@ -60,10 +65,12 @@ function checkoutDetails(raw: unknown, pending: PendingCartRequestV2): CheckoutC
     if (!source || seen.has(key)) return null;
     seen.add(key); subtotal += source.qty * line.currentUnitPrice;
     if (!money(subtotal)) return null;
-    changed ||= source.expectedUnitPrice !== line.currentUnitPrice;
+    priceChanged ||= source.expectedUnitPrice !== line.currentUnitPrice;
     items.push(line);
   }
-  return subtotal === raw.currentSubtotal && changed ? { reason: raw.reason,
+  if (raw.reason === "PRODUCT_PRICE_CHANGED" && !priceChanged) return null;
+  if (raw.reason === "EXPECTED_TOTAL_MISMATCH" && (priceChanged || !totalChanged)) return null;
+  return subtotal === raw.currentSubtotal && (priceChanged || totalChanged) ? { reason: raw.reason,
     currentSubtotal: subtotal, currentDiscountTotal: raw.currentDiscountTotal, currentTotal: raw.currentTotal, items } : null;
 }
 

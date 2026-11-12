@@ -102,7 +102,9 @@ details V2 tối thiểu có {reason:string}; CHECKOUT_CHANGED thêm {currentSub
 
 Nếu đồng thời có thay đổi giá dòng và lệch tổng, ưu tiên `PRODUCT_PRICE_CHANGED`. OUT_OF_STOCK có {resources:[{kind:'PRODUCT',id,requested,available}]} với số thực đã xác nhận; không gửi SQL/constraint nội bộ. PROMOTION_NOT_APPLICABLE reason thuộc NOT_FOUND|INACTIVE|NOT_STARTED|EXPIRED|MINIMUM_NOT_MET. Không đưa một reason lạ thành lỗi đã xác nhận trong classifier. Response lỗi sai schema vẫn UNKNOWN khi đã gửi mutation.
 
-Điểm tích hợp chưa chốt: danh sách giá trị `reason` của CHECKOUT_CHANGED và OUT_OF_STOCK chưa được liệt kê ở baseline này. C/D cần xác định và ghi danh sách tại đây để A đối chiếu trước khi bật luồng v2 trên UI. Helper frontend mặc định giữ UNKNOWN cho hai lỗi này; chỉ kết thúc pending khi cấu trúc/số liệu khớp yêu cầu đã gửi và reason thuộc danh sách cố định đã thống nhất. Không lấy chính reason trong response để tự bổ sung vào danh sách; tên reason trong fixture unit test không phải hợp đồng backend đã được nhóm chốt.
+Đồng bộ ngày 12/11/2026: hai reason CHECKOUT_CHANGED ở trên đã được C bổ sung tại `25ff9a8` (PR #43), nhận vào bản tích hợp `c290c57`. Runtime checkout v2 dùng danh sách cố định này; helper settlement độc lập vẫn mặc định danh sách rỗng nếu caller chưa truyền cấu hình. Chỉ kết thúc pending khi cấu trúc/số liệu khớp yêu cầu đã gửi: PRODUCT_PRICE_CHANGED phải có ít nhất một giá dòng đổi; EXPECTED_TOTAL_MISMATCH chỉ hợp lệ khi mọi giá dòng khớp nhưng tổng khác expectedTotal. Cả hai giữ nguyên giỏ và dữ liệu yêu cầu cũ; khách xem lại rồi xác nhận mới, không tự gửi POST hoặc thay key/body.
+
+OUT_OF_STOCK vẫn chờ D/E/A chốt tên reason. Backend tại `c290c57` trả `INSUFFICIENT_STOCK`, trong khi mục 7.2 còn đề xuất `INSUFFICIENT_PRODUCT_STOCK`; chưa tự coi tên nào là đã được cả nhóm duyệt. Runtime giữ danh sách kho rỗng và UNKNOWN cho nhánh này. Không lấy chính reason trong response để tự bổ sung vào danh sách; tên reason trong fixture unit test không phải hợp đồng backend đã được nhóm chốt.
 
 V1 PRICE_CHANGED giữ đúng details {items,currentTotal}; mỗi item có productId,size,toppingIds,qty,expectedUnitPrice,currentUnitPrice,currentLineTotal. Không thêm field phá exact-key classifier nền hoặc đổi giá snapshot của pending. FieldErrors của validation vẫn theo index request gốc; replay lỗi đảo dòng phải remap như S2.
 
@@ -241,16 +243,15 @@ Ba coordinator dùng chung type `CheckoutOrderReaderV2` export từ `apps/web/sr
 - Adapter kiểm tra ID và đầy đủ OrderDetail qua parser B trước projection, chuyển AbortSignal cho fetch và không trả kết quả sau hủy. Trong cùng checkpoint, bỏ version thấp hơn đã đọc (cùng version bỏ serverTime cũ hơn); storage/coordinator vẫn kiểm tra version đã lưu. Adapter không ghi storage, tạo key, gọi POST, suy paymentId từ latestPayment hoặc tự refresh auth.
 - Trước bật UI v2 cần test UI A + cookie B không nhận dữ liệu B; response A về sau login B hoặc login lại A bị bỏ; GET version cũ không ghi đè; ID chứa `%` chỉ encode một lần. UI dựng bằng fixture không chứng minh các điều kiện HTTP này.
 
-### 7.2 Đề xuất chờ A/C/D đối chiếu
+### 7.2 Các điểm còn chờ A/C/D/E đối chiếu
 
-Phần này bổ sung phương án cho các điểm baseline còn mở, **chưa là hợp đồng đã chốt**. Runtime hiện chưa dùng các reason/nhánh kết thúc recovery dưới đây; không sửa enum hoặc tự mở fallback theo response. Khi có thống nhất, chuyển nội dung đã chốt vào mục 3/7, ghi PR/SHA xác nhận và thêm fixture/test tương ứng trước kích hoạt.
+Phần này bổ sung phương án cho các điểm baseline còn mở, **chưa là hợp đồng đã chốt**. Đề xuất CHECKOUT_CHANGED dùng `PRICE_OR_TOTAL_CHANGED` trước đây đã được thay bằng hai reason cụ thể của C tại mục 3; không nhận tên cũ trong runtime. Runtime chưa dùng reason kho/nhánh kết thúc payment recovery dưới đây. Khi có thống nhất, chuyển nội dung đã chốt vào mục 3/7, ghi PR/SHA xác nhận và thêm fixture/test tương ứng trước kích hoạt.
 
 | Nhánh | Reason đề xuất | Người đối chiếu |
 |---|---|---|
-| 409 CHECKOUT_CHANGED | `PRICE_OR_TOTAL_CHANGED`, dùng cho giá dòng hoặc tổng chính thức không khớp expected*; giữ nguyên details đã thiết kế | C pricing, D workflow, A classifier |
 | 409 OUT_OF_STOCK | `INSUFFICIENT_PRODUCT_STOCK`; resources chỉ gồm Product thiếu, requested là tổng qty qua mọi cấu hình | E stock, D workflow, A classifier |
 
-Hai reason trên không đổi HTTP status, thứ tự validation, canonical/hash hoặc request body. Frontend vẫn kiểm toàn bộ details với saved request trước khi kết thúc pending; không lấy số liệu server để sửa body/key cũ. Lỗi chưa thống nhất hoặc dữ liệu sai giữ UNKNOWN.
+Việc chốt reason kho không đổi HTTP status, thứ tự validation, canonical/hash hoặc request body. Frontend vẫn kiểm toàn bộ details với saved request trước khi kết thúc pending; không lấy số liệu server để sửa body/key cũ. Lỗi chưa thống nhất hoặc dữ liệu sai giữ UNKNOWN.
 
 Đề xuất nhánh payment không có attempt: sau khi lấy đúng khóa user/key, tra replay và khóa/đối chiếu Order bằng snapshot đủ mới, D chỉ bổ sung marker dưới đây vào 409 ORDER_NOT_PAYABLE khi đã chứng minh không có attempt của chính user/key và Order thuộc PAID/PREPARING/READY/COMPLETED/CANCELLED:
 

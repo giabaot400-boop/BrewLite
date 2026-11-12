@@ -13,6 +13,7 @@ import type { AuthSession } from "../auth/auth-session";
 import type { CheckoutUiEnvironment } from "./cart-checkout-ui";
 import type { CartCurrentOrder } from "./cart-order-binding-v2";
 import type { OrderRejectionReasonsV2 } from "./cart-order-rejection-v2";
+import { ORDER_REJECTION_REASONS_V2 } from "./cart-order-rejection-v2.ts";
 import type { createCartStorage } from "./cart-storage";
 import type { createCartControllerV2 } from "./cart-controller-v2";
 
@@ -48,7 +49,8 @@ export function createCartCheckoutRuntimeV2(environment: Environment): CheckoutU
   const shared = { auth, storage, sessionClient, readOrder };
   const http = { fetch: fetchImpl, now: environment.now };
   const checkout = createCartCheckoutClientV2({ ...shared, transport: createCartOrderTransport(http),
-    rejectionReasons: environment.rejectionReasons, now: environment.now, randomUUID: environment.randomUUID });
+    rejectionReasons: environment.rejectionReasons === undefined ? ORDER_REJECTION_REASONS_V2 : environment.rejectionReasons,
+    now: environment.now, randomUUID: environment.randomUUID });
   const transport = createCartMutationTransport(http);
   const payment = createCartPaymentClientV2({ ...shared, transport, now: environment.now, randomUUID: environment.randomUUID });
   const cancel = createCartCancelClientV2({ ...shared, transport, parseOrderDetail: currentOrder });
