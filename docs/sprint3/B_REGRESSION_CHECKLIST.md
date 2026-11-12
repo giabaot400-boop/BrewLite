@@ -10,15 +10,23 @@ Chạy từ thư mục gốc, Node ≥ 24.15.0 < 25 (theo `engines` và `.nvmrc`
 
 | # | Lệnh | Phạm vi | Ghi chú | Trạng thái | SHA | Log |
 |---|---|---|---|---|---|---|
-| 1 | `npm ci` | cả repo | Cài đúng lockfile | CHƯA CHẠY |  |  |
-| 2 | `npm run lint` | frontend | | CHƯA CHẠY |  |  |
-| 3 | `npm run typecheck` | frontend + backend | Backend cần `npm run db:generate` trước | CHƯA CHẠY |  |  |
-| 4 | `npm test --workspace apps/web` | frontend | Hiện chạy `node --test` trên `src/**/*.test.mjs` | CHƯA CHẠY |  |  |
-| 5 | `npm run build` | frontend + backend | | CHƯA CHẠY |  |  |
+| 1 | `npm ci` | cả repo | Cài đúng lockfile | Đã chạy `npm ci --ignore-scripts` trên Node 22.22 (khác `engines` ≥ 24.15): thành công. Chưa chạy `npm ci` đầy đủ trên Node 24 | `ff9bb73` | Tóm tắt ở mục 1.1; chưa lưu file log |
+| 2 | `npm run lint` | frontend | | PASS (Node 22.22) | `ff9bb73` | Mục 1.1 |
+| 3 | `npm run typecheck` | frontend + backend | Backend cần `npm run db:generate` trước | Frontend PASS (Node 22.22). **Backend CHƯA CHẠY**: môi trường review của B không sinh được Prisma client | `ff9bb73` | Mục 1.1 |
+| 4 | `npm test --workspace apps/web` | frontend | Hiện chạy `node --test` trên `src/**/*.test.mjs` | PASS: 945/945 test (Node 22.22) | `ff9bb73` | Mục 1.1 |
+| 5 | `npm run build` | frontend + backend | | Frontend `next build` PASS (Node 22.22). **Backend CHƯA CHẠY** (cần `prisma generate`) | `ff9bb73` | Mục 1.1 |
 | 6 | `npm run db:validate` | backend | Cần `DATABASE_URL` hợp lệ | CHƯA CHẠY |  |  |
-| 7 | Backend integration (D/E) | backend | **Chưa có script**: D/E phải thêm harness trước khi ghi lệnh vào kết quả | CHƯA CÓ |  |  |
+| 7 | Backend integration (D/E) | backend | Harness do D/E cung cấp; chỉ ghi lệnh đã tồn tại | CHƯA CHẠY. Bản #53 có các script `apps/api/prisma/check-*.ts` (PostgreSQL), chưa có lệnh npm và chưa chạy trong môi trường của B | `ff9bb73` |  |
 
 Không ghi lệnh nào chưa tồn tại trong `package.json` như đã chạy.
+
+### 1.1 Kết quả B ghi ngày 12/11/2026 (SHA `ff9bb73`, PR #53)
+
+- Môi trường: Node 22.22 trong sandbox của B (repo yêu cầu Node ≥ 24.15 < 25), `npm ci --ignore-scripts`. Kết quả chưa thay phần kiểm chứng trên Node 24.
+- Frontend: `npm run lint` sạch; `tsc --noEmit` sạch; `npm test --workspace apps/web` 945/945 pass; `next build` thành công. `next start` (production): `/dev/checkout` trả 404, `/api/orders/me` khi chưa đăng nhập trả 401, `POST /api/payments` thiếu điều kiện hợp lệ bị chặn 403.
+- Backend: `tsx --test "src/**/*.spec.ts"` 50/54 pass. 4 spec lỗi `ERR_MODULE_NOT_FOUND` vì thiếu `src/generated/prisma/client.js` (chưa sinh Prisma client), chưa phải kết luận về logic. Typecheck/build backend và các script PostgreSQL chưa chạy.
+- Migration: #53 chỉ thêm `20261109010714_sprint3_payment_stock`; không sửa migration Sprint 2.
+- Chưa có log lưu thành file; số liệu lấy từ lần chạy của B và cần lặp lại trên CI hoặc máy có Prisma/PostgreSQL trước khi ghi PASS chính thức.
 
 ## 2. Hồi quy Sprint 1
 

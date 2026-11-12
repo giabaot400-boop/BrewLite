@@ -19,8 +19,8 @@ Trạng thái ghi theo dữ liệu B có tại 06/11/2026. Các ticket của lea
 |---|---|---|---|---|---|---|
 | S3-A-01 | A | B | 5–7 | chưa cập nhật |  |  |
 | S3-A-02 | A | D | 4–6 | chưa cập nhật |  | Cần DTO D, read API C |
-| S3-B-01 | B | A | 5–7 | Code xong trên máy B, **chờ mở PR** (chưa có reviewer) |  | Dùng fixture; chưa thử với backend C thật (DEP-05/06) |
-| S3-B-02 | B | D | 3–4 | DOING: bộ tài liệu board/AC/hồi quy/Review-Retro đã soạn, **chờ evidence từng lead** |  | Review/Retro chỉ điền sau khi có sự việc thật |
+| S3-B-01 | B | A | 5–7 | PR #32 đã merge vào main (merge `5a0fde2`); A đã approve tại `ee15c75` sau khi B sửa 4 điểm review. **Chưa kiểm với backend tích hợp** | PR #32 / `5a0fde2` | Dùng fixture; cần thử trên #53 khi backend đủ payment/cancel (DEP-05/06) |
+| S3-B-02 | B | D | 3–4 | DOING: tài liệu đã cập nhật 12/11 theo kết quả review #49/#53; **chờ evidence từng lead** |  | Review/Retro chỉ điền sau khi có sự việc thật |
 | S3-C-01 | C | D | 5–7 | chưa cập nhật |  | Cần trường E, interface D |
 | S3-C-02 | C | E | 3–4 | chưa cập nhật |  | Cần workflow D, schema E |
 | S3-D-01 | D | E | 6–8 | chưa cập nhật |  | Đường găng |
@@ -44,6 +44,12 @@ Thêm một khối mỗi ngày, mới nhất ở trên. Không sửa khối cũ;
 - D: ...
 - E: ...
 ```
+
+### 12/11/2026
+
+- B: đã làm: review PR #49 (sơ đồ Sprint 2): đạt, 8 SVG khớp nguồn PlantUML, 0 liên kết hỏng; review PR #53 tại `ff9bb73`: frontend lint/typecheck/build sạch, 945/945 test web, API 50/54 spec (4 spec cần Prisma client); backend chưa có `POST /payments` và hủy đơn; cập nhật checklist hồi quy, ghi chú AC, board, Review/Retro | tiếp theo: kiểm UI trên backend tích hợp khi D bàn giao payment/cancel; chạy lại trên Node 24/CI | blocked bởi: backend payment/cancel (D), Prisma/PostgreSQL chưa chạy trong môi trường của B.
+- A (thông báo nhóm 12/11): A2 PR #2 (CI) và #4 (UML) đã merge.
+- C, D, E: chưa cập nhật trong repository.
 
 ### 07/11/2026
 
@@ -82,6 +88,8 @@ Chỉ điền số thật từng ngày; ô chưa có số để trống, **khôn
 | 07/11 | _Đã xử lý:_ PR #30 (`apps/web`, `apps/api`) đã merge vào main; nhánh Sprint 3 cần cập nhật đường dẫn theo README | A2-REPO-CI | Mỗi lead cập nhật nhánh của mình |
 | 07/11 | Task 3.1/3.2 (mốc 06/11) chưa đủ tạo phẩm trên main: kiến trúc tổng thể/ADR (D) và deployment (E) chưa thấy; PR #31 mới có phần BFF/PWA của A | A2-ARCH (D), A2-DEPLOY-DESIGN (E) | D, E đặt mốc mới và ghi vào board trong 07/11 |
 | 06/11 | Giờ chốt nộp trên LMS chưa xác minh | PO | Kiểm tra trước 12/11 |
+| 12/11 | Bản tích hợp #53 chưa có `POST /payments`, hủy đơn, hết hạn; các AC S3-PAY/S3-ORD chưa kiểm được dù BFF web đã có route | D (backend), E (kiểm thử PostgreSQL) | D, E đặt giờ bàn giao PR/SHA |
+| 12/11 | Typecheck/build backend và script PostgreSQL chưa chạy trên SHA #53 trong môi trường của B | E, B | Chạy trên CI hoặc máy có Prisma/PostgreSQL |
 
 Nếu cuối 08/11 chưa có E2E đầu tiên: A/B ghi rủi ro với ticket/owner/ngày mới trong ngày đó, cập nhật capacity và giảm việc ngoài phạm vi. Không bỏ Task 10 để đạt ngày.
 

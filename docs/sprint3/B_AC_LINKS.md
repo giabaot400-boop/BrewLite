@@ -11,6 +11,8 @@ Quy tắc ghi (TEST_MATRIX mục 1, TEAM_PLAN mục 5–6):
 - Không đổi hàng loạt dựa trên một demo đường thành công. Chạy lại sau sửa thì thêm dòng mới (SHA mới), giữ dòng `FAIL` cũ.
 - Cột `Task đề` là số Task 8/9/10 của đề mà AC thuộc về (theo TEST_MATRIX).
 
+**Cập nhật 12/11/2026 (B):** chưa đổi trạng thái AC nào. Bản tích hợp #53 (`ff9bb73`) chỉ có `POST /orders`, `GET /orders/me`, `GET /orders/:id`; chưa có `POST /payments` và hủy đơn, nên các AC thanh toán/hủy/hết hạn chưa kiểm được. Phần tạo/đọc đơn có test đơn vị (web 945/945; API 50/54, 4 spec cần Prisma client), nhưng AC chỉ chuyển `PASS` khi có SHA, lệnh, expected/actual và log theo quy tắc trên.
+
 | AC | Nội dung | Lead | Reviewer | Ticket (gợi ý) | Task đề | Trạng thái | SHA | Lệnh / log | Ghi chú lỗi còn lại |
 |---|---|---|---|---|---|---|---|---|---|
 | S3-PAY-01 | Thanh toán WALLET/CARD thành công, amount=Order.total | A | D | S3-A-02 | 8 | CHƯA CHẠY |  |  |  |

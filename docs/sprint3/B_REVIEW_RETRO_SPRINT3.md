@@ -44,9 +44,9 @@ Chỉ ghi điều **đã xảy ra** trong Sprint 3 và việc cải thiện có 
 
 | Nhóm | Ghi nhận (sự việc, ngày, bằng chứng) |
 |---|---|
-| Làm tốt, nên giữ | |
-| Chưa tốt | |
-| Việc cải thiện | _việc / owner / hạn / ticket_ |
+| Làm tốt, nên giữ | B review có kiểm chứng (lint/test/build, merge thử với main) cho các PR checkout/docs; PR #32 sửa 4 điểm review của A ngày 08/11 và A approve tại `ee15c75`; PR #49 và #53 được review 12/11 |
+| Chưa tốt | Tại 12/11, bản tích hợp #53 chưa có `POST /payments`, hủy đơn, hết hạn; board trong repository chưa có cập nhật của A, C, D, E; route tạo đơn V1/V2 phải thống nhất lại (commit `4e1d3ce`) mới hết lệch contract |
+| Việc cải thiện | Bàn giao payment/cancel/expiry kèm PR/SHA và lệnh test / D / chưa có xác nhận giờ / S3-D-01, S3-D-02; chạy lại PostgreSQL trên SHA mới / E / chưa có xác nhận giờ / S3-E-01; kiểm UI trên backend tích hợp / B / sau khi D bàn giao / S3-B-01 |
 
 ## 3. Backlog thật (ứng viên đã biết tại 06/11/2026)
 
@@ -62,3 +62,5 @@ và main `a1a0e4a`. Mỗi dòng cần PO/nhóm xác nhận trước khi đưa v�
 | BL-05 | Trình đọc màn hình thật và Safari/Firefox chưa kiểm tra cho UI dùng chung và UI đơn hàng | `UI_SHARED_COMPONENTS.md`, `SPRINT3_B_UI.md` | B | |
 | BL-06 | Nút Thanh toán/Hủy trên trang chi tiết đơn (điểm gắn `renderActions`) và điều hướng `?placed=1` sau tạo đơn do S3-A-02 | `SPRINT3_B_UI.md` | A | |
 | BL-07 | Cập nhật board Sprint 2 (S2-03 Done) và hồ sơ Review/Retro Sprint 2 khớp `SPRINT2_CLOSEOUT.md` | Nhắc từ trao đổi nhóm | B | |
+| BL-08 | Hoàn thiện `POST /payments`, hủy đơn và hết hạn trên bản tích hợp A1 (#53), rồi chạy lại PostgreSQL | Review #53 ngày 12/11 | D, E | |
+| BL-09 | Typecheck/build backend cần Prisma client; môi trường review của B chưa chạy được, cần CI hoặc máy có Prisma | Review #53 ngày 12/11 | B, E | |
