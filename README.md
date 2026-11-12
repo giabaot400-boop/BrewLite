@@ -6,6 +6,18 @@ Assignment 2 có [repo và bộ source riêng](https://github.com/giabaot400-boo
 Ứng dụng BrewLite sử dụng Next.js, TypeScript, Tailwind CSS và backend
 NestJS, Prisma, PostgreSQL.
 
+## Bản tích hợp Sprint 3
+
+PR [#53](https://github.com/giabaot400-boop/BrewLite/pull/53) bổ sung checkout,
+payment/cancel/expiry, điểm thưởng và kiểm soát kho. Bản được B review là
+`a08152c`; source ứng dụng đã kiểm trên máy A là `3959f40`. Các phần mô tả
+Sprint 1 bên dưới giữ bối cảnh tại mốc đó, không thay trạng thái tích hợp mới.
+
+- Chạy ba service: [hướng dẫn Compose](docs/SPRINT3_COMPOSE.md).
+- Phiên bản/bằng chứng và giới hạn: [đối chiếu A1](docs/sprint3/A1_ACCEPTANCE_REVIEW.md).
+- Checkout v2 mặc định tắt. Profile đã chuyển storage sang v2 cần tiếp tục dùng
+  writer v2; không tắt cờ để quay về writer v1 hoặc xóa giỏ để hạ cấp.
+
 Sprint 1 triển khai menu, chi tiết sản phẩm, chọn size/topping và tính giá
 xem trước theo hồ sơ phân tích và thiết kế v1.1.
 
@@ -235,11 +247,22 @@ master use case, activity Sprint 1, ERD tổng thể và logical architecture. T
 
 ## Kiểm tra
 
+Sau `npm ci`, chạy từ thư mục gốc repo:
+
 ```sh
 npm run lint
 npm run typecheck
+npm test --workspace apps/api
+npm test --workspace apps/web
 npm run build
 ```
+
+Test API có bước `pretest` gọi `db:generate` để tự sinh Prisma Client từ schema
+đã commit. Không cần lưu client đã sinh vào Git hoặc chạy build trước chỉ để
+unit test nhận được client. Lệnh này không migrate/seed/reset database.
+Nó chạy các file `src/**/*.spec.ts` và `src/**/*.test.ts`; PostgreSQL workflow
+và HTTP/BFF là các lệnh riêng, có yêu cầu môi trường/profile trong
+[hồ sơ workflow](docs/sprint3/A1_WORKFLOW_HANDOVER.md).
 
 Các lệnh trên không thay cho kiểm thử kết nối PostgreSQL và migration/seed thực tế.
 Xem [checklist và đối chiếu 24 AC](docs/sprint1/SPRINT1_CHECKLIST.md),

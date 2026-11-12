@@ -1,5 +1,15 @@
 # BrewLite Sprint 3 gói triển khai rút gọn
 
+## Xử lý review bản a08152c — 12/11/2026
+
+B đã review ZIP cả nhánh tại `a08152c`, tự kiểm web typecheck/lint và 960/960
+test; backend/PG/build/Compose/browser/hiệu năng dựa vào hồ sơ A. Review ở trạng
+thái `COMMENTED`, chưa thay approval mới. Đợt sửa tiếp theo bổ sung `pretest`
+API, chỉ rõ mốc QA/review, hướng dẫn chuyển tiếp giỏ v2 và dời một báo cáo cũ
+vào [thư mục bằng chứng](testing/orders-closeout-2026-11-10/README.md).
+Không đổi contract nghiệp vụ hoặc gán kết quả cũ thành test trên commit mới.
+Xem [đối chiếu A1](A1_ACCEPTANCE_REVIEW.md) để theo dõi phần còn mở.
+
 ## Mốc QA hiện hành — 12/11/2026
 
 Source `3959f40` đã qua frontend 960/960 và lint/typecheck/build trên máy A; image frontend mới chạy legacy/session 9/9 nhóm, gồm browser bổ sung 7 nhóm và hồi quy 9 bước. Boundary d42deb5 trước đó đạt 7/7 và 10 vòng tranh ly cuối. Cleanup giữ tồn có trước, ba service healthy. Xem [đối chiếu 27 AC và giới hạn](A1_ACCEPTANCE_REVIEW.md), [bằng chứng gốc](testing/a1-final-qa-2026-11-12/README.md). Còn chốt PR review, Review/Retro và gói bàn giao; các mốc cũ bên dưới giữ theo SHA/phạm vi lịch sử.

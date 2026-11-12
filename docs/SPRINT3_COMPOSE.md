@@ -108,7 +108,18 @@ $env:CHECKOUT_V2_ENABLED = "1"
 docker compose --env-file .env.compose up -d --build --wait backend frontend
 ```
 
-`CHECKOUT_V2_ENABLED` mặc định là `0`. Profile đã migrate sang v2 phải tiếp tục dùng writer v2 theo CONTRACTS mục 7. Backend khởi động sẽ chạy catch-up các đơn policy2 đã hết hạn và trả kho đúng workflow, giữ lịch sử. Không chạy lại seed/INIT_DEMO_STOCK trên database đã sử dụng.
+`CHECKOUT_V2_ENABLED` mặc định là `0`. Sau khi profile đã migrate sang v2,
+giữ cờ bằng `1` để tiếp tục dùng writer v2 theo CONTRACTS mục 7. Đây là chuyển
+tiếp một chiều: tắt cờ không chuyển dữ liệu v2 về v1. Writer v1 gặp envelope v2
+sẽ dừng với `UNSUPPORTED_VERSION`, không ghi đè bằng giỏ rỗng.
+
+Nếu cần tạm dừng rollout, giữ nguyên bytes storage, pending và payment recovery;
+tạm dừng thao tác ghi để kiểm tra. Không xóa storage, đổi key hoặc quay lại
+writer v1 để né lỗi. Trước khi bật v2, đóng/reload các tab writer v1 của cùng
+profile. Đây là hướng dẫn vận hành của cơ chế đã có, không thêm cách hạ cấp.
+
+Backend khởi động sẽ chạy catch-up các đơn policy2 đã hết hạn và trả kho đúng
+workflow, giữ lịch sử. Không chạy lại seed/INIT_DEMO_STOCK trên database đã sử dụng.
 
 Mock payment mặc định trả SUCCEEDED. Để kiểm tra nhánh FAILED qua backend, đổi cấu hình và tạo lại service: Replay payment key đã lưu không thay theo outcome mới:
 

@@ -10,6 +10,25 @@ Bản sửa 3959f40 nối migration storage trước khi controller v2 hoạt đ
 
 ## Các mốc và nguồn bằng chứng
 
+Mốc hồ sơ được B review là `a08152c2358a800cea0c45bef05668c31e15b208`,
+phát triển tiếp từ source ứng dụng `3959f40`. Commit `a08152c` chỉ bổ sung tài
+liệu/bằng chứng; không là lượt chạy lại các test bên dưới. Báo cáo gốc giữ
+SHA/image, thời điểm và môi trường của từng lượt. Phần backend kế thừa source
+`88f5f35`; boundary gắn `d42deb5`; phiên bản frontend sau sửa rollout gắn
+`3959f40`. Kết quả hiệu năng vẫn thuộc image cũ tại `88f5f35`.
+
+[Review mới của B](https://github.com/giabaot400-boop/BrewLite/pull/53#pullrequestreview-5878454053)
+ngày 12/11/2026, trạng thái `COMMENTED`, gắn đúng `a08152c`: đọc ZIP cả nhánh,
+tự chạy web typecheck/lint và 960/960 test; chưa so diff với approval cũ.
+Backend/PG/build/Docker/browser/hiệu năng trong review này dựa vào hồ sơ A,
+không được ghi thành các lượt B đã chạy. Đây là review mới có phạm vi rõ,
+chưa phải approval mới hoặc xác nhận đã merge/phát hành.
+
+Đợt xử lý góp ý này thêm `pretest` sinh Prisma Client, làm rõ hướng dẫn và
+chuyển vị trí một JSON lịch sử; không sửa code chạy nghiệp vụ, schema DB hoặc
+contract. Kiểm tra riêng cho đợt sửa được ghi khi có kết quả thực; không đổi
+SHA trong các bằng chứng cũ thành commit mới.
+
 | Mã | Bản kiểm và kết quả thực |
 |---|---|
 | V | Backend 181 unit/controller/HTTP mock trên workflow source 88f5f35; có 49 cặp trạng thái, canonical, create V1/V2/retry/PR28 invariant. Log trong [workflow](testing/a1-workflow-2026-11-12/backend-unit.txt). |
@@ -77,7 +96,8 @@ NFR N được đo trước sửa provider và trước image frontend mới. So
 
 ## Điều kiện đóng A1 còn lại
 
-- PR #53 đã có head 3959f40 nhưng mô tả vẫn thuộc nền tạo/đọc đơn. Cần cập nhật mô tả và review diff workflow/rollout mới. Approval Khai-Dang tại ff9bb73 chỉ cho bản trước workflow, không thay review này.
+- PR #53 đã cập nhật mô tả workflow/rollout và có review mới trên `a08152c` như trên. Cần xử lý/trả lời góp ý, xác nhận review bản sau sửa rồi chốt merge/phát hành. Approval Khai-Dang tại `ff9bb73` thuộc bản trước workflow, không thay approval mới.
 - [Review/Retro/backlog](B_REVIEW_RETRO_SPRINT3.md) ghi sự việc A thực hiện và việc cần làm; chưa xác nhận buổi nhóm, feedback giảng viên hoặc người khác approve.
-- Lưu log/JSON browser gốc, commit/push hồ sơ QA; đối chiếu [board](B_BOARD_SPRINT3.md), hoàn thiện README/demo và gói source bàn giao; kiểm giờ nộp LMS theo thông tin thật.
+- Hồ sơ QA gốc đã commit/push tại `a08152c`; gói candidate từ đúng SHA này đã tạo trên máy A, gồm 422 file tracked, kiểm ZIP đạt/mã 0. Sau khi chốt bản mới, cập nhật gói và ghi SHA thực tế; candidate không thay bản phát hành. Đối chiếu [board](B_BOARD_SPRINT3.md), thực hiện Review/Retro/demo và kiểm giờ nộp LMS theo thông tin thật.
+- CI được theo dõi ở phạm vi A2 Task 4.4; đợt sửa này không thêm CI vào A1. B cho phép tách CI sang PR sau nếu cần merge sớm. Trả lời rõ lựa chọn này trên PR, không ghi pipeline đã chạy hoặc góp ý đã được B chấp thuận khi chưa có xác nhận.
 - Không mở thêm tính năng ngoài phạm vi để đóng các mục hồ sơ này. Phần đã code/test và phần cần review/nghiệm thu được theo dõi riêng, không xóa lịch sử FAIL hoặc lập burndown giả.
