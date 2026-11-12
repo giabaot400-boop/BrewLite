@@ -1,5 +1,10 @@
 # BrewLite Sprint 3 gói triển khai rút gọn
 
+## Mốc QA hiện hành — 12/11/2026
+
+Source `3959f40` đã qua frontend 960/960 và lint/typecheck/build trên máy A; image frontend mới chạy legacy/session 9/9 nhóm, gồm browser bổ sung 7 nhóm và hồi quy 9 bước. Boundary d42deb5 trước đó đạt 7/7 và 10 vòng tranh ly cuối. Cleanup giữ tồn có trước, ba service healthy. Xem [đối chiếu 27 AC và giới hạn](A1_ACCEPTANCE_REVIEW.md), [bằng chứng gốc](testing/a1-final-qa-2026-11-12/README.md). Còn chốt PR review, Review/Retro và gói bàn giao; các mốc cũ bên dưới giữ theo SHA/phạm vi lịch sử.
+
+
 ## Hiệu đính kích hoạt giỏ v2 — 12/11/2026
 
 Rà browser trên nền `d42deb5` phát hiện provider được bật nhưng chưa gọi migration, khiến profile có envelope v1 báo không hỗ trợ. Bản sửa nối `migrateToV2()` trước controller, giữ giỏ/pending/key/body, có lỗi và thử lại; controller riêng vẫn không tự migrate. Môi trường chuẩn bị đã đạt frontend 960/960, lint/typecheck/build, 7 nhóm browser bổ sung, migration legacy riêng và 9 bước browser hồi quy. Kết quả Windows sau patch được ghi khi có lượt chạy thật. Xem [phạm vi bản sửa và cách kiểm tra](A1_CART_ROLLOUT_FIX.md).

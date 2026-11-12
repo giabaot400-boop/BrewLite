@@ -1,5 +1,10 @@
 # Sprint 3 — tích hợp workflow đơn hàng và thanh toán
 
+## Kết quả tích hợp mới nhất
+
+Source 3959f40 đã được A commit/push và build lại frontend Docker: 960/960 frontend, lint/typecheck/build mã 0; legacy/session 9/9 nhóm, browser mới 7 nhóm và hồi quy 9 bước. Backend/DB giữ image đã kiểm tại 88f5f35; frontend có image mới; ba service healthy, cleanup giữ kho. [Đối chiếu 27 AC](A1_ACCEPTANCE_REVIEW.md) và [bằng chứng gốc](testing/a1-final-qa-2026-11-12/README.md) ghi rõ SHA/môi trường/giới hạn. Còn review/phát hành S3-DEL-02; phần hướng dẫn áp patch workflow ở dưới giữ cho mốc nền cũ, không apply lại trên HEAD hiện tại.
+
+
 Ngày cập nhật: 12/11/2026. Nhánh tích hợp: `integration/sprint3-checkout-e2e`, trên nền `04f3dc6a1f9bb9260934ab94d2caf52cc23c8801`. Phạm vi gồm thanh toán giả lập, hủy đơn, hoàn tiền, xử lý hết hạn và chuyển trạng thái qua CLI. Kết quả kiểm tra Windows được ghi riêng tại [A1_WORKFLOW_WINDOWS_QA.md](A1_WORKFLOW_WINDOWS_QA.md). Trạng thái nghiệm thu 27 AC tiếp tục được quản lý theo SHA, bằng chứng và review của từng AC.
 
 ## Phạm vi hiện thực

@@ -1,0 +1,88 @@
+{
+  "browser": "158.0.8127.18",
+  "checks": [
+    {
+      "ac": "S3-CART-02/S3-CART-04",
+      "name": "logout/login A-B-A retains exact unresolved payment and never auto-POSTs",
+      "passed": true,
+      "detail": {
+        "requestDigest": "2898606fde46566ea83a21de1c8fdb0c0b161ef1b21ca462045448552f1017bc",
+        "sameKeyAndBody": true,
+        "paymentAttempts": 1
+      }
+    },
+    {
+      "ac": "S3-SEC-01/S3-CART-02",
+      "name": "shared-cookie account switch blocks A headers and cancels or ignores delayed A Order after B verification",
+      "passed": true,
+      "detail": {
+        "expectedOwnerStatus": 403,
+        "oldOrderHidden": true,
+        "noPaymentCreated": true,
+        "automaticMutationPosts": 0,
+        "oldResponse": {
+          "clientAborted": false,
+          "delivered": true
+        }
+      }
+    },
+    {
+      "ac": "S3-SEC-01",
+      "name": "late logout response cannot erase a new B cookie or B cart",
+      "passed": true,
+      "detail": {
+        "logoutStatus": 204,
+        "logoutDoesNotSetCookie": true,
+        "newSessionOwnerPreserved": true,
+        "newCartPreserved": true
+      }
+    },
+    {
+      "ac": "S3-SEC-01/S3-CART-02",
+      "name": "real revoked-session 401 preserves owned cart and login restores with GET only",
+      "passed": true,
+      "detail": {
+        "revokedSessionHTTP": 401,
+        "storagePreserved": true,
+        "loginAutoMutationPosts": 0
+      }
+    },
+    {
+      "ac": "S3-CART-05",
+      "name": "expired order retains choices and only explicit new confirmation creates a new key/order",
+      "passed": true,
+      "detail": {
+        "distinctOrderAndKey": true,
+        "createBeforeConfirmation": 0,
+        "automaticPayments": 0
+      }
+    },
+    {
+      "ac": "S3-CART-05/S3-CART-03",
+      "name": "late expired-order read cannot overwrite a newer same-owner cart from another tab",
+      "passed": true,
+      "detail": {
+        "newerCartDigest": "b62821fffb386a9999587ac4e6643922cf9b0be146c343e3fba363788901069f",
+        "newerCartPreserved": true,
+        "unexpectedPosts": 0
+      }
+    },
+    {
+      "ac": "S3-MIG-01",
+      "name": "unsupported storage stays intact; explicit retry migrates v1 pending to v2 without POST",
+      "passed": true,
+      "detail": {
+        "pendingDigest": "c7d635036f8ed07b3f00afe4d2de1555e5529833560008e271552b5e3da52861",
+        "payloadAndKeyPreserved": true,
+        "automaticPosts": 0,
+        "webLocksAvailable": true,
+        "unsupportedBytesRetained": true,
+        "explicitRetryWorked": true
+      }
+    }
+  ],
+  "pageErrors": [],
+  "passed": true,
+  "scope": "real production BFF/Nest/PostgreSQL and browser storage/Web Locks; fixture expiry/revocation through compiled backend services",
+  "currentCheck": "unsupported storage stays intact; explicit retry migrates v1 pending to v2 without POST"
+}

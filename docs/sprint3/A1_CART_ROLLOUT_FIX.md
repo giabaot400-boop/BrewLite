@@ -1,5 +1,10 @@
 # Hiệu đính kích hoạt giỏ v2
 
+## Kết quả Windows sau sửa
+
+A đã commit/push bản sửa tại `3959f4096ee8b2f4baffac83ab8e0e5b6460752d`; frontend 960/960, lint/typecheck/build mã 0. Build Docker frontend 41,0 giây; recreate healthy 7,8 giây theo console. Lượt 20:18 UTC+7 trên Chromium 158.0.8127.18 đạt legacy/session 9/9 nhóm, gồm 7 nhóm browser bổ sung và hồi quy 9 bước; pageErrors=[], cleanup và tồn có trước giữ nguyên. JSON source/blob/script hash và image đã đối chiếu. Xem [báo cáo](A1_ACCEPTANCE_REVIEW.md) và [file gốc](testing/a1-final-qa-2026-11-12/README.md). Các mục “kiểm tra tiếp” bên dưới là quy trình đã dùng; chưa thay review nhóm/phát hành.
+
+
 Ngày: 12/11/2026. Nền áp dụng: `d42deb5023ec0323b3d8ba1357b9694db7e1c921`. Phạm vi source: provider v2, helper kích hoạt và năm test lifecycle. Không đổi DTO, canonical, envelope, backend hoặc migration SQL.
 
 ## Lỗi được xác nhận

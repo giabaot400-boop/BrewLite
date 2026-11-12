@@ -1,5 +1,12 @@
 # S3-B-02: Checklist hồi quy Sprint 1–2 và lệnh kiểm tra phát hành
 
+## Kết quả bổ sung trên bản tích hợp
+
+Source 3959f40: A chạy frontend 960/960, lint/typecheck/build mã 0; Docker frontend được build/recreate riêng và ba service healthy. Legacy/session đạt 9/9 nhóm, gồm 7 nhóm browser mới và runner hồi quy 9 bước; cleanup và kho có trước giữ nguyên. Xem [đối chiếu AC](A1_ACCEPTANCE_REVIEW.md) và [JSON/log gốc](testing/a1-final-qa-2026-11-12/README.md).
+
+Các bảng và câu CHƯA CHẠY/CHƯA CÓ bên dưới giữ snapshot checklist ban đầu; backend hiện đã có `npm test --workspace apps/api`, `workflow-postgres.integration.ts`, `prisma/check-workflow-http.ts` và các script E. Kết quả backend/PG/HTTP được ghi theo đúng mốc tại handover, không suy từ build web. Chrome/Chromium và mobile viewport đã được thử; các dòng Safari/Firefox/screen reader thật tiếp tục chưa có bằng chứng.
+
+
 Phiên bản 1.0 ngày 06/11/2026. Nguồn: `TEST_MATRIX.md` v1.3 mục 3 và `TEAM_PLAN.md` mục 6.
 **Tất cả mục dưới đây đang `CHƯA CHẠY`.** Chỉ đổi sang PASS/FAIL khi có SHA + lệnh + actual + log.
 Hồi quy là chạy lại phần Sprint 3 chạm tới; không mở lại lỗi Sprint 2 đã sửa và không sửa lịch sử test cũ thành "đã PASS".

@@ -1,5 +1,19 @@
 # S3-B-02: Board Sprint 3, nhật ký hằng ngày và burndown
 
+## Mốc tích hợp của A — 12/11/2026
+
+A đã chủ động tiếp nhận phần workflow còn thiếu để hoàn thiện A1 theo trao đổi trong ngày; dùng lại helper/schema/pricing/read và UI đã có của các bạn. Đây là ghi nhận phần tích hợp thực tế, không thay lời xác nhận nhận việc hoặc review của C/D/E.
+
+| Phần | Artifact/kết quả thực | Trạng thái hiện tại |
+|---|---|---|
+| Workflow còn thiếu và tích hợp | 88f5f35: payment/cancel/refund/expiry/CLI; 181 backend, 955 frontend, 28 PG, HTTP/browser và Compose | Có code/evidence, cần review diff phát hành |
+| Boundary/QA triển khai | d42deb5: Compose/performance được lưu; boundary 7/7, 10 vòng last-cup | Kết quả kỹ thuật đã đối chiếu |
+| Rollout giỏ cũ | 3959f40: sửa provider trước controller; 960 frontend, checks đạt, image mới; legacy/session 9/9 nhóm | Đã sửa và kiểm Windows, chờ review |
+| Hồ sơ/bàn giao | Đối chiếu 27 AC; cập nhật Review/Retro/backlog từ sự việc thật | Đang hoàn thiện; S3-DEL-02 còn mở |
+
+Xem [báo cáo](A1_ACCEPTANCE_REVIEW.md). Các bảng ticket/nhật ký cũ bên dưới là lịch sử theo mốc ghi trên từng bảng; không tự chuyển 12 ticket sang DONE hoặc điền giờ/burndown thay thành viên.
+
+
 Phiên bản 1.0 ngày 06/11/2026, phần việc của B (Scrum Master). Nguồn: `TEAM_PLAN.md` v1.3 mục 1, 4, 5, 6.
 Chưa có bằng chứng về một board ngoài repository; bảng dưới đây là bản trong repository để cả nhóm cập nhật
 bằng PR nhỏ. Không ghi thay là đã cập nhật board ngoài.

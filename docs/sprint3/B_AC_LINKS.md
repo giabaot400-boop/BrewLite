@@ -1,5 +1,12 @@
 # S3-B-02: Liên kết 27 AC với ticket, lead, reviewer và bằng chứng
 
+## Đối chiếu kỹ thuật cập nhật 12/11/2026
+
+[A1_ACCEPTANCE_REVIEW.md](A1_ACCEPTANCE_REVIEW.md) nối đủ 27 AC với source và bằng chứng: 26 AC chức năng/triển khai có kết quả theo assertion được liệt kê; S3-DEL-02 còn review/phát hành. Boundary 7/7 trên d42deb5; source 3959f40 có frontend 960/960, legacy/session 9/9 nhóm và browser hồi quy 9 bước; JSON/log gốc được lưu riêng.
+
+Bảng CHƯA CHẠY bên dưới là snapshot lập kế hoạch ngày 06/11, không phải kết luận hiện tại rằng chưa có test. Bảng rà mới phân biệt kết quả kỹ thuật và nghiệm thu nhóm; chưa ghi thay approval của các reviewer trong TEAM_PLAN. Dùng báo cáo mới khi review bản tích hợp; không đổi kết quả lịch sử thành đã PASS ở ngày cũ.
+
+
 Cập nhật ngày 12/11/2026: [hồ sơ tích hợp](A1_WORKFLOW_HANDOVER.md), [báo cáo Windows](A1_WORKFLOW_WINDOWS_QA.md) và [báo cáo Compose/hiệu năng](A1_COMPOSE_PERFORMANCE_QA.md) bổ sung source, lệnh kiểm tra và bằng chứng thật. Compose đạt 8/8 nhóm, browser 9/9 bước; 330/330 mẫu API sau warmup dưới 500 ms trên `88f5f35`. Các kết quả này cần được nối với từng assertion/fixture của AC khi review; không chuyển cả 27 dòng sang PASS từ một lượt tổng hợp.
 
 Bảng trạng thái bên dưới giữ snapshot khi lập hồ sơ, chưa cập nhật thành kết quả nghiệm thu mới. Các dòng CHƯA CHẠY không phủ nhận những lượt test đã được ghi trong báo cáo tổng hợp; việc cập nhật từng dòng cần SHA, bằng chứng và kết quả review tương ứng.

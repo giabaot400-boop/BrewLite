@@ -1,5 +1,32 @@
 # S3-B-02: Sprint 3 Review, Retrospective và backlog (khung điền từ sự việc thật)
 
+## Ghi nhận thực tế trong đợt tích hợp 12/11/2026
+
+Phần này ghi từ source, kết quả A cung cấp và quá trình kiểm tra; chưa phải biên bản một buổi Review/Retrospective chung. Chưa có xác nhận demo với giảng viên hoặc feedback khách hàng. Source ứng dụng đã kiểm: 3959f40; [báo cáo và giới hạn](A1_ACCEPTANCE_REVIEW.md).
+
+| Nội dung | Sự việc và bằng chứng |
+|---|---|
+| Increment đã có | Payment, hủy/refund/điểm, expiry/startup, CLI và checkout v2 đã tích hợp; unit/PG/HTTP/browser và Compose có kết quả thật |
+| Demo kỹ thuật A đã chạy | Đăng nhập/cart/PENDING/payment/recovery/refund/history/mobile; FAILED/retry qua cấu hình backend; persistence; không đồng nhất lượt script với một buổi nhóm đã họp |
+| Phát hiện và sửa | Profile có giỏ v1 báo không hỗ trợ khi bật provider v2; sửa 3959f40 gọi migration trước controller. Giữ FAIL trước sửa và PASS sau sửa riêng |
+| Kiểm chứng bổ sung | A→B→A giữ recovery; hai tab/cookie; late logout giữ B; 401 thật; expired/reorder; newer cart; legacy digest/replay/read-only; Windows 9/9 nhóm |
+| Điều làm tốt để giữ | Tích hợp từng thay đổi, kiểm bằng chứng theo SHA; fixture riêng và cleanup; kiểm mất response sau commit, concurrency và rollback thay vì chỉ demo happy path |
+| Điều cần cải thiện | Mô tả PR/bảng trạng thái bị chậm so với source; các helper có sẵn nhưng bước kích hoạt chưa nối đầy đủ; cần thêm ca profile cũ trước bật rollout |
+
+### Việc tiếp theo và backlog phát hiện từ kết quả thật
+
+| ID | Việc | Owner thực hiện/đề xuất | Điều kiện hoàn tất |
+|---|---|---|---|
+| A1-CLOSE-01 | Lưu QA cuối, cập nhật mô tả PR #53 và chốt review diff mới | A; reviewer nhóm xác nhận trên PR | SHA/evidence hiện hành; review có tên/commit, không dùng approval ff9bb73 thay bản workflow |
+| A1-CLOSE-02 | Hoàn thiện gói source/README/demo và nội dung trình bày Review/Retro | A điều phối | File/link chạy được; ghi đúng sự kiện/người tham gia/feedback khi thực sự có |
+| A1-CLOSE-03 | Xác minh giờ nộp LMS | A/PO | Theo thông báo chính thức, không suy giờ từ kế hoạch cũ |
+| BL-03 cập nhật | Backend integration harness đã có tại 88f5f35 và có kết quả PG/concurrency/rollback | A tích hợp, tái sử dụng phần C/D/E | Không tiếp tục ghi là chưa có code; review/phát hành vẫn cần chốt |
+| BL-06 cập nhật | Payment/cancel/official total và provider đã nối vào UI; rollout v1→v2 sửa tại 3959f40 | A | Có unit/browser/Windows; không coi là toàn bộ ticket đã được peer approve |
+| BL-05 giữ mở | Screen reader thật và Firefox/Safari/Edge | B/A đề xuất cho đợt kiểm tiếp | Có môi trường và kết quả riêng; hiện chỉ ghi Chromium đã kiểm |
+
+Các phần khung và backlog ở dưới là snapshot 06/11, được giữ để truy vết. Không điền ngược ngày họp, người tham gia hoặc feedback chưa xảy ra.
+
+
 Phiên bản 1.0 ngày 06/11/2026. Nguồn quy tắc: `TEAM_PLAN.md` v1.3 mục 5–6.
 **Đây là khung, chưa phải biên bản.** Chưa có buổi Review hay Retro nào của Sprint 3 diễn ra; không ghi đã họp,
 đã demo hoặc đã nhận góp ý khi chưa có. Nếu lớp yêu cầu buổi trực tiếp, hình thức bất đồng bộ phải theo hướng dẫn của lớp.
