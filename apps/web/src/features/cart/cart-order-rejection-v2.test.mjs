@@ -152,10 +152,21 @@ test("agreed price reason must match the saved request and line-price precedence
   assert.equal(settle(value, reply("CHECKOUT_CHANGED", compensated), ORDER_REJECTION_REASONS_V2).outcome.kind, "CHECKOUT_CHANGED");
 });
 
-test("price agreement does not enable old proposed reasons or unagreed stock reasons", () => {
+test("agreed reasons exclude old proposals; backend stock evidence must match the saved request", () => {
   unknown(fixture(), reply("CHECKOUT_CHANGED", checkout(fixture(), { reason: "PRICE_OR_TOTAL_CHANGED" })), ORDER_REJECTION_REASONS_V2);
-  for (const reason of ["INSUFFICIENT_STOCK", "INSUFFICIENT_PRODUCT_STOCK"]) {
+  for (const reason of ["INSUFFICIENT_PRODUCT_STOCK"]) {
     unknown(fixture(), reply("OUT_OF_STOCK", stock({ reason })), ORDER_REJECTION_REASONS_V2);
+  }
+});
+
+test("backend stock reason resolves only a proven shortage of the requested products", () => {
+  const value = fixture(), details = stock({ reason: "INSUFFICIENT_STOCK" });
+  const result = settle(value, reply("OUT_OF_STOCK", details), ORDER_REJECTION_REASONS_V2);
+  assert.equal(result.outcome.kind, "OUT_OF_STOCK"); assert.deepEqual(result.envelope.cart, value.cart);
+  assert.deepEqual(result.envelope.pendingRequests, {});
+  for (const changes of [{ id: "foreign" }, { requested: 20 }, { available: details.resources[0].requested }]) {
+    const invalid = structuredClone(details); Object.assign(invalid.resources[0], changes);
+    unknown(value, reply("OUT_OF_STOCK", invalid), ORDER_REJECTION_REASONS_V2);
   }
 });
 

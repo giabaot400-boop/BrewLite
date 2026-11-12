@@ -75,6 +75,18 @@ export function parseCartPaymentReply(reply: OrderReply, recovery: PaymentRecove
   } else return null;
   return structuredClone(p) as CartPaymentView;
 }
+/** Proof from replay of the exact saved key; GET by itself is never sufficient. */
+export function parseNoAttemptTerminalReply(reply: OrderReply, recovery: PaymentRecovery) {
+  const body = reply.body;
+  if (reply.status !== 409 || recovery.paymentId !== null || recovery.recoveryStatus !== "UNRESOLVED"
+    || !record(body) || Object.keys(body).length !== 1 || !record(body.error)) return null;
+  const e = body.error, d = e.details;
+  if (Object.keys(e).length !== 3 || e.code !== "ORDER_NOT_PAYABLE" || !text(e.message) || !record(d)
+    || Object.keys(d).length !== 4 || d.reason !== "NO_ATTEMPT_TERMINAL_ORDER" || d.orderId !== recovery.body.orderId
+    || !money(d.orderVersion) || !text(d.orderStatus) || ![...paidStatuses, "CANCELLED"].includes(d.orderStatus)) return null;
+  return { orderId: d.orderId, orderVersion: d.orderVersion, orderStatus: d.orderStatus };
+}
+
 function matchesCheckpoint(expected: PaymentRecovery, actual: PaymentRecovery): boolean {
   return !!expected && expected.ownerId === actual.ownerId && expected.requestKey === actual.requestKey
     && expected.createdAt === actual.createdAt && expected.body?.orderId === actual.body.orderId && expected.body.method === actual.body.method
@@ -128,7 +140,20 @@ export function applyCartPaymentV2(value: CartEnvelopeV2, command: CartPaymentCo
   // Duplicate/late responses cannot publish an older Order view after reconciliation.
   if (recovery.recoveryStatus === "RESOLVED") return result(value, "IGNORED");
   const payment = parseCartPaymentReply(command.reply, recovery);
-  if (!payment) return result(value, "UNKNOWN");
+  if (!payment) {
+    const marker = parseNoAttemptTerminalReply(command.reply, recovery);
+    const order = command.order;
+    if (!marker || !order) return result(value, "UNKNOWN");
+    try { requireCurrentCartOrder(order); } catch { return result(value, "UNKNOWN"); }
+    const bound = checkoutBindingForOwner(value, recovery.ownerId);
+    if (order.id !== marker.orderId || order.version < marker.orderVersion || ![...paidStatuses, "CANCELLED"].includes(order.status)
+      || bound?.orderId === order.id && order.version < bound.orderVersion
+      || order.version === marker.orderVersion && order.status !== marker.orderStatus) return result(value, "UNKNOWN");
+    // Resolve only this request. No invented PaymentAttempt, cart cleanup or binding replacement.
+    return result(withRecovery(value, { ...recovery, recoveryStatus: "RESOLVED" }), "RESOLVED", {
+      request: { ...recovery, recoveryStatus: "RESOLVED" }, order: structuredClone(order),
+    });
+  }
   // Pin the ID from this exact POST response even when the following GET fails.
   const pinned = recovery.paymentId === payment.id ? value : withRecovery(value, { ...recovery, paymentId: payment.id });
   const bound = checkoutBindingForOwner(value, recovery.ownerId);

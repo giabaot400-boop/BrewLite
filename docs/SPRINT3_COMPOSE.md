@@ -94,3 +94,31 @@ Chưa xác nhận:
 - Tính đúng thời gian backend qua kiểm thử round-trip.
 - Chạy theo hướng dẫn trên máy thành viên khác.
 - Compose local không phải bằng chứng triển khai production HTTPS.
+
+## Cấu hình workflow ngày 12/11/2026
+
+Sử dụng cùng phiên bản frontend/backend của bản tích hợp. Trước khi bật checkout v2, đóng các tab writer v1 trong profile thử nghiệm, sau đó tạo lại frontend với cờ sau:
+
+```powershell
+$env:CHECKOUT_V2_ENABLED = "1"
+docker compose --env-file .env.compose up -d --build --wait backend frontend
+```
+
+`CHECKOUT_V2_ENABLED` mặc định là `0`. Profile đã migrate sang v2 phải tiếp tục dùng writer v2 theo CONTRACTS mục 7. Backend khởi động sẽ chạy catch-up các đơn policy2 đã hết hạn và trả kho đúng workflow, giữ lịch sử. Không chạy lại seed/INIT_DEMO_STOCK trên database đã sử dụng.
+
+Mock payment mặc định trả SUCCEEDED. Để kiểm tra nhánh FAILED qua backend, đổi cấu hình và tạo lại service: Replay payment key đã lưu không thay theo outcome mới:
+
+```powershell
+$env:MOCK_PAYMENT_OUTCOME = "FAILED"
+docker compose --env-file .env.compose up -d --force-recreate --wait backend
+# Thử tạo/thanh toán bằng UI, rồi đổi lại SUCCEEDED và khởi động lại backend.
+```
+
+CLI chuyển trạng thái được bật riêng cho từng lệnh; chức năng này không có endpoint công khai:
+
+```powershell
+docker compose --env-file .env.compose exec -e DEMO_WORKFLOW_ENABLED=true backend npm run demo:advance --workspace apps/api -- <orderId> PREPARING
+# Sau đó READY, rồi COMPLETED; không bỏ qua cạnh.
+```
+
+Kết quả chạy ngoài container và trong Docker được ghi riêng. Lượt kiểm tra Docker cần bao gồm auth, cart và payment trên cùng bản tích hợp; xem [hồ sơ workflow](sprint3/A1_WORKFLOW_HANDOVER.md).

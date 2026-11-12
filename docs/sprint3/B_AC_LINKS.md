@@ -1,5 +1,8 @@
 # S3-B-02: Liên kết 27 AC với ticket, lead, reviewer và bằng chứng
 
+Cập nhật ngày 12/11/2026: [hồ sơ tích hợp](A1_WORKFLOW_HANDOVER.md) và [báo cáo Windows](A1_WORKFLOW_WINDOWS_QA.md) bổ sung source, lệnh kiểm tra và bằng chứng PostgreSQL/HTTP/browser. Trạng thái trong bảng được cập nhật sau khi đối chiếu SHA, báo cáo và review từng AC.
+
+
 Phiên bản 1.0 ngày 06/11/2026. Nguồn: `docs/sprint3/TEST_MATRIX.md` v1.3 (lead của từng AC) và
 `docs/sprint3/TEAM_PLAN.md` v1.3 (ticket, reviewer). **Cột ticket là gợi ý của B để nối AC với ticket;
 lead xác nhận hoặc sửa trên PR đầu tiên chạm vào AC đó.** Reviewer lấy theo ticket gợi ý trong TEAM_PLAN mục 1 (reviewer gắn với ticket, không gắn với lead).

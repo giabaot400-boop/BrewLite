@@ -404,3 +404,35 @@ test("resolved or missing recovery cannot replay; v1 storage is never migrated i
   await assert.rejects(old.client.submit(await old.review()), code("UNSUPPORTED_VERSION"));
   assert.equal(old.raw(), before); assert.equal(old.calls.posts.length, 0);
 });
+
+const noAttempt = (changes = {}) => Response.json({ error: { code: "ORDER_NOT_PAYABLE", message: "No new attempt.",
+  details: { reason: "NO_ATTEMPT_TERMINAL_ORDER", orderId: "order-a", orderVersion: 1, orderStatus: "CANCELLED", ...changes } } }, { status: 409 });
+test("saved key with no attempt can resolve only from a terminal marker plus a fresh owner-verified GET", async () => {
+  for (const status of ["CANCELLED", "PAID", "PREPARING", "READY", "COMPLETED"]) {
+    const f = setup({ value: unresolved(), fetcher: async () => noAttempt({ orderStatus: status }),
+      reader: input => ({ session: input.session, order: status === "CANCELLED" ? cancelled() : paid({ status, canCancel: status === "PAID" }) }) });
+    const before = f.value(), result = await f.client.submit(f.reviewRecovery());
+    assert.equal(result.kind, "RESOLVED"); assert.equal(result.settlement.payment, null);
+    assert.equal(f.value().paymentRecoveries.A[KEY].recoveryStatus, "RESOLVED");
+    assert.equal(f.value().paymentRecoveries.A[KEY].paymentId, null);
+    assert.deepEqual(f.value().cart, before.cart); assert.deepEqual(f.value().checkoutBindings, before.checkoutBindings);
+    assert.deepEqual(f.calls.sequence, ["POST", "GET"]); assert.equal(f.keys(), 0);
+  }
+});
+test("terminal no-attempt marker cannot resolve a pinned ID, stale GET, wrong order, changed session or read failure", async () => {
+  for (const options of [
+    { value: unresolved({ pinned: true }) },
+    { reader: input => ({ session: input.session, order: cancelled({ version: 0 }) }) },
+    { reader: input => ({ session: input.session, order: cancelled({ id: "other" }) }) },
+    { reader: input => ({ session: { ...input.session, ownerId: "B" }, order: cancelled() }) },
+    { reader: () => { throw Error("GET unavailable"); } },
+    { reader: input => ({ session: input.session, order: failedOrder() }) },
+    { fetcher: async () => noAttempt({ orderId: "other" }) },
+    { fetcher: async () => noAttempt({ reason: "UNKNOWN" }) },
+  ]) {
+    const f = setup({ value: unresolved(), fetcher: async () => noAttempt(),
+      reader: input => ({ session: input.session, order: cancelled() }), ...options });
+    try { assert.equal((await f.client.submit(f.reviewRecovery())).kind, "UNKNOWN"); } catch (e) { assert.ok(["OWNER_MISMATCH", "INVALID_DATA"].includes(e.code)); }
+    assert.equal(f.value().paymentRecoveries.A[KEY].recoveryStatus, "UNRESOLVED");
+  }
+});

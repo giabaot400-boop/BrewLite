@@ -190,8 +190,13 @@ export function CheckoutV2Panel({ environment, disabled = false }: { environment
         } else if (selected.kind === "PAYMENT") {
           const result = await environment.payment.submit(selected.review);
           if (result.kind === "RESOLVED") {
-            showOrder(session, result.settlement.order);
-            tell(session, result.settlement.payment?.status === "FAILED" && result.settlement.order?.status === "PAYMENT_FAILED"
+            // A reload may already have released the paid binding while the exact-key recovery remained unresolved.
+            // Settlement then avoids publishing a captured view; restore the current order through the verified reader.
+            const currentOrder = result.settlement.order ?? (await environment.restoreOrder())?.order ?? null;
+            showOrder(session, currentOrder);
+            tell(session, result.settlement.payment === null
+              ? "Yêu cầu này chưa tạo giao dịch thanh toán; đơn đã kết thúc hoặc đã được thanh toán bằng lần khác."
+              : result.settlement.payment.status === "FAILED" && result.settlement.order?.status === "PAYMENT_FAILED"
               ? "Thanh toán chưa thành công. Giỏ được giữ; bạn có thể xác nhận một lần thanh toán mới."
               : "Đã đối chiếu lần thanh toán. Hãy xem trạng thái đơn hiện tại bên dưới.");
           } else {

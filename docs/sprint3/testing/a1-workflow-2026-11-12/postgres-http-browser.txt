@@ -1,0 +1,181 @@
+ISOLATED POSTGRESQL 17 READY
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma/schema.prisma.
+Datasource "db": PostgreSQL database "brewlite_s2_test", schema "public" at "127.0.0.1:55432"
+
+3 migrations found in prisma/migrations
+
+Applying migration `20261024160346_init_products`
+Applying migration `20261030152601_sprint2_auth_orders`
+Applying migration `20261109010714_sprint3_payment_stock`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20261024160346_init_products/
+    └─ migration.sql
+  └─ 20261030152601_sprint2_auth_orders/
+    └─ migration.sql
+  └─ 20261109010714_sprint3_payment_stock/
+    └─ migration.sql
+
+All migrations have been successfully applied.
+✔ state machine PENDING -> PENDING (2.012168ms)
+✔ state machine PENDING -> PAYMENT_FAILED (0.22545ms)
+✔ state machine PENDING -> PAID (0.075433ms)
+✔ state machine PENDING -> PREPARING (0.114993ms)
+✔ state machine PENDING -> READY (0.137588ms)
+✔ state machine PENDING -> COMPLETED (0.085789ms)
+✔ state machine PENDING -> CANCELLED (0.12631ms)
+✔ state machine PAYMENT_FAILED -> PENDING (0.059059ms)
+✔ state machine PAYMENT_FAILED -> PAYMENT_FAILED (0.591113ms)
+✔ state machine PAYMENT_FAILED -> PAID (0.277449ms)
+✔ state machine PAYMENT_FAILED -> PREPARING (0.190848ms)
+✔ state machine PAYMENT_FAILED -> READY (0.1322ms)
+✔ state machine PAYMENT_FAILED -> COMPLETED (0.12565ms)
+✔ state machine PAYMENT_FAILED -> CANCELLED (0.057627ms)
+✔ state machine PAID -> PENDING (0.09935ms)
+✔ state machine PAID -> PAYMENT_FAILED (0.07273ms)
+✔ state machine PAID -> PAID (0.062033ms)
+✔ state machine PAID -> PREPARING (0.055965ms)
+✔ state machine PAID -> READY (0.060742ms)
+✔ state machine PAID -> COMPLETED (0.121503ms)
+✔ state machine PAID -> CANCELLED (0.05992ms)
+✔ state machine PREPARING -> PENDING (0.07273ms)
+✔ state machine PREPARING -> PAYMENT_FAILED (0.05912ms)
+✔ state machine PREPARING -> PAID (0.057016ms)
+✔ state machine PREPARING -> PREPARING (0.055283ms)
+✔ state machine PREPARING -> READY (0.045028ms)
+✔ state machine PREPARING -> COMPLETED (0.060271ms)
+✔ state machine PREPARING -> CANCELLED (0.07282ms)
+✔ state machine READY -> PENDING (0.055674ms)
+✔ state machine READY -> PAYMENT_FAILED (0.09954ms)
+✔ state machine READY -> PAID (0.074623ms)
+✔ state machine READY -> PREPARING (0.055844ms)
+✔ state machine READY -> READY (0.132279ms)
+✔ state machine READY -> COMPLETED (0.057957ms)
+✔ state machine READY -> CANCELLED (0.064818ms)
+✔ state machine COMPLETED -> PENDING (0.062955ms)
+✔ state machine COMPLETED -> PAYMENT_FAILED (0.054362ms)
+✔ state machine COMPLETED -> PAID (0.050697ms)
+✔ state machine COMPLETED -> PREPARING (0.053891ms)
+✔ state machine COMPLETED -> READY (0.050226ms)
+✔ state machine COMPLETED -> COMPLETED (0.163747ms)
+✔ state machine COMPLETED -> CANCELLED (0.070817ms)
+✔ state machine CANCELLED -> PENDING (0.057827ms)
+✔ state machine CANCELLED -> PAYMENT_FAILED (0.455158ms)
+✔ state machine CANCELLED -> PAID (0.269928ms)
+✔ state machine CANCELLED -> PREPARING (0.096015ms)
+✔ state machine CANCELLED -> READY (0.084077ms)
+✔ state machine CANCELLED -> COMPLETED (0.061022ms)
+✔ state machine CANCELLED -> CANCELLED (0.057557ms)
+✔ payment canonical has stable field order, namespace content and method/order sensitivity (0.382508ms)
+✔ mock uses backend startup configuration and rejects an invalid configuration (0.277318ms)
+✔ retry classifier admits conflicts and only named payment uniqueness constraints (0.620897ms)
+✔ one retry loop runs at most three transactions and propagates non-conflicts (0.632615ms)
+PostgreSQL 17.11; isolated fixture prefix a1-workflow-ce708344-e851-451e-b4d6-330c3bde4bda
+(node:99) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ payment WALLET commits one attempt, stock consumption and points (372.621361ms)
+✔ payment CARD commits one attempt, stock consumption and points (61.107908ms)
+✔ FAILED keeps hold; replay old key stays FAILED after success with a new key (72.445725ms)
+✔ cancel before payment releases hold once and retains immutable creation replay (42.003345ms)
+✔ PAID cancel refunds full amount, returns stock, reverses points exactly once (92.723289ms)
+✔ expiry rechecks database deadline, rejects payment and never mutates legacy orders (67.690757ms)
+✔ internal demo advances only paid chain and cancellation stops at PREPARING (68.855344ms)
+✔ other owner cannot pay, cancel or read an order; no mutation or attempt is created (22.74501ms)
+✔ two concurrent payments with the same key converge on one attempt and one award (75.711926ms)
+✔ different payment keys racing on one order cannot produce two successes (43.217237ms)
+✔ payment racing cancel leaves one consistent canceled state and zero net award (74.0749ms)
+✔ payment rollback after injected paymentAttempt.create failure preserves order/hold/points/key (43.351941ms)
+✔ payment rollback after injected product.updateMany failure preserves order/hold/points/key (32.853951ms)
+✔ payment rollback after injected loyaltyEntry.create failure preserves order/hold/points/key (37.374592ms)
+✔ payment rollback after injected order.updateMany failure preserves order/hold/points/key (40.28419ms)
+✔ refund write failure rolls back returned stock, reversed points and refund metadata (49.271126ms)
+✔ two customers reading two available cups cannot reserve quantities 2 and 1 together (92.455886ms)
+[Nest] 99  - 11/12/2026, 12:14:05 PM   ERROR [OrderExpiryService] An expired order could not be released; it remains eligible for retry.
+✔ expiry batch shares an in-flight scan and retries failed rows without stopping the batch (21.982404ms)
+✔ loyalty entry includes 0 points and reverses the original entry exactly once (75.055681ms)
+✔ loyalty entry includes 9 points and reverses the original entry exactly once (49.674397ms)
+✔ loyalty entry includes 28 points and reverses the original entry exactly once (50.935565ms)
+✔ payment racing expiry after the deadline cannot consume the expired hold (30.251492ms)
+✔ cancel racing PREPARING has exactly one valid outcome with consistent refund and stock (41.440645ms)
+✔ new V1 payload keeps canonical identity and still reserves policy2 stock with a deadline (27.342591ms)
+✔ distinct configurations share one Product hold, and failure on the second Product rolls back the first (44.08637ms)
+✔ promotion integer boundary and expiry preserve the original order total through FAILED and retry (56.519841ms)
+✔ simultaneous create with one key commits one order and replay converges without a second hold (15.752392ms)
+✔ a new failed retry uses the logical PENDING edge once; cancel releases its original hold (40.684654ms)
+CLEANUP: only this run's isolated fixtures removed.
+ℹ tests 81
+ℹ suites 0
+ℹ pass 81
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2414.374429
+PASS 1: transaction A acquired the lock.
+PASS 2: transaction B could not acquire the same lock.
+PASS 3: B acquired the lock after A committed.
+PASS 4: a different request key acquired its lock.
+PASS 5: a different user acquired its lock.
+PASS 6: the lock was released after rollback.
+PASS 1: duplicate product demands are aggregated.
+PASS 2: reserve increments held stock and version.
+PASS 3: insufficient stock is rejected without writes.
+PASS 4: consumption decrements stock and held stock.
+PASS 5: return restores stock.
+PASS 6: repeated return cannot add stock.
+PASS 7: release preserves total stock.
+PASS 8: repeated release cannot subtract held stock.
+PASS 10: stale stock plan is rejected without reservation.
+PASS 9: test fixtures were rolled back.
+PASS 1: both transactions observed the last available product.
+PASS 2: one transaction committed; the other hit a stock conflict.
+PASS 3: only one order/item/reservation remains; no overselling.
+PASS 4: a fresh transaction sees out-of-stock.
+PASS 5: isolated concurrency fixtures were cleaned up.
+PASS 1: V2 tạo đơn, snapshot, ledger và giữ kho.
+PASS 2: Replay không tạo đơn hoặc giữ kho lần hai.
+PASS 3: Hết kho lưu REJECTED, không tạo thêm đơn/giữ kho.
+PASS 4: Lỗi ledger rollback Order, reservation và stock.
+PASS 5: Promotion chuẩn hóa mã, áp dụng cap và lưu snapshot.
+PASS 6: Replay sau khi tắt promotion giữ nguyên kết quả và snapshot.
+CLEANUP: Đã xóa fixture riêng.
+PASS 1: Hai transaction cùng đọc tồn khả dụng bằng 1.
+PASS 2: Một request tạo đơn; request còn lại retry rồi hết kho. Attempts: 1,2
+PASS 3: Chỉ một Order/item/reservation, không vượt tồn.
+PASS 4: Ledger SUCCEEDED/REJECTED khớp kết quả.
+CLEANUP: Đã dọn fixture concurrency riêng.
+PASS HTTP/BFF 1: FAILED is HTTP 200; holds/points preserved; UI-only fields cannot control payment
+PASS HTTP/BFF 2: restart config changes do not change old key; new key pays same order once
+PASS HTTP/BFF 3: authorization, exact DTO/key validation and empty history query
+PASS HTTP/BFF 4: exact cancel body, full refund and repeated cancel do not repeat effects
+PASS HTTP/BFF 5: startup catch-up expires only eligible policy2; legacy and paid order stay intact
+PASS HTTP/BFF 6: compiled demo CLI validates the flag and advances only the three paid workflow edges
+PASS HTTP/BFF 7: real BFF cookie authentication, origin and expected-owner guards
+PASS HTTP/BFF 8: BFF create promotion, payment, exact-key replay and full refund
+PASS HTTP/BFF 9: no-attempt terminal marker is only returned when the exact payment key has no attempt
+PASS BROWSER 1: real form login and owner cart
+
+PASS BROWSER 2: create PENDING keeps durable cart, shows official total and sends no automatic payment
+
+PASS BROWSER 3: reload restores the current order without POST
+
+PASS BROWSER 4: lost payment response retains its original key/body as UNRESOLVED
+
+PASS BROWSER 5: explicit recovery after reload replays the exact committed payment
+
+PASS BROWSER 6: payment consumes the order once and clears only its cart after a current read
+
+PASS BROWSER 7: paid cancellation keeps the cleared cart empty
+
+PASS BROWSER 8: history and detail show current canceled order
+
+PASS BROWSER 9: mobile order detail has no horizontal overflow
+
+BROWSER CHECKS: 9/9 PASSED
+
+WORKFLOW HTTP/BFF CHECKS: 10/10 PASSED (real PostgreSQL/Nest/Next production)
+HTTP fixture cleanup completed.

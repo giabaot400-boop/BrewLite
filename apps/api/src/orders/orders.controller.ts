@@ -76,7 +76,11 @@ export class OrdersController {
   @Get("me")
   @UseGuards(AuthGuard)
   async getMyOrders(@Req() req: Request) {
-    return this.ordersReader.getMyOrders(this.getUserId(req as AuthRequest));
+    const userId = this.getUserId(req as AuthRequest);
+    if (Object.keys(req.query ?? {}).length) throw new BadRequestException({ error: {
+      code: "VALIDATION_ERROR", message: "Lịch sử không hỗ trợ tham số lọc hoặc phân trang.",
+    } });
+    return this.ordersReader.getMyOrders(userId);
   }
 
   @Get(":id")

@@ -1,5 +1,12 @@
 # BrewLite Sprint 3 gói triển khai rút gọn
 
+## Trạng thái tích hợp ngày 12/11/2026
+
+[Hồ sơ tích hợp workflow](A1_WORKFLOW_HANDOVER.md) ghi phạm vi hiện thực, cấu hình và lệnh kiểm tra. [Báo cáo Windows](A1_WORKFLOW_WINDOWS_QA.md) ghi kết quả backend 181/181, frontend 955/955, PostgreSQL 28/28, HTTP/BFF/CLI 9/9 nhóm và browser 9/9 bước do A cung cấp. Các báo cáo kiểm thử được quản lý riêng theo môi trường và phiên bản.
+
+Công việc bàn giao còn lại gồm lưu báo cáo gốc và SHA, kiểm tra Compose, đo độ trễ API và review từng AC. Các mục bên dưới giữ nguyên nhật ký tại từng mốc; trạng thái "chờ backend" trong nhật ký được hiểu theo thời điểm ghi nhận.
+
+
 Cập nhật ngày 07/11/2026. Thiết kế triển khai Task 8–10 của Assignment 1 trên nền Sprint 2 tại a1a0e4a. Bộ tài liệu xác định phạm vi, contract, phân công và kiểm thử dự kiến; chưa xác nhận code hoặc AC Sprint 3 đã đạt.
 
 ## Đọc và nhận việc
@@ -139,18 +146,14 @@ không phải toàn bộ ma trận AC đã nghiệm thu. Không chạy lại ch�
 
 Đặt `CHECKOUT_V2_INTEGRATION_ENABLED=1` trong cửa sổ chạy `next dev`, rồi khởi
 động lại frontend. Cờ phía server chọn đồng thời đúng một provider và panel
-v2 tại layout và `/cart`. Không có cờ, giá trị khác `1`, hoặc production vẫn
-dùng v1. Cờ này khác `CHECKOUT_PREVIEW_ENABLED` của trang fixture `/dev/checkout`.
+v2 tại layout và `/cart`. Bản bổ sung hỗ trợ `CHECKOUT_V2_ENABLED=1` ở cả dev/production, mặc định tắt. Cờ dev cũ chỉ có hiệu lực ở development. Cờ này khác `CHECKOUT_PREVIEW_ENABLED` của trang fixture `/dev/checkout`.
 
 Chỉ thử bằng một cửa sổ ẩn danh mới, giữ các tab của profile đó ở cùng phiên
 bản. Mở ứng dụng với cờ sẽ đọc/migrate envelope v1 sang v2 dưới Web Lock;
 không tự POST và không tự đổi pending key/body. Migration storage là một chiều:
 không quay lại writer v1 trên profile đã migrate; không xóa storage để hạ cấp.
 
-Phạm vi lượt thử hiện tại là tạo/đọc đơn, giữ giỏ và khôi phục bằng GET sau F5.
-Thanh toán/hủy/expiry và hai lỗi V1 ở PR #52 còn chờ backend; không thao tác
-thanh toán/hủy trong lượt này và không dùng các kết quả trên để công bố các
-luồng đó đạt. Production rollout vẫn chờ đóng phụ thuộc DEP-05/06 và nghiệm thu.
+Phạm vi lượt thử tại mốc ghi chép cũ là tạo/đọc đơn. Bản bổ sung ngày 12/11 đã thêm payment/cancel/expiry/CLI; tình trạng kiểm thử mới nằm trong handover, không dùng báo cáo tạo đơn cũ thay cho kiểm thử workflow.
 
 Trong môi trường chuẩn bị patch, 945/945 unit test, lint và build frontend
 đạt. Đã build với cờ bằng `1` và kiểm tra HTML production vẫn chọn provider/

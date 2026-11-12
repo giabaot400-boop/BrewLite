@@ -1,0 +1,28 @@
+{
+  "browser": "158.0.8127.18",
+  "checks": 9,
+  "passed": true,
+  "posts": [
+    {
+      "path": "/api/auth/login",
+      "keyPresent": false
+    },
+    {
+      "path": "/api/orders",
+      "keyPresent": true
+    },
+    {
+      "path": "/api/payments",
+      "keyPresent": true
+    },
+    {
+      "path": "/api/payments",
+      "keyPresent": true
+    },
+    {
+      "path": "/api/orders/2d2c3e0e-11a3-45ba-89f7-29d2e51dc78f/cancel",
+      "keyPresent": false
+    }
+  ],
+  "pageErrors": []
+}

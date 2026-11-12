@@ -1,6 +1,6 @@
 import { CartStorageError } from "./cart-envelope.ts";
 import { createEmptyCartEnvelopeV2, isCartEnvelopeV2 } from "./cart-envelope-v2.ts";
-import { parseCartPaymentReply } from "./cart-payment-recovery-v2.ts";
+import { parseCartPaymentReply, parseNoAttemptTerminalReply } from "./cart-payment-recovery-v2.ts";
 import { requireCurrentCartOrder } from "./cart-order-binding-v2.ts";
 import { isSessionBinding } from "../../lib/session-binding.ts";
 import type { AuthClient } from "../auth/auth-client";
@@ -180,6 +180,13 @@ export function createCartPaymentClientV2(environment: Environment) {
             }
           }
           requireCurrent(session);
+          if (order && parseNoAttemptTerminalReply(reply, request)) {
+            const settlement = await environment.storage.applyPaymentLifecycleV2({ type: "SETTLE_PAYMENT", ownerId: request.ownerId,
+              requestKey: request.requestKey, expectedRecovery: request, expectedBinding: saved.binding, reply, order }, guard);
+            requireCurrent(session);
+            if (settlement.outcome === "RESOLVED") return { kind: "RESOLVED", request, settlement };
+            if (settlement.outcome === "IGNORED") return { kind: "IGNORED", request };
+          }
           return { kind: "UNKNOWN", request, order };
         }
         const command = { type: "SETTLE_PAYMENT" as const, ownerId: request.ownerId, requestKey: request.requestKey,

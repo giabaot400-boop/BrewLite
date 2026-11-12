@@ -9,7 +9,7 @@ import type { OrderReply, OrderReplyOutcome } from "./cart-order-response";
 /**
  * Pin these lists from the agreed C/D response contract, never from a response.
  * CONTRACTS section 3 pins the two CHECKOUT_CHANGED reasons from C (25ff9a8).
- * OUT_OF_STOCK still awaits agreement; the assembled runtime keeps it UNKNOWN.
+ * OUT_OF_STOCK pins the existing backend INSUFFICIENT_STOCK response.
  * Promotion reasons below are already enumerated by CONTRACTS section 3.
  */
 export type OrderRejectionReasonsV2 = {
@@ -19,7 +19,7 @@ export type OrderRejectionReasonsV2 = {
 const NO_REASONS: OrderRejectionReasonsV2 = { checkoutChanged: [], outOfStock: [] };
 export const ORDER_REJECTION_REASONS_V2: OrderRejectionReasonsV2 = Object.freeze({
   checkoutChanged: Object.freeze(["PRODUCT_PRICE_CHANGED", "EXPECTED_TOTAL_MISMATCH"]),
-  outOfStock: Object.freeze([] as string[]),
+  outOfStock: Object.freeze(["INSUFFICIENT_STOCK"]),
 });
 export type CheckoutChangedDetails = {
   reason: string; currentSubtotal: number; currentDiscountTotal: number; currentTotal: number;

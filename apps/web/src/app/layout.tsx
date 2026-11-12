@@ -21,6 +21,9 @@ export const viewport: Viewport = {
   themeColor: "#704b35",
 };
 
+// Select the provider from the server runtime flag, including container deployments.
+export const dynamic = "force-dynamic";
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const ActiveCartProvider = checkoutV2IntegrationEnabled() ? CartProviderV2 : CartProvider;
   return (

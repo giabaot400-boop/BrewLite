@@ -184,8 +184,20 @@ for (const reason of ["PRODUCT_PRICE_CHANGED", "EXPECTED_TOTAL_MISMATCH"]) {
   });
 }
 
-test("default runtime keeps unknown price and unagreed stock responses pending without another POST", async () => {
-  for (const reason of ["PRICE_OR_TOTAL_CHANGED", "INSUFFICIENT_STOCK", "INSUFFICIENT_PRODUCT_STOCK"]) {
+test("default runtime accepts backend stock rejection and preserves the cart for explicit editing", async () => {
+  const f = await fixture(), before = structuredClone(f.saved().cart);
+  f.mode.orderError = () => ({ code: "OUT_OF_STOCK", message: "Không đủ hàng.", details: {
+    reason: "INSUFFICIENT_STOCK", resources: [{ kind: "PRODUCT", id: "cappuccino", requested: 2, available: 1 }] } });
+  try {
+    const result = await f.create(); assert.equal(result.kind, "REJECTED");
+    assert.equal(result.settlement.outcome.kind, "OUT_OF_STOCK"); assert.deepEqual(f.saved().cart, before);
+    assert.equal(f.saved().pendingRequests.A, undefined); assert.equal(f.controller.getView().canMutate, true);
+    assert.equal(f.calls.filter(call => call.method === "POST").length, 1);
+  } finally { f.stop(); }
+});
+
+test("default runtime keeps unknown price and proposed stock responses pending without another POST", async () => {
+  for (const reason of ["PRICE_OR_TOTAL_CHANGED", "INSUFFICIENT_PRODUCT_STOCK"]) {
     const f = await fixture(), before = structuredClone(f.saved().cart);
     f.mode.orderError = pending => reason === "PRICE_OR_TOTAL_CHANGED"
       ? { code: "CHECKOUT_CHANGED", message: "Review.", details: { reason, currentSubtotal: 110000,
