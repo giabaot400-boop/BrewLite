@@ -10,16 +10,50 @@ import {
   UseGuards,
   BadRequestException,
   UnauthorizedException,
+  ValidationPipe,
 } from "@nestjs/common";
+
+import type { ArgumentMetadata } from "@nestjs/common";
 import type { Request, Response } from "express";
+
 import { AuthGuard } from "../auth/auth.guard.js";
+import { createOrderValidationException } from "../common/order-validation.js";
 import { OrdersService } from "./orders.service.js";
 import { OrdersReaderService } from "./orders-reader.service.js";
 import { CreateOrderDto } from "./dto/create-order.dto.js";
 import { CreateOrderV2Dto } from "./dto/create-order-v2.dto.js";
+
 type AuthRequest = Request & {
-  user?: { id?: string; userId?: string };
+  user?: {
+    id?: string;
+    userId?: string;
+  };
 };
+
+// Su dung cung cau hinh voi global ValidationPipe trong main.ts.
+const orderValidationPipe = new ValidationPipe({
+  whitelist: true,
+  forbidNonWhitelisted: true,
+  transform: true,
+  transformOptions: {
+    enableImplicitConversion: false,
+  },
+  exceptionFactory: createOrderValidationException,
+});
+
+// Chon va validate DTO theo phien ban request.
+async function validateOrderBody<T extends CreateOrderDto | CreateOrderV2Dto>(
+  body: unknown,
+  dtoType: new () => T,
+): Promise<T> {
+  const metadata: ArgumentMetadata = {
+    type: "body",
+    metatype: dtoType,
+    data: undefined,
+  };
+
+  return (await orderValidationPipe.transform(body, metadata)) as T;
+}
 
 @Controller("orders")
 export class OrdersController {
@@ -38,78 +72,32 @@ export class OrdersController {
     return userId;
   }
 
-  // Đặt /me trước /:id để tránh route động bắt nhầm.
+  // Dat /me truoc /:id de tranh nhan nham route.
   @Get("me")
   @UseGuards(AuthGuard)
   async getMyOrders(@Req() req: Request) {
-    return this.ordersReader.getMyOrders(
-      this.getUserId(req as AuthRequest),
-    );
+    return this.ordersReader.getMyOrders(this.getUserId(req as AuthRequest));
   }
 
   @Get(":id")
   @UseGuards(AuthGuard)
-  async getOrderDetail(
-    @Param("id") id: string,
-    @Req() req: Request,
-  ) {
+  async getOrderDetail(@Param("id") id: string, @Req() req: Request) {
     return this.ordersReader.getOrderDetail(
       this.getUserId(req as AuthRequest),
       id,
     );
   }
-@Post("v2")
-@UseGuards(AuthGuard)
-async createOrderV2(
-  @Body() dto: CreateOrderV2Dto,
-  @Headers("idempotency-key") requestKey: string,
-  @Req() req: Request,
-  @Res() res: Response,
-) {
-  const userId = this.getUserId(req as AuthRequest);
 
-  const uuidV4 =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-  if (!requestKey || !uuidV4.test(requestKey)) {
-    throw new BadRequestException({
-      error: {
-        code: "VALIDATION_ERROR",
-        message: "Idempotency-Key phải là UUID v4.",
-      },
-    });
-  }
-
-  const result = await this.ordersService.createOrderV2(
-    userId,
-    requestKey,
-    dto,
-  );
-
-  return res.status(result.httpStatus).json(result.body);
-}
+  // Endpoint thong nhat cho Orders V1 va V2.
   @Post()
   @UseGuards(AuthGuard)
   async createOrder(
-    @Body() dto: CreateOrderDto,
+    @Body() body: unknown,
     @Headers("idempotency-key") requestKey: string,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const userId = (
-      req as Request & {
-        user?: { id?: string; userId?: string };
-      }
-    ).user?.id;
-
-    if (!userId) {
-      return res.status(401).json({
-        error: {
-          code: "UNAUTHORIZED",
-          message: "Bạn chưa đăng nhập.",
-        },
-      });
-    }
+    const userId = this.getUserId(req as AuthRequest);
 
     const uuidV4 =
       /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -123,12 +111,56 @@ async createOrderV2(
       });
     }
 
-    const result = await this.ordersService.createOrder(
-      userId,
-      requestKey,
-      dto,
-    );
+    // Request phai la JSON object, khong phai array/null.
+    if (body === null || typeof body !== "object" || Array.isArray(body)) {
+      throw new BadRequestException({
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "Dữ liệu gửi lên không hợp lệ.",
+          fieldErrors: {
+            body: ["Request body phải là một JSON object."],
+          },
+        },
+      });
+    }
 
-    return res.status(result.httpStatus).json(result.body);
+    const payload = body as Record<string, unknown>;
+
+    // V1: Khong co schemaVersion.
+    if (!Object.prototype.hasOwnProperty.call(payload, "schemaVersion")) {
+      const dto = await validateOrderBody(body, CreateOrderDto);
+
+      const result = await this.ordersService.createOrder(
+        userId,
+        requestKey,
+        dto,
+      );
+
+      return res.status(result.httpStatus).json(result.body);
+    }
+
+    // V2: schemaVersion phai la number 2.
+    if (payload.schemaVersion === 2) {
+      const dto = await validateOrderBody(body, CreateOrderV2Dto);
+
+      const result = await this.ordersService.createOrderV2(
+        userId,
+        requestKey,
+        dto,
+      );
+
+      return res.status(result.httpStatus).json(result.body);
+    }
+
+    // Khong tu dong chuyen "2" thanh 2.
+    throw new BadRequestException({
+      error: {
+        code: "VALIDATION_ERROR",
+        message: "schemaVersion không được hỗ trợ.",
+        fieldErrors: {
+          schemaVersion: ["schemaVersion phải bằng 2 hoặc không được gửi."],
+        },
+      },
+    });
   }
 }
