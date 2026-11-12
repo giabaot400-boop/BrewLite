@@ -96,7 +96,11 @@ Error envelope kế thừa {error:{code,message,fieldErrors?,details?}}. BFF P04
 
 Lỗi DTO/auth/quyền/key trước transaction không ledger; business rejection tạo đơn (món không tồn tại/topping không cho phép/giá/mã/thiếu kho) giữ chính sách baseline OrderRequest REJECTED, orderId=null, snapshot response gốc, replay cùng HTTP status. Rejection payment/cancel không tạo PaymentAttempt giả; payment FAILED là HTTP 200 kết quả nghiệp vụ chứ không lỗi transport.
 
-details V2 tối thiểu có {reason:string}; CHECKOUT_CHANGED thêm {currentSubtotal,currentDiscountTotal,currentTotal,items:[{productId,size,toppingIds,currentUnitPrice}]} toàn bộ từ server, không tự áp vào pending cũ. OUT_OF_STOCK có {resources:[{kind:'PRODUCT',id,requested,available}]} với số thực đã xác nhận; không gửi SQL/constraint nội bộ. PROMOTION_NOT_APPLICABLE reason thuộc NOT_FOUND|INACTIVE|NOT_STARTED|EXPIRED|MINIMUM_NOT_MET. Không đưa một reason lạ thành lỗi đã xác nhận trong classifier. Response lỗi sai schema vẫn UNKNOWN khi đã gửi mutation.
+details V2 tối thiểu có {reason:string}; CHECKOUT_CHANGED thêm {currentSubtotal,currentDiscountTotal,currentTotal,items:[{productId,size,toppingIds,currentUnitPrice}]} toàn bộ từ server, không tự áp vào pending cũ. `CHECKOUT_CHANGED.details.reason` chỉ nhận:
+- `PRODUCT_PRICE_CHANGED`: ít nhất một `currentUnitPrice` khác `expectedUnitPrice` trong request.
+- `EXPECTED_TOTAL_MISMATCH`: tất cả `currentUnitPrice` khớp `expectedUnitPrice`, nhưng `currentTotal` khác `expectedTotal`.
+
+Nếu đồng thời có thay đổi giá dòng và lệch tổng, ưu tiên `PRODUCT_PRICE_CHANGED`. OUT_OF_STOCK có {resources:[{kind:'PRODUCT',id,requested,available}]} với số thực đã xác nhận; không gửi SQL/constraint nội bộ. PROMOTION_NOT_APPLICABLE reason thuộc NOT_FOUND|INACTIVE|NOT_STARTED|EXPIRED|MINIMUM_NOT_MET. Không đưa một reason lạ thành lỗi đã xác nhận trong classifier. Response lỗi sai schema vẫn UNKNOWN khi đã gửi mutation.
 
 Điểm tích hợp chưa chốt: danh sách giá trị `reason` của CHECKOUT_CHANGED và OUT_OF_STOCK chưa được liệt kê ở baseline này. C/D cần xác định và ghi danh sách tại đây để A đối chiếu trước khi bật luồng v2 trên UI. Helper frontend mặc định giữ UNKNOWN cho hai lỗi này; chỉ kết thúc pending khi cấu trúc/số liệu khớp yêu cầu đã gửi và reason thuộc danh sách cố định đã thống nhất. Không lấy chính reason trong response để tự bổ sung vào danh sách; tên reason trong fixture unit test không phải hợp đồng backend đã được nhóm chốt.
 
