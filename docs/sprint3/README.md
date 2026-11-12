@@ -1,5 +1,10 @@
 # BrewLite Sprint 3 gói triển khai rút gọn
 
+## Hiệu đính kích hoạt giỏ v2 — 12/11/2026
+
+Rà browser trên nền `d42deb5` phát hiện provider được bật nhưng chưa gọi migration, khiến profile có envelope v1 báo không hỗ trợ. Bản sửa nối `migrateToV2()` trước controller, giữ giỏ/pending/key/body, có lỗi và thử lại; controller riêng vẫn không tự migrate. Môi trường chuẩn bị đã đạt frontend 960/960, lint/typecheck/build, 7 nhóm browser bổ sung, migration legacy riêng và 9 bước browser hồi quy. Kết quả Windows sau patch được ghi khi có lượt chạy thật. Xem [phạm vi bản sửa và cách kiểm tra](A1_CART_ROLLOUT_FIX.md).
+
+
 ## Trạng thái tích hợp ngày 12/11/2026
 
 [Hồ sơ tích hợp workflow](A1_WORKFLOW_HANDOVER.md) ghi phạm vi hiện thực, cấu hình và lệnh kiểm tra. [Báo cáo Windows](A1_WORKFLOW_WINDOWS_QA.md) ghi kết quả backend 181/181, frontend 955/955, PostgreSQL 28/28, HTTP/BFF/CLI 9/9 nhóm và browser 9/9 bước do A cung cấp. Các báo cáo kiểm thử được quản lý riêng theo môi trường và phiên bản.
