@@ -1,6 +1,6 @@
 # Assignment 1 — demo thủ công trên máy A ngày 13/11/2026
 
-Người thao tác: A. Hana hỗ trợ hướng dẫn và tổng hợp từ kết quả A xác nhận,
+Người thao tác: A. Trợ lý hỗ trợ hướng dẫn và tổng hợp từ kết quả A xác nhận,
 ảnh giao diện và console PowerShell được gửi trong trao đổi. Thời gian nêu
 trong tài liệu theo Việt Nam, UTC+7. Không có giờ bắt đầu/kết thúc chính xác
 của toàn lượt, bản ghi Network/SQL hoặc video liên tục.

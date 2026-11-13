@@ -23,7 +23,7 @@
   Không gán image đã build trước thành một lượt build/test tại Git HEAD mới.
 
 Các mục QA ngày 12/11 bên dưới giữ nguồn SHA/image và giới hạn ban đầu.
-Ngày rà soát ban đầu: 12/11/2026. Source ứng dụng mới nhất đã kiểm trên máy A: `3959f4096ee8b2f4baffac83ab8e0e5b6460752d`, nhánh `integration/sprint3-checkout-e2e`. Nguồn: code/test, JSON gốc của A, console đã cung cấp và hồ sơ lịch sử có ghi phạm vi. Hana hỗ trợ đối chiếu kỹ thuật; bằng chứng này không tự thay approval trong nhóm.
+Ngày rà soát ban đầu: 12/11/2026. Source ứng dụng mới nhất đã kiểm trên máy A: `3959f4096ee8b2f4baffac83ab8e0e5b6460752d`, nhánh `integration/sprint3-checkout-e2e`. Nguồn: code/test, JSON gốc của A, console đã cung cấp và hồ sơ lịch sử có ghi phạm vi. Trợ lý hỗ trợ đối chiếu kỹ thuật; bằng chứng này không tự thay approval trong nhóm.
 
 ## Kết luận kỹ thuật và phần còn mở
 
