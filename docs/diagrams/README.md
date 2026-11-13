@@ -4,6 +4,12 @@
 - [Sprint 2](sprint2/README.md): giỏ, auth/session, tạo đơn PENDING và ERD tại thời điểm bàn giao.
 - [Sprint 3](sprint3/README.md): bộ thiết kế checkout/payment và trạng thái đơn.
 
+Kiến trúc tổng hợp bản tích hợp A1 ngày 13/11/2026 nằm tại Sprint 3:
+[system context](sprint3/system-context-sprint3.svg),
+[logical architecture](sprint3/logical-architecture-sprint3.svg) và
+[đối chiếu thay đổi từ Sprint 1](../sprint3/A1_ARCHITECTURE_UPDATE.md).
+Các hình Sprint 1 ở bên dưới vẫn được giữ đúng phạm vi lịch sử.
+
 Mỗi bộ phản ánh phạm vi tại mốc của mình. Kết quả triển khai và nghiệm thu
 đọc trong hồ sơ sprint; không dùng hình thiết kế để suy ra kiểm thử đã đạt.
 

@@ -1,5 +1,12 @@
 # BrewLite Sprint 3 gói triển khai rút gọn
 
+## Kiến trúc bản tích hợp — 13/11/2026
+
+Bổ sung [system context và logical architecture Sprint 3](A1_ARCHITECTURE_UPDATE.md)
+từ source `88b4e12` sau merge #53/#49/#51. Hai nguồn PlantUML và hai SVG thể
+hiện mock nội bộ NestJS, Next.js/BFF, giỏ/recovery, expiry và CLI có flag.
+Giữ hình Sprint 1–2 theo lịch sử; không thêm API, schema, UC hoặc kết quả test.
+
 ## Xử lý review bản a08152c — 12/11/2026
 
 B đã review ZIP cả nhánh tại `a08152c`, tự kiểm web typecheck/lint và 960/960
@@ -37,7 +44,7 @@ Cập nhật ngày 07/11/2026. Thiết kế triển khai Task 8–10 của Assig
 2. `docs/sprint3/TEAM_PLAN.md` có 12 ticket A–E, đầu vào, reviewer và checklist bằng chứng.
 3. `docs/sprint3/CONTRACTS.md` có năm API, DTO/response/error, BFF, hash/storage, schema/transaction, demo và usecase09…13.
 4. `docs/sprint3/TEST_MATRIX.md` có fixture/thao tác/assertion cho 27 AC và ba test (a)(b)(c).
-5. `docs/diagrams/sprint3` có năm nguồn/chín SVG cùng nội dung thiết kế; hai ERD là một mô hình 13 model.
+5. `docs/diagrams/sprint3` có bảy nguồn/mười một SVG: năm nguồn/chín SVG của bộ D01–D07 và hai nguồn/hai SVG mới D08/D09; hai ERD là một mô hình 13 model.
 6. [Rà soát phạm vi](REVIEW.md) giữ kết quả đối chiếu và lịch sử thay đổi thiết kế.
 
 Bảng [user story và công việc hỗ trợ](DESIGN.md#11-user-story) trong thiết kế

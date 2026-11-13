@@ -1,0 +1,42 @@
+@startuml system-context-sprint3
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #5B4636
+skinparam roundcorner 12
+skinparam rectangleBorderColor #80644F
+skinparam actorBorderColor #5B4636
+skinparam noteBackgroundColor #FFF6DA
+skinparam noteBorderColor #B89551
+top to bottom direction
+title BrewLite — System context Sprint 3\nBản tích hợp A1 tại 88b4e12 — 13/11/2026
+
+actor "Khách hàng" as Customer
+rectangle "Hệ thống BrewLite\nỨng dụng đặt đồ uống" as BrewLite #F9F2E9
+actor "Thành viên nhóm\nVận hành demo nội bộ" as Operator
+
+Customer --> BrewLite : Chọn món / giỏ / tài khoản\nĐặt, thanh toán và xem/hủy đơn
+BrewLite --> Customer : Tổng chính thức / mã và trạng thái đơn\nKết quả, lỗi và lựa chọn phục hồi
+Operator --> BrewLite : CLI có flag: cập nhật pha chế demo
+
+note bottom of BrewLite
+  Mock payment Ví/Thẻ thuộc bên trong BrewLite (NestJS).
+  Không có cổng thanh toán/server bên ngoài hoặc tiền thật.
+  Tạo PENDING và xác nhận thanh toán là hai thao tác riêng.
+  Đơn, kho Product và điểm được cập nhật nhất quán.
+  Hết hạn được xử lý trong backend, độc lập với browser.
+end note
+
+note bottom of Operator
+  Vai trò kỹ thuật chạy công cụ demo có sẵn.
+  PAID → PREPARING → READY → COMPLETED.
+  Không biểu thị trang quản trị/barista hoặc API pha chế công khai.
+end note
+
+legend bottom
+  Ranh giới logic là toàn hệ thống BrewLite; các thành phần nội bộ xem D09.
+  Hình mô tả phạm vi đã hiện thực, không là xác nhận mọi AC/DoD đã nghiệm thu.
+  Giữ nguyên hồ sơ Sprint 1–2; xem A1_ARCHITECTURE_UPDATE.md để đối chiếu delta.
+endlegend
+@enduml
