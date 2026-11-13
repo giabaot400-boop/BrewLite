@@ -28,6 +28,28 @@ Không ghi lệnh nào chưa tồn tại trong `package.json` như đã chạy.
 - Migration: #53 chỉ thêm `20261109010714_sprint3_payment_stock`; không sửa migration Sprint 2.
 - Chưa có log lưu thành file; số liệu lấy từ lần chạy của B và cần lặp lại trên CI hoặc máy có Prisma/PostgreSQL trước khi ghi PASS chính thức.
 
+### 1.2 Các lượt review sau `ff9bb73`
+
+| Mốc | B tự chạy/xác nhận | Phần chưa tự chạy và nguồn |
+|---|---|---|
+| `a08152c`, review COMMENTED ngày 12/11 | Web typecheck/lint và 960/960 test | Backend 181, PostgreSQL 28, build/Compose/browser/hiệu năng dựa vào hồ sơ A; chưa so diff với approval cũ |
+| `f3f0ef7`, review APPROVED ngày 13/11 | Merge thử sạch; web lint/typecheck/960 test/build; API 89/94, năm spec cần Prisma Client trong môi trường B | Backend typecheck/build, PostgreSQL và UI với backend thật chưa tự chạy; SHA256 QA đã đối chiếu theo review B |
+
+Nguồn: [review `a08152c`](https://github.com/giabaot400-boop/BrewLite/pull/53#pullrequestreview-5878454053)
+và [approval `f3f0ef7`](https://github.com/giabaot400-boop/BrewLite/pull/53#pullrequestreview-5884511329).
+Không suy phiên bản Node hoặc cách cài dependencies của hai lượt mới từ
+lượt Node 22.22/`--ignore-scripts` tại `ff9bb73`; review mới chưa ghi các chi tiết đó.
+
+Từ `f3f0ef7`, API có `pretest` chạy sinh Prisma Client trước `npm test`;
+backend workflow, script PostgreSQL/HTTP và Compose đã có bằng chứng A theo
+[hồ sơ nghiệm thu](https://github.com/giabaot400-boop/BrewLite/blob/88b4e12cf909226e9b376041d5da4205765b7649/docs/sprint3/A1_ACCEPTANCE_REVIEW.md).
+Kết quả 50/54 và 945/945 ở mục 1.1 được giữ nguyên, không sửa thành số mới.
+Không cộng các tổng test khác SHA/phạm vi hoặc coi 89/94 là toàn bộ suite API hiện hành.
+
+PR #53 đã merge tại `6f38fcb`. B đồng ý tách CI sang PR sau; A2 theo dõi CI
+riêng, không ghi A1 đã có pipeline từ quyết định này. Đợt cập nhật checklist
+không chạy lại test ứng dụng hoặc xác nhận toàn bộ DoD đã đạt.
+
 ## 2. Hồi quy Sprint 1
 
 | Mục | Cách kiểm tra | Trạng thái | Bằng chứng |

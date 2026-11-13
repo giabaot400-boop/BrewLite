@@ -11,7 +11,7 @@ Quy tắc ghi (TEST_MATRIX mục 1, TEAM_PLAN mục 5–6):
 - Không đổi hàng loạt dựa trên một demo đường thành công. Chạy lại sau sửa thì thêm dòng mới (SHA mới), giữ dòng `FAIL` cũ.
 - Cột `Task đề` là số Task 8/9/10 của đề mà AC thuộc về (theo TEST_MATRIX).
 
-**Cập nhật 12/11/2026 (B):** chưa đổi trạng thái AC nào. Bản tích hợp #53 (`ff9bb73`) chỉ có `POST /orders`, `GET /orders/me`, `GET /orders/:id`; chưa có `POST /payments` và hủy đơn, nên các AC thanh toán/hủy/hết hạn chưa kiểm được. Phần tạo/đọc đơn có test đơn vị (web 945/945; API 50/54, 4 spec cần Prisma client), nhưng AC chỉ chuyển `PASS` khi có SHA, lệnh, expected/actual và log theo quy tắc trên.
+**Ghi nhận lịch sử 12/11/2026 (B), chỉ tại `ff9bb73`:** chưa đổi trạng thái AC nào. Bản này của #53 chỉ có `POST /orders`, `GET /orders/me`, `GET /orders/:id`; chưa có `POST /payments` và hủy đơn, nên B chưa kiểm được các AC thanh toán/hủy/hết hạn. Phần tạo/đọc đơn có test đơn vị (web 945/945; API 50/54, 4 spec cần Prisma client). Ghi nhận này không mô tả bản workflow đã merge; xem cập nhật 13/11 bên dưới.
 
 | AC | Nội dung | Lead | Reviewer | Ticket (gợi ý) | Task đề | Trạng thái | SHA | Lệnh / log | Ghi chú lỗi còn lại |
 |---|---|---|---|---|---|---|---|---|---|
@@ -42,6 +42,24 @@ Quy tắc ghi (TEST_MATRIX mục 1, TEAM_PLAN mục 5–6):
 | S3-MIG-01 | Migration giữ dữ liệu legacy, policy 1 chỉ đọc | E | D | S3-E-01 | 10 | CHƯA CHẠY |  |  |  |
 | S3-DEL-01 | Compose ba service, chạy máy khác, seed không reset kho | E | C | S3-E-03 | 9 | CHƯA CHẠY |  |  |  |
 | S3-DEL-02 | SHA/command/actual/log, Review/Retro/backlog thật | B | D | S3-B-02 | 8,9,10 | CHƯA CHẠY |  |  |  |
+
+## Đối chiếu cập nhật 13/11/2026
+
+Workflow payment/cancel/refund/expiry/CLI đã có tại `88f5f35`; provider v2
+được sửa tại `3959f40`. [Đối chiếu 27 AC trên main](https://github.com/giabaot400-boop/BrewLite/blob/88b4e12cf909226e9b376041d5da4205765b7649/docs/sprint3/A1_ACCEPTANCE_REVIEW.md)
+ghi 26 AC chức năng/triển khai có bằng chứng trong phạm vi assertion đã nêu;
+S3-DEL-02 còn hồ sơ/phát hành. Bảng CHƯA CHẠY ở trên giữ snapshot lập kế hoạch,
+không phủ nhận các lượt QA đã có hoặc tự thay chữ ký reviewer từng ticket.
+
+B review `a08152c` ở trạng thái COMMENTED: tự chạy web typecheck/lint và
+960/960 test. Sau sửa, B [approve `f3f0ef7`](https://github.com/giabaot400-boop/BrewLite/pull/53#pullrequestreview-5884511329):
+web lint/typecheck/960 test/build đạt; API 89/94, năm spec còn vướng Prisma
+Client. Backend/PG/UI thật dựa vào hồ sơ A; không gán 181 backend hoặc 28 PG
+thành các lượt B đã tự chạy. Approval `ff9bb73` chỉ thuộc bản cũ.
+
+PR #53 đã merge `6f38fcb`; main sau #49/#51 là `88b4e12`. Không đổi hàng loạt
+27 AC sang PASS từ approval PR hoặc một lượt demo; giữ SHA/image và giới hạn
+của từng bằng chứng. Bản cập nhật tài liệu này không là một lượt chạy lại test.
 
 ## Tổng hợp theo lead
 
