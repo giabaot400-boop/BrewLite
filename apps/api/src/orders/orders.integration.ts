@@ -218,6 +218,7 @@ async function main() {
               requestHash: rollbackHash,
               status: "PENDING",
               total: 94000,
+              subtotal: 94000,
             },
           });
 

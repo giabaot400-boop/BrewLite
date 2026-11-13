@@ -11,7 +11,13 @@
     "db:generate": "prisma generate",
     "db:validate": "prisma validate",
     "db:migrate": "prisma migrate dev",
-    "db:seed": "prisma db seed"
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "prisma db seed",
+    "demo:advance": "node dist/orders/demo-advance.js",
+    "pretest": "npm run db:generate",
+    "test": "node --import tsx --test \"src/**/*.spec.ts\" \"src/**/*.test.ts\"",
+    "test:workflow": "node --import tsx --test src/orders/workflow-postgres.integration.ts",
+    "test:workflow-http": "node --import tsx prisma/check-workflow-http.ts"
   },
   "dependencies": {
     "@nestjs/common": "12.1.3",

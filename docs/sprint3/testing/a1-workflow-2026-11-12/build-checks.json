@@ -1,0 +1,22 @@
+[
+  {
+    "command": "npm run typecheck --workspace apps/api",
+    "exitCode": 0
+  },
+  {
+    "command": "npm run build --workspace apps/api",
+    "exitCode": 0
+  },
+  {
+    "command": "npm run lint --workspace apps/web",
+    "exitCode": 0
+  },
+  {
+    "command": "npm run typecheck --workspace apps/web",
+    "exitCode": 0
+  },
+  {
+    "command": "npm run build --workspace apps/web",
+    "exitCode": 0
+  }
+]

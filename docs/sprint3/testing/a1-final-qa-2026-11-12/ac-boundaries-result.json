@@ -1,0 +1,347 @@
+{
+  "helperVersion": 1,
+  "startedAt": "2026-11-12T12:31:48.035Z",
+  "repo": "giabaot400-boop/BrewLite",
+  "expectedSourceSha": "d42deb5023ec0323b3d8ba1357b9694db7e1c921",
+  "applicationImageSourceSha": "88f5f35f3bb921bd68be2d0f8c70bd6736ab101e",
+  "passed": true,
+  "host": {
+    "platform": "win32",
+    "node": "v24.16.0",
+    "release": "10.0.19045"
+  },
+  "sha": "d42deb5023ec0323b3d8ba1357b9694db7e1c921",
+  "servicesBefore": [
+    {
+      "service": "backend",
+      "name": "brewlite-sprint3-backend-1",
+      "state": "running",
+      "health": "healthy",
+      "image": "brewlite-api:sprint3"
+    },
+    {
+      "service": "db",
+      "name": "brewlite-sprint3-db-1",
+      "state": "running",
+      "health": "healthy",
+      "image": "postgres:17-bookworm"
+    },
+    {
+      "service": "frontend",
+      "name": "brewlite-sprint3-frontend-1",
+      "state": "running",
+      "health": "healthy",
+      "image": "brewlite-web:sprint3"
+    }
+  ],
+  "imageIds": {
+    "backend": "sha256:93c73e1dd9c20e558c64f08aac6f859792384ed430653ec27f7b522be71e0e7b",
+    "frontend": "sha256:bb88e42438f0a4abdfad51c87a10dd58fca8747c3d151d3a73b6a22bcdc9ab05",
+    "db": "sha256:665dc7b37ac52a17e298511414c21d23ffa4e6a6ef6225b3e5d59c7afb35e994"
+  },
+  "docker": "Docker version 29.9.3, build 5457199",
+  "compose": "Docker Compose version v5.7.0",
+  "dbProgramSha256": "cc45b696fa8f95209fa03841313705441497c724a918bca2ac734324fe841021",
+  "result": {
+    "runId": "a1-boundaries-f4a74691-2881-47e5-aba5-b1c9b7a65222",
+    "scope": "compiled backend services with real PostgreSQL; no HTTP/browser assertions",
+    "checks": [
+      {
+        "id": "S3-ORD-04",
+        "name": "history is owner-scoped, empty-safe and sorted by createdAt/id DESC on PostgreSQL",
+        "passed": true,
+        "detail": {
+          "sameTimestampOrders": 2,
+          "totalOwnerOrders": 3,
+          "foreignOrders": 1,
+          "emptyOwner": true
+        }
+      },
+      {
+        "id": "S3-PAY-08",
+        "name": "payment accepts deadline minus 1 ms and rejects exactly at or after deadline",
+        "passed": true,
+        "detail": {
+          "clock": "test transaction proxy only; application clock/API unchanged",
+          "observed": [
+            {
+              "offsetMs": -1,
+              "payable": true
+            },
+            {
+              "offsetMs": 0,
+              "payable": false
+            },
+            {
+              "offsetMs": 1,
+              "payable": false
+            }
+          ]
+        }
+      },
+      {
+        "id": "S3-PAY-05",
+        "name": "a canceled order still rejects reuse of an old key with a different method or orderId",
+        "passed": true
+      },
+      {
+        "id": "S3-STK-02",
+        "name": "a create failure on the second Product rolls back the first hold; topping has no stock writes",
+        "passed": true,
+        "detail": {
+          "failedProductWrite": 2,
+          "orderAndLedgerRolledBack": true,
+          "retrySameKey": true,
+          "aggregateProductQuantity": 3,
+          "toppingQuantityInOrder": 2
+        }
+      },
+      {
+        "id": "S3-PRO-01",
+        "name": "DEMO10 minimum, cap, start-inclusive/end-exclusive and inactive reasons",
+        "passed": true,
+        "detail": {
+          "assertions": 10,
+          "promotionLookup": "test fixture; original DEMO10 unchanged",
+          "productReads": "real PostgreSQL"
+        }
+      },
+      {
+        "id": "S3-STK-01",
+        "name": "ten barrier-controlled races for the last Product keep one hold and replay the loser",
+        "passed": true,
+        "detail": {
+          "rounds": [
+            {
+              "round": 1,
+              "observed": [
+                1,
+                1
+              ],
+              "initial": [
+                {
+                  "httpStatus": 409
+                },
+                {
+                  "httpStatus": 201
+                }
+              ],
+              "winners": 1,
+              "loserReplay": 409,
+              "reservedStock": 1,
+              "stock": 1
+            },
+            {
+              "round": 2,
+              "observed": [
+                1,
+                1
+              ],
+              "initial": [
+                {
+                  "httpStatus": 201
+                },
+                {
+                  "httpStatus": 409
+                }
+              ],
+              "winners": 1,
+              "loserReplay": 409,
+              "reservedStock": 1,
+              "stock": 1
+            },
+            {
+              "round": 3,
+              "observed": [
+                1,
+                1
+              ],
+              "initial": [
+                {
+                  "httpStatus": 409
+                },
+                {
+                  "httpStatus": 201
+                }
+              ],
+              "winners": 1,
+              "loserReplay": 409,
+              "reservedStock": 1,
+              "stock": 1
+            },
+            {
+              "round": 4,
+              "observed": [
+                1,
+                1
+              ],
+              "initial": [
+                {
+                  "httpStatus": 201
+                },
+                {
+                  "httpStatus": 409
+                }
+              ],
+              "winners": 1,
+              "loserReplay": 409,
+              "reservedStock": 1,
+              "stock": 1
+            },
+            {
+              "round": 5,
+              "observed": [
+                1,
+                1
+              ],
+              "initial": [
+                {
+                  "httpStatus": 201
+                },
+                {
+                  "httpStatus": 409
+                }
+              ],
+              "winners": 1,
+              "loserReplay": 409,
+              "reservedStock": 1,
+              "stock": 1
+            },
+            {
+              "round": 6,
+              "observed": [
+                1,
+                1
+              ],
+              "initial": [
+                {
+                  "httpStatus": 201
+                },
+                {
+                  "httpStatus": 409
+                }
+              ],
+              "winners": 1,
+              "loserReplay": 409,
+              "reservedStock": 1,
+              "stock": 1
+            },
+            {
+              "round": 7,
+              "observed": [
+                1,
+                1
+              ],
+              "initial": [
+                {
+                  "httpStatus": 409
+                },
+                {
+                  "httpStatus": 201
+                }
+              ],
+              "winners": 1,
+              "loserReplay": 409,
+              "reservedStock": 1,
+              "stock": 1
+            },
+            {
+              "round": 8,
+              "observed": [
+                1,
+                1
+              ],
+              "initial": [
+                {
+                  "httpStatus": 201
+                },
+                {
+                  "httpStatus": 409
+                }
+              ],
+              "winners": 1,
+              "loserReplay": 409,
+              "reservedStock": 1,
+              "stock": 1
+            },
+            {
+              "round": 9,
+              "observed": [
+                1,
+                1
+              ],
+              "initial": [
+                {
+                  "httpStatus": 201
+                },
+                {
+                  "httpStatus": 409
+                }
+              ],
+              "winners": 1,
+              "loserReplay": 409,
+              "reservedStock": 1,
+              "stock": 1
+            },
+            {
+              "round": 10,
+              "observed": [
+                1,
+                1
+              ],
+              "initial": [
+                {
+                  "httpStatus": 409
+                },
+                {
+                  "httpStatus": 201
+                }
+              ],
+              "winners": 1,
+              "loserReplay": 409,
+              "reservedStock": 1,
+              "stock": 1
+            }
+          ]
+        }
+      },
+      {
+        "id": "S3-ORD-02",
+        "name": "cancel racing expiry releases the original hold once and preserves its reason",
+        "passed": true
+      }
+    ],
+    "cleanup": true,
+    "passed": true,
+    "database": {
+      "name": "brewlite_s3_demo",
+      "version": "17.11 (Debian 17.11-1.pgdg12+2)"
+    },
+    "currentCheck": "S3-ORD-02"
+  },
+  "runnerExitCode": 0,
+  "servicesAfter": [
+    {
+      "service": "backend",
+      "name": "brewlite-sprint3-backend-1",
+      "state": "running",
+      "health": "healthy",
+      "image": "brewlite-api:sprint3"
+    },
+    {
+      "service": "db",
+      "name": "brewlite-sprint3-db-1",
+      "state": "running",
+      "health": "healthy",
+      "image": "postgres:17-bookworm"
+    },
+    {
+      "service": "frontend",
+      "name": "brewlite-sprint3-frontend-1",
+      "state": "running",
+      "health": "healthy",
+      "image": "brewlite-web:sprint3"
+    }
+  ],
+  "completedAt": "2026-11-12T12:31:54.264Z"
+}

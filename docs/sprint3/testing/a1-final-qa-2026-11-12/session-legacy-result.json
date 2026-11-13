@@ -1,0 +1,244 @@
+{
+  "helperVersion": 1,
+  "startedAt": "2026-11-12T13:18:10.568Z",
+  "baseSourceSha": "d42deb5023ec0323b3d8ba1357b9694db7e1c921",
+  "backendImageSourceSha": "88f5f35f3bb921bd68be2d0f8c70bd6736ab101e",
+  "passed": true,
+  "cleanup": true,
+  "host": {
+    "platform": "win32",
+    "node": "v24.16.0",
+    "release": "10.0.19045"
+  },
+  "sha": "3959f4096ee8b2f4baffac83ab8e0e5b6460752d",
+  "applicationGitBlobs": {
+    "apps/web/src/features/cart/cart-activation-v2.ts": "d38f994efc34dd17722555c8aa29c507a9377529",
+    "apps/web/src/features/cart/cart-activation-v2.test.mjs": "96328a1de6c7429beb178d6c4193123dfe9a1a4b",
+    "apps/web/src/features/cart/cart-provider-v2.tsx": "c88d8f1cf936785e35a08f9c89f1d47317681ed0"
+  },
+  "servicesBefore": [
+    {
+      "service": "backend",
+      "name": "brewlite-sprint3-backend-1",
+      "state": "running",
+      "health": "healthy",
+      "image": "brewlite-api:sprint3"
+    },
+    {
+      "service": "db",
+      "name": "brewlite-sprint3-db-1",
+      "state": "running",
+      "health": "healthy",
+      "image": "postgres:17-bookworm"
+    },
+    {
+      "service": "frontend",
+      "name": "brewlite-sprint3-frontend-1",
+      "state": "running",
+      "health": "healthy",
+      "image": "brewlite-web:sprint3"
+    }
+  ],
+  "imageIds": {
+    "backend": "sha256:93c73e1dd9c20e558c64f08aac6f859792384ed430653ec27f7b522be71e0e7b",
+    "frontend": "sha256:6ac3316340d40fee89a9522aa5cb851934249c8dab5b86a900053dcdb5fc3db5",
+    "db": "sha256:665dc7b37ac52a17e298511414c21d23ffa4e6a6ef6225b3e5d59c7afb35e994"
+  },
+  "scriptSha256": {
+    "session-browser.mjs": "3d64cfee85c89d85a4be2904c8114ae021e8431e0470afb2d42b4c62a6d3e872",
+    "session-db.mjs": "c0da0afbaa32b3f037716251f91a040e384178228004250dc99437e2e240460f",
+    "legacy-preservation.mjs": "138946194066e0f6db576231772fcef7e1a85dee7b24ea976cf11fbdc6cb4b59"
+  },
+  "docker": "Docker version 29.9.3, build 5457199",
+  "compose": "Docker Compose version v5.7.0",
+  "legacy": {
+    "schema": "a1_legacy_3ceabda6bf8441dfb9b7204d462b7334",
+    "scope": "exact S1/S2/S3 migration SQL in a fresh isolated schema; legacy replay with compiled services",
+    "passed": true,
+    "cleanup": true,
+    "database": {
+      "name": "brewlite_s3_demo",
+      "version": "17.11 (Debian 17.11-1.pgdg12+2)"
+    },
+    "migrations": [
+      {
+        "name": "20261024160346_init_products",
+        "sha256": "536a24ff5fbbcf34654bd971fbae2086c2f3674de5b31c5b334a28bccbea20c6"
+      },
+      {
+        "name": "20261030152601_sprint2_auth_orders",
+        "sha256": "b55c6e6b97339d7c7016ac96dd69f7cd92b0586cbaf1889b02582ea8545b949d"
+      },
+      {
+        "name": "20261109010714_sprint3_payment_stock",
+        "sha256": "6d3e037165234c05f4a152ff2612bd7dc6951e45a917ecc722de02c49350e9c9"
+      }
+    ],
+    "beforeDigest": "b945defe404e7f859ce479f2a1ccb1d883fa724bf4c81383d43ae48dfb589814",
+    "rowCounts": {
+      "products": 1,
+      "toppings": 0,
+      "product_toppings": 0,
+      "users": 1,
+      "auth_sessions": 0,
+      "orders": 2,
+      "order_items": 2,
+      "order_item_toppings": 0,
+      "order_requests": 2
+    },
+    "afterDigest": "b945defe404e7f859ce479f2a1ccb1d883fa724bf4c81383d43ae48dfb589814",
+    "assertions": {
+      "migrationPreservesOriginalColumns": true,
+      "legacyPolicy1NoHold": true,
+      "successReplay200": true,
+      "rejectedReplay400": true,
+      "reorderedFieldErrorRemapped": true,
+      "v1v2Conflict": true,
+      "legacyPayCancelBlocked": true,
+      "legacyExpiryIgnored": true
+    }
+  },
+  "browserExitCode": 0,
+  "browser": {
+    "browser": "158.0.8127.18",
+    "checks": [
+      {
+        "ac": "S3-CART-02/S3-CART-04",
+        "name": "logout/login A-B-A retains exact unresolved payment and never auto-POSTs",
+        "passed": true,
+        "detail": {
+          "requestDigest": "2898606fde46566ea83a21de1c8fdb0c0b161ef1b21ca462045448552f1017bc",
+          "sameKeyAndBody": true,
+          "paymentAttempts": 1
+        }
+      },
+      {
+        "ac": "S3-SEC-01/S3-CART-02",
+        "name": "shared-cookie account switch blocks A headers and cancels or ignores delayed A Order after B verification",
+        "passed": true,
+        "detail": {
+          "expectedOwnerStatus": 403,
+          "oldOrderHidden": true,
+          "noPaymentCreated": true,
+          "automaticMutationPosts": 0,
+          "oldResponse": {
+            "clientAborted": false,
+            "delivered": true
+          }
+        }
+      },
+      {
+        "ac": "S3-SEC-01",
+        "name": "late logout response cannot erase a new B cookie or B cart",
+        "passed": true,
+        "detail": {
+          "logoutStatus": 204,
+          "logoutDoesNotSetCookie": true,
+          "newSessionOwnerPreserved": true,
+          "newCartPreserved": true
+        }
+      },
+      {
+        "ac": "S3-SEC-01/S3-CART-02",
+        "name": "real revoked-session 401 preserves owned cart and login restores with GET only",
+        "passed": true,
+        "detail": {
+          "revokedSessionHTTP": 401,
+          "storagePreserved": true,
+          "loginAutoMutationPosts": 0
+        }
+      },
+      {
+        "ac": "S3-CART-05",
+        "name": "expired order retains choices and only explicit new confirmation creates a new key/order",
+        "passed": true,
+        "detail": {
+          "distinctOrderAndKey": true,
+          "createBeforeConfirmation": 0,
+          "automaticPayments": 0
+        }
+      },
+      {
+        "ac": "S3-CART-05/S3-CART-03",
+        "name": "late expired-order read cannot overwrite a newer same-owner cart from another tab",
+        "passed": true,
+        "detail": {
+          "newerCartDigest": "b62821fffb386a9999587ac4e6643922cf9b0be146c343e3fba363788901069f",
+          "newerCartPreserved": true,
+          "unexpectedPosts": 0
+        }
+      },
+      {
+        "ac": "S3-MIG-01",
+        "name": "unsupported storage stays intact; explicit retry migrates v1 pending to v2 without POST",
+        "passed": true,
+        "detail": {
+          "pendingDigest": "c7d635036f8ed07b3f00afe4d2de1555e5529833560008e271552b5e3da52861",
+          "payloadAndKeyPreserved": true,
+          "automaticPosts": 0,
+          "webLocksAvailable": true,
+          "unsupportedBytesRetained": true,
+          "explicitRetryWorked": true
+        }
+      }
+    ],
+    "pageErrors": [],
+    "passed": true,
+    "scope": "real production BFF/Nest/PostgreSQL and browser storage/Web Locks; fixture expiry/revocation through compiled backend services",
+    "currentCheck": "unsupported storage stays intact; explicit retry migrates v1 pending to v2 without POST"
+  },
+  "baselineExitCode": 0,
+  "baselineBrowser": {
+    "browser": "158.0.8127.18",
+    "checks": 9,
+    "passed": true,
+    "posts": [
+      {
+        "path": "/api/auth/login",
+        "keyPresent": false
+      },
+      {
+        "path": "/api/orders",
+        "keyPresent": true
+      },
+      {
+        "path": "/api/payments",
+        "keyPresent": true
+      },
+      {
+        "path": "/api/payments",
+        "keyPresent": true
+      },
+      {
+        "path": "/api/orders/881b576e-2483-4242-95e4-36843086814f/cancel",
+        "keyPresent": false
+      }
+    ],
+    "pageErrors": []
+  },
+  "servicesAfter": [
+    {
+      "service": "backend",
+      "name": "brewlite-sprint3-backend-1",
+      "state": "running",
+      "health": "healthy",
+      "image": "brewlite-api:sprint3"
+    },
+    {
+      "service": "db",
+      "name": "brewlite-sprint3-db-1",
+      "state": "running",
+      "health": "healthy",
+      "image": "postgres:17-bookworm"
+    },
+    {
+      "service": "frontend",
+      "name": "brewlite-sprint3-frontend-1",
+      "state": "running",
+      "health": "healthy",
+      "image": "brewlite-web:sprint3"
+    }
+  ],
+  "demoInventoryUnchanged": true,
+  "completedAt": "2026-11-12T13:18:55.773Z"
+}

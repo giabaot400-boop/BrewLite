@@ -27,3 +27,15 @@ test("chưa nối giỏ: không nói gì về giỏ", () => {
   const text = logoutDialogLines(null).join(" ");
   assert.doesNotMatch(text, /giỏ/);
 });
+
+test("đơn đã tạo hoặc payment chưa rõ vẫn cần hỏi khi giỏ rỗng và không pending tạo đơn", () => {
+  const base = { cartItemCount: 0, hasPendingOrder: false };
+  assert.equal(needsLogoutConfirmation({ ...base, hasCheckoutOrder: true }), true);
+  assert.equal(needsLogoutConfirmation({ ...base, hasUnresolvedPayment: true }), true);
+  const order = logoutDialogLines({ ...base, hasCheckoutOrder: true }).join(" ");
+  assert.match(order, /Đơn đã tạo không bị hủy/);
+  assert.doesNotMatch(order, /Lần đặt gần nhất chưa rõ/);
+  const payment = logoutDialogLines({ ...base, hasUnresolvedPayment: true }).join(" ");
+  assert.match(payment, /Lần thanh toán chưa rõ kết quả được giữ/);
+  assert.doesNotMatch(payment, /thanh toán.*bị hủy/);
+});

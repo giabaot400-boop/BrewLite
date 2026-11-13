@@ -1,0 +1,47 @@
+COMPOSE CHECK START (helper v2): 2026-11-12T11:31:06.172Z
+STEP: readiness: initial deployment
+READY: initial deployment (1 GET probe(s))
+STEP: BFF registration/login and guards
+PASS COMPOSE 1: three healthy services, private DB/backend, real BFF registration/login and access guards
+STEP: payment, replay and refund
+PASS COMPOSE 2: promotion total, successful payment, exact-key replay, points, full refund and repeated cancel
+STEP: FAILED payment and new-key retry
+STEP: recreate backend with MOCK_PAYMENT_OUTCOME=FAILED
+STEP: readiness: backend outcome FAILED
+READY: backend outcome FAILED (1 GET probe(s))
+STEP: validate payment DTO and record FAILED attempt
+STEP: recreate backend with MOCK_PAYMENT_OUTCOME=SUCCEEDED
+STEP: readiness: backend outcome SUCCEEDED
+READY: backend outcome SUCCEEDED (1 GET probe(s))
+STEP: replay old key and pay with a new key
+PASS COMPOSE 3: FAILED configuration, preserved hold/deadline, old-key replay after restart and new-key retry
+STEP: terminal no-attempt marker
+PASS COMPOSE 4: terminal no-attempt marker does not create a payment
+STEP: compiled workflow CLI
+PASS COMPOSE 5: compiled internal CLI flag, legal state transitions and late-cancel rejection
+STEP: expiry startup catch-up
+STEP: readiness: expiry backend restart
+READY: expiry backend restart (1 GET probe(s))
+PASS COMPOSE 6: backend startup catches up expired policy2 fixture and releases its hold
+STEP: existing browser suite against Compose
+Running existing browser suite against http://localhost:3000 in Compose.
+PASS BROWSER 1: real form login and owner cart
+PASS BROWSER 2: create PENDING keeps durable cart, shows official total and sends no automatic payment
+PASS BROWSER 3: reload restores the current order without POST
+PASS BROWSER 4: lost payment response retains its original key/body as UNRESOLVED
+PASS BROWSER 5: explicit recovery after reload replays the exact committed payment
+PASS BROWSER 6: payment consumes the order once and clears only its cart after a current read
+PASS BROWSER 7: paid cancellation keeps the cleared cart empty
+PASS BROWSER 8: history and detail show current canceled order
+PASS BROWSER 9: mobile order detail has no horizontal overflow
+BROWSER CHECKS: 9/9 PASSED
+
+PASS COMPOSE 7: real browser 9/9: login/cart/create/reload/lost response/replay/refund/history/mobile
+STEP: persistent data after three-service stop/start
+STEP: readiness: three-service stop/start
+READY: three-service stop/start (1 GET probe(s))
+PASS COMPOSE 8: all three services stop/start with persistent orders, payment ledger, points, stock and session
+Fixture cleanup completed; demo product inventory unchanged.
+COMPOSE WORKFLOW CHECKS: 8/8 PASSED
+REPORT: E:\download\BrewLite_A1_Compose_2026-11-12T11-31-06-170Z
+COMPOSE_WORKFLOW_CHECKS_PASSED

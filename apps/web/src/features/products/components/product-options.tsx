@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/features/cart/cart-provider";
+import { useCartEditing } from "@/features/cart/cart-edit-context";
 import { CartNotice } from "@/features/cart/components/cart-notice";
 import { buildProductCartDraft } from "@/features/cart/product-cart-draft";
 import type { ProductDetail, SizeCode } from "../types";
@@ -18,7 +18,7 @@ type ProductOptionsProps = {
 
 export function ProductOptions({ product }: ProductOptionsProps) {
   const { sizes, toppings } = product;
-  const { state: cartState, canMutate, addItem } = useCart();
+  const { state: cartState, canMutate, addItem } = useCartEditing();
   const [feedback, setFeedback] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<SizeCode>("S");
 

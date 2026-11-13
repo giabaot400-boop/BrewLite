@@ -1,0 +1,27 @@
+SESSION/LEGACY CHECK START: 2026-11-12T13:18:10.568Z
+STEP: isolated schema migration and legacy replay
+PASS LEGACY: exact migration SQL, preserved digest, replay and policy1 read-only; private schema removed.
+STEP: real browser session/expiry/storage checks
+PASS SESSION 1: logout/login A-B-A retains exact unresolved payment and never auto-POSTs
+PASS SESSION 2: shared-cookie account switch blocks A headers and cancels or ignores delayed A Order after B verification
+PASS SESSION 3: late logout response cannot erase a new B cookie or B cart
+PASS SESSION 4: real revoked-session 401 preserves owned cart and login restores with GET only
+PASS SESSION 5: expired order retains choices and only explicit new confirmation creates a new key/order
+PASS SESSION 6: late expired-order read cannot overwrite a newer same-owner cart from another tab
+PASS SESSION 7: unsupported storage stays intact; explicit retry migrates v1 pending to v2 without POST
+SESSION BROWSER CHECKS: 7/7 PASSED
+STEP: existing nine-step browser regression
+PASS BROWSER 1: real form login and owner cart
+PASS BROWSER 2: create PENDING keeps durable cart, shows official total and sends no automatic payment
+PASS BROWSER 3: reload restores the current order without POST
+PASS BROWSER 4: lost payment response retains its original key/body as UNRESOLVED
+PASS BROWSER 5: explicit recovery after reload replays the exact committed payment
+PASS BROWSER 6: payment consumes the order once and clears only its cart after a current read
+PASS BROWSER 7: paid cancellation keeps the cleared cart empty
+PASS BROWSER 8: history and detail show current canceled order
+PASS BROWSER 9: mobile order detail has no horizontal overflow
+BROWSER CHECKS: 9/9 PASSED
+Session fixture cleanup completed; existing Product inventory unchanged.
+SESSION/LEGACY CHECKS: 9/9 PASSED
+REPORT: E:\download\BrewLite_A1_Cart_Rollout_Fix\BrewLite_A1_Session_Legacy_2026-11-12T13-18-10-566Z
+SESSION_LEGACY_CHECKS_PASSED

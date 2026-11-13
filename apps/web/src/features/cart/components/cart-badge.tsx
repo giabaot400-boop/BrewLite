@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { selectCartQuantity } from "../cart-reducer";
-import { useCart } from "../cart-provider";
+import { useCartEditing } from "../cart-edit-context";
 
 export function CartBadge() {
-  const { state } = useCart();
+  const { state } = useCartEditing();
   const quantity = state.status === "ready" && state.cart !== null ? selectCartQuantity(state.cart) : null;
   const quantityLabel = quantity === null ? "số lượng chưa xác định" : `${quantity} ly`;
   return (

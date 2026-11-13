@@ -1,0 +1,450 @@
+{
+  "helperVersion": 2,
+  "startedAt": "2026-11-12T11:31:06.172Z",
+  "repo": "giabaot400-boop/BrewLite",
+  "groups": [
+    {
+      "name": "three healthy services, private DB/backend, real BFF registration/login and access guards",
+      "passed": true
+    },
+    {
+      "name": "promotion total, successful payment, exact-key replay, points, full refund and repeated cancel",
+      "passed": true
+    },
+    {
+      "name": "FAILED configuration, preserved hold/deadline, old-key replay after restart and new-key retry",
+      "passed": true
+    },
+    {
+      "name": "terminal no-attempt marker does not create a payment",
+      "passed": true
+    },
+    {
+      "name": "compiled internal CLI flag, legal state transitions and late-cancel rejection",
+      "passed": true
+    },
+    {
+      "name": "backend startup catches up expired policy2 fixture and releases its hold",
+      "passed": true
+    },
+    {
+      "name": "real browser 9/9: login/cart/create/reload/lost response/replay/refund/history/mobile",
+      "passed": true
+    },
+    {
+      "name": "all three services stop/start with persistent orders, payment ledger, points, stock and session",
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "cleanup": true,
+  "sha": "88f5f35f3bb921bd68be2d0f8c70bd6736ab101e",
+  "browserRunnerBlob": "f9a248160eab2b3ced5647d1c4110ef5e906c32f",
+  "beforeServices": [
+    {
+      "service": "backend",
+      "name": "brewlite-sprint3-backend-1",
+      "state": "running",
+      "health": "healthy",
+      "image": "brewlite-api:sprint3"
+    },
+    {
+      "service": "db",
+      "name": "brewlite-sprint3-db-1",
+      "state": "running",
+      "health": "healthy",
+      "image": "postgres:17-bookworm"
+    },
+    {
+      "service": "frontend",
+      "name": "brewlite-sprint3-frontend-1",
+      "state": "running",
+      "health": "healthy",
+      "image": "brewlite-web:sprint3"
+    }
+  ],
+  "docker": "Docker version 29.9.3, build 5457199",
+  "compose": "Docker Compose version v5.7.0",
+  "imageIds": {
+    "backend": "sha256:93c73e1dd9c20e558c64f08aac6f859792384ed430653ec27f7b522be71e0e7b",
+    "frontend": "sha256:bb88e42438f0a4abdfad51c87a10dd58fca8747c3d151d3a73b6a22bcdc9ab05",
+    "db": "sha256:665dc7b37ac52a17e298511414c21d23ffa4e6a6ef6225b3e5d59c7afb35e994"
+  },
+  "phase": "readiness: three-service stop/start",
+  "readiness": [
+    {
+      "reason": "initial deployment",
+      "probes": [
+        {
+          "status": 200
+        }
+      ]
+    },
+    {
+      "reason": "backend outcome FAILED",
+      "probes": [
+        {
+          "status": 200
+        }
+      ]
+    },
+    {
+      "reason": "backend outcome SUCCEEDED",
+      "probes": [
+        {
+          "status": 200
+        }
+      ]
+    },
+    {
+      "reason": "expiry backend restart",
+      "probes": [
+        {
+          "status": 200
+        }
+      ]
+    },
+    {
+      "reason": "three-service stop/start",
+      "probes": [
+        {
+          "status": 200
+        }
+      ]
+    }
+  ],
+  "demoBaseline": [
+    {
+      "id": "americano",
+      "price": 40000,
+      "stock": 10,
+      "reservedStock": 0,
+      "stockVersion": 1
+    },
+    {
+      "id": "cappuccino",
+      "price": 45000,
+      "stock": 10,
+      "reservedStock": 0,
+      "stockVersion": 1
+    },
+    {
+      "id": "coffee-milk",
+      "price": 35000,
+      "stock": 10,
+      "reservedStock": 0,
+      "stockVersion": 1
+    },
+    {
+      "id": "peach-tea",
+      "price": 39000,
+      "stock": 10,
+      "reservedStock": 0,
+      "stockVersion": 1
+    }
+  ],
+  "lastRequest": {
+    "method": "GET",
+    "path": "/api/orders/me"
+  },
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "status": 201,
+      "elapsedMs": 343.16
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200,
+      "elapsedMs": 337.07
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "status": 201,
+      "elapsedMs": 308.78
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200,
+      "elapsedMs": 308.54
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders/me",
+      "status": 401,
+      "elapsedMs": 8.79
+    },
+    {
+      "method": "POST",
+      "path": "/api/orders",
+      "status": 201,
+      "elapsedMs": 110.15
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments",
+      "status": 200,
+      "elapsedMs": 81.3
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments",
+      "status": 404,
+      "elapsedMs": 28.01
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments",
+      "status": 403,
+      "elapsedMs": 8.84
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments",
+      "status": 403,
+      "elapsedMs": 14.99
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders/me",
+      "status": 403,
+      "elapsedMs": 8.36
+    },
+    {
+      "method": "POST",
+      "path": "/api/orders/:id/cancel",
+      "status": 200,
+      "elapsedMs": 90.09
+    },
+    {
+      "method": "POST",
+      "path": "/api/orders",
+      "status": 201,
+      "elapsedMs": 65.58
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments",
+      "status": 200,
+      "elapsedMs": 60.46
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments",
+      "status": 200,
+      "elapsedMs": 28.31
+    },
+    {
+      "method": "POST",
+      "path": "/api/orders/:id/cancel",
+      "status": 200,
+      "elapsedMs": 60.66
+    },
+    {
+      "method": "POST",
+      "path": "/api/orders/:id/cancel",
+      "status": 200,
+      "elapsedMs": 40.17
+    },
+    {
+      "method": "POST",
+      "path": "/api/orders",
+      "status": 201,
+      "elapsedMs": 72.32
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments",
+      "status": 400,
+      "elapsedMs": 61.28
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments",
+      "status": 200,
+      "elapsedMs": 160.73
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments",
+      "status": 200,
+      "elapsedMs": 73.8
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments",
+      "status": 200,
+      "elapsedMs": 133.97
+    },
+    {
+      "method": "POST",
+      "path": "/api/orders/:id/cancel",
+      "status": 200,
+      "elapsedMs": 99.07
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments",
+      "status": 200,
+      "elapsedMs": 26.57
+    },
+    {
+      "method": "POST",
+      "path": "/api/orders",
+      "status": 201,
+      "elapsedMs": 109.51
+    },
+    {
+      "method": "POST",
+      "path": "/api/orders/:id/cancel",
+      "status": 200,
+      "elapsedMs": 78.43
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments",
+      "status": 409,
+      "elapsedMs": 31.11
+    },
+    {
+      "method": "POST",
+      "path": "/api/orders",
+      "status": 201,
+      "elapsedMs": 75.6
+    },
+    {
+      "method": "POST",
+      "path": "/api/payments",
+      "status": 200,
+      "elapsedMs": 99.45
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders/:id",
+      "status": 200,
+      "elapsedMs": 29.74
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders/:id",
+      "status": 200,
+      "elapsedMs": 23.15
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders/:id",
+      "status": 200,
+      "elapsedMs": 23.03
+    },
+    {
+      "method": "POST",
+      "path": "/api/orders/:id/cancel",
+      "status": 409,
+      "elapsedMs": 27.77
+    },
+    {
+      "method": "POST",
+      "path": "/api/orders",
+      "status": 201,
+      "elapsedMs": 50.26
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders/:id",
+      "status": 200,
+      "elapsedMs": 37.52
+    },
+    {
+      "method": "GET",
+      "path": "/api/orders/me",
+      "status": 200,
+      "elapsedMs": 83.18
+    }
+  ],
+  "browser": {
+    "browser": "158.0.8127.18",
+    "checks": 9,
+    "passed": true,
+    "posts": [
+      {
+        "path": "/api/auth/login",
+        "keyPresent": false
+      },
+      {
+        "path": "/api/orders",
+        "keyPresent": true
+      },
+      {
+        "path": "/api/payments",
+        "keyPresent": true
+      },
+      {
+        "path": "/api/payments",
+        "keyPresent": true
+      },
+      {
+        "path": "/api/orders/3ca36ae4-854e-4a56-a30a-877fb0329105/cancel",
+        "keyPresent": false
+      }
+    ],
+    "pageErrors": []
+  },
+  "afterServices": [
+    {
+      "service": "backend",
+      "name": "brewlite-sprint3-backend-1",
+      "state": "running",
+      "health": "healthy",
+      "image": "brewlite-api:sprint3"
+    },
+    {
+      "service": "db",
+      "name": "brewlite-sprint3-db-1",
+      "state": "running",
+      "health": "healthy",
+      "image": "postgres:17-bookworm"
+    },
+    {
+      "service": "frontend",
+      "name": "brewlite-sprint3-frontend-1",
+      "state": "running",
+      "health": "healthy",
+      "image": "brewlite-web:sprint3"
+    }
+  ],
+  "demoAfter": [
+    {
+      "id": "americano",
+      "price": 40000,
+      "stock": 10,
+      "reservedStock": 0,
+      "stockVersion": 1
+    },
+    {
+      "id": "cappuccino",
+      "price": 45000,
+      "stock": 10,
+      "reservedStock": 0,
+      "stockVersion": 1
+    },
+    {
+      "id": "coffee-milk",
+      "price": 35000,
+      "stock": 10,
+      "reservedStock": 0,
+      "stockVersion": 1
+    },
+    {
+      "id": "peach-tea",
+      "price": 39000,
+      "stock": 10,
+      "reservedStock": 0,
+      "stockVersion": 1
+    }
+  ],
+  "completedAt": "2026-11-12T11:32:37.563Z"
+}

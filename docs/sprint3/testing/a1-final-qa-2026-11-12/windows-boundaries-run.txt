@@ -1,0 +1,12 @@
+AC BOUNDARY CHECK START: 2026-11-12T12:31:48.035Z
+PASS BOUNDARY 1: S3-ORD-04 — history is owner-scoped, empty-safe and sorted by createdAt/id DESC on PostgreSQL
+PASS BOUNDARY 2: S3-PAY-08 — payment accepts deadline minus 1 ms and rejects exactly at or after deadline
+PASS BOUNDARY 3: S3-PAY-05 — a canceled order still rejects reuse of an old key with a different method or orderId
+PASS BOUNDARY 4: S3-STK-02 — a create failure on the second Product rolls back the first hold; topping has no stock writes
+PASS BOUNDARY 5: S3-PRO-01 — DEMO10 minimum, cap, start-inclusive/end-exclusive and inactive reasons
+PASS BOUNDARY 6: S3-STK-01 — ten barrier-controlled races for the last Product keep one hold and replay the loser
+PASS BOUNDARY 7: S3-ORD-02 — cancel racing expiry releases the original hold once and preserves its reason
+Boundary fixture cleanup completed; existing Product inventory unchanged.
+AC BOUNDARY CHECKS: 7/7 PASSED
+REPORT: E:\download\BrewLite_A1_AC_Closeout\BrewLite_A1_AC_Boundaries_2026-11-12T12-31-48-033Z
+AC_BOUNDARY_CHECKS_PASSED
