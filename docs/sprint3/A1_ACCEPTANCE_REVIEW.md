@@ -1,6 +1,29 @@
 # Assignment 1 — đối chiếu nghiệm thu sau tích hợp
 
-Ngày rà soát: 12/11/2026. Source ứng dụng mới nhất đã kiểm trên máy A: `3959f4096ee8b2f4baffac83ab8e0e5b6460752d`, nhánh `integration/sprint3-checkout-e2e`. Nguồn: code/test, JSON gốc của A, console đã cung cấp và hồ sơ lịch sử có ghi phạm vi. Hana hỗ trợ đối chiếu kỹ thuật; đây chưa thay approval trong nhóm.
+## Cập nhật 13/11/2026 — review, merge và demo thủ công
+
+- B đã [approve PR #53 tại `f3f0ef7`](https://github.com/giabaot400-boop/BrewLite/pull/53#pullrequestreview-5884511329).
+  B tự chạy web lint/typecheck/960 test/build; API 89/94, năm spec còn vướng
+  Prisma Client trong môi trường B. Backend typecheck/build, PostgreSQL và
+  UI với backend thật vẫn dựa vào hồ sơ A; không đổi thành các lượt B tự chạy.
+- [PR #53](https://github.com/giabaot400-boop/BrewLite/pull/53) đã merge
+  `6f38fcb`; #49 merge `a9145f3`; #51 merge `88b4e12`. Main khi đối chiếu
+  là `88b4e12cf909226e9b376041d5da4205765b7649`; không còn chờ merge #53.
+- [PR #54](https://github.com/giabaot400-boop/BrewLite/pull/54) tại `85062ce`
+  và [PR #55](https://github.com/giabaot400-boop/BrewLite/pull/55) tại
+  `0741c18` còn mở tại thời điểm ghi. #55 có review COMMENTED trên `4b0742a`,
+  đã sửa góp ý ở `0741c18`; chưa ghi approval mới hoặc merge cho hai PR này.
+- A đã thực hiện [lượt demo thủ công ngày 13/11](A1_MANUAL_DEMO_2026-11-13.md)
+  trên Compose: các luồng chính checkout, workflow, hủy, FAILED/thử mới,
+  chờ hết hạn thật, đăng nhập lại giữ giỏ và chủ động đặt lại. Đây là xác nhận
+  thao tác/ảnh/console A cung cấp, không phải chạy lại toàn bộ test/27 AC,
+  buổi Review/Retro chung hoặc nghiệm thu của giảng viên.
+- Git HEAD khi chốt thông tin sau demo là `0741c18`; image đang chạy có ID
+  rút gọn backend `93c73e1dd9c2`, db `665dc7b37ac5`, frontend `6ac3316340d4`.
+  Không gán image đã build trước thành một lượt build/test tại Git HEAD mới.
+
+Các mục QA ngày 12/11 bên dưới giữ nguồn SHA/image và giới hạn ban đầu.
+Ngày rà soát ban đầu: 12/11/2026. Source ứng dụng mới nhất đã kiểm trên máy A: `3959f4096ee8b2f4baffac83ab8e0e5b6460752d`, nhánh `integration/sprint3-checkout-e2e`. Nguồn: code/test, JSON gốc của A, console đã cung cấp và hồ sơ lịch sử có ghi phạm vi. Trợ lý hỗ trợ đối chiếu kỹ thuật; bằng chứng này không tự thay approval trong nhóm.
 
 ## Kết luận kỹ thuật và phần còn mở
 
@@ -17,12 +40,13 @@ SHA/image, thời điểm và môi trường của từng lượt. Phần backen
 `88f5f35`; boundary gắn `d42deb5`; phiên bản frontend sau sửa rollout gắn
 `3959f40`. Kết quả hiệu năng vẫn thuộc image cũ tại `88f5f35`.
 
-[Review mới của B](https://github.com/giabaot400-boop/BrewLite/pull/53#pullrequestreview-5878454053)
+[Review của B tại mốc `a08152c`](https://github.com/giabaot400-boop/BrewLite/pull/53#pullrequestreview-5878454053)
 ngày 12/11/2026, trạng thái `COMMENTED`, gắn đúng `a08152c`: đọc ZIP cả nhánh,
 tự chạy web typecheck/lint và 960/960 test; chưa so diff với approval cũ.
 Backend/PG/build/Docker/browser/hiệu năng trong review này dựa vào hồ sơ A,
-không được ghi thành các lượt B đã chạy. Đây là review mới có phạm vi rõ,
-chưa phải approval mới hoặc xác nhận đã merge/phát hành.
+không được ghi thành các lượt B đã chạy. Tại thời điểm đó, review này chưa
+là approval hoặc xác nhận merge/phát hành; approval `f3f0ef7` và các mốc
+merge sau đó được ghi trong cập nhật 13/11 ở đầu tài liệu.
 
 Đợt xử lý góp ý này thêm `pretest` sinh Prisma Client, làm rõ hướng dẫn và
 chuyển vị trí một JSON lịch sử; không sửa code chạy nghiệp vụ, schema DB hoặc
@@ -41,6 +65,7 @@ SHA trong các bằng chứng cũ thành commit mới.
 | S | 7 nhóm browser session/expiry/storage trên 3959f40; Chromium 158.0.8127.18; pageErrors=[]; cookie/auth/BFF/Nest/PG thật. |
 | R | Runner browser hiện có, 9/9 bước trên frontend mới tại cùng lượt 3959f40; pageErrors=[]. R là một nhóm trong tổng 9 nhóm, không cộng thành 17 AC. |
 | N | 55 mẫu warmup tách riêng; 330/330 mẫu API trong 11 nhóm dưới 500 ms, 0 lỗi, max 331,88 ms trên 88f5f35. [Báo cáo và giới hạn](A1_COMPOSE_PERFORMANCE_QA.md). |
+| M | [Demo thủ công 13/11](A1_MANUAL_DEMO_2026-11-13.md): M01–M10 là các nhóm thao tác A xác nhận, không là tổng test tự động. Có chờ hạn thật 15 phút và tạo đơn mới chủ động; metadata Git và image được ghi riêng. Không thu Network/SQL, không kết luận exact-key replay hoặc side effects một lần từ UI. |
 
 L/S/R thuộc một lượt: **9/9 nhóm**, mã 0, `passed=true`, `cleanup=true`, `demoInventoryUnchanged=true`, bắt đầu 20:18:10.568 và kết thúc 20:18:55.773 UTC+7. [JSON tổng hợp gốc](testing/a1-final-qa-2026-11-12/session-legacy-result.json) đã chứa cả hai báo cáo browser; log và JSON browser riêng được sao chép theo [chỉ mục](testing/a1-final-qa-2026-11-12/README.md).
 
@@ -82,11 +107,11 @@ NFR N được đo trước sửa provider và trước image frontend mới. So
 | S3-CART-02 | Không auto POST; A/B và logout/login giữ recovery đúng chủ | S1 A→B→A; S2 shared cookie; S4 revoked-session/login; W bridge | Key/body cũ được so sánh trước/sau; B không thấy/gửi recovery A. |
 | S3-CART-03 | Chỉ clear paid-current đúng tuple, giữ giỏ mới | W revision/snapshot/owner/cancellation; S6 delayed read/new cart; R6–7 | S6 dùng hai tab thật và Web Locks; late read không ghi đè cart mới. |
 | S3-CART-04 | UNRESOLVED giữ key/body; key mới chỉ sau FAILED xác nhận | W payment/client/runtime; S1 lost-before-forward + replay; R4–6 lost-after-commit | Hai tình huống mất phản hồi được phân biệt, không tự gửi lại sau login/F5. |
-| S3-CART-05 | Expired/reorder chủ động, kiểm kho/tổng, giữ giỏ mới | S5 expiry→preview/back→new order/key; S6 old read/new cart; B/P stock; R2 | Deadline của riêng fixture được đặt về quá khứ rồi gọi service expiry; không chờ 15 phút. |
+| S3-CART-05 | Expired/reorder chủ động, kiểm kho/tổng, giữ giỏ mới | S5 expiry→preview/back→new order/key; S6 old read/new cart; B/P stock; R2; M08–M10 | S5 đặt deadline fixture về quá khứ; M08 chờ hạn thật, M10 xác nhận mã/hạn mới. Lượt thủ công không chụp key/body hoặc SQL. |
 | S3-SEC-01 | Owner/session/Origin guards, response cũ và cookie mới | H3/H7/C1; S2 expected-owner 403/late A GET; S3 late logout/B cookie+cart; S4 real 401; W no-store/token | S2 old response thực sự delivered rồi bị bỏ; S3 204 không Set-Cookie. Safari/Firefox chưa kiểm. |
 | S3-MIG-01 | Giữ legacy DB/key/hash/response, storage v1 pending, old writer guard | L exact S1/S2→S3 SQL + digest + replay/remap/policy1; S7 v1/unsupported/retry; W envelope migration/v1 writer | L ở schema UUID riêng: 2 Order/2 ledger; old writer/quota/lock failures có unit, không nhận là browser tab ứng dụng v1. |
 | S3-DEL-01 | Compose ba service, README/deploy/seed/demo/persistence | C1–8 trên máy A; E seed ACTIVE/migration; S/L/R trên frontend mới | A khác môi trường E; backend/DB private. Production HTTPS thuộc nghiệm thu A2 riêng. |
-| S3-DEL-02 | Hồ sơ phát hành, review PR, Review/Retro/backlog và packaging | Source/QA đã push; bản ghi này và board/Retro cập nhật từ sự việc thật | CÒN MỞ: review diff mới, buổi demo/feedback nếu lớp yêu cầu và gói bàn giao cuối. |
+| S3-DEL-02 | Hồ sơ phát hành, review PR, Review/Retro/backlog và packaging | QA đã push; B approve `f3f0ef7`, #53 đã merge; M ghi demo riêng của A | CÒN MỞ: chốt review/merge hồ sơ cuối, Review/Retro/feedback nếu lớp yêu cầu, giờ LMS và gói bàn giao từ SHA cuối. |
 
 ## Ba tiêu chí chấm Task 10
 
@@ -96,8 +121,8 @@ NFR N được đo trước sửa provider và trước image frontend mới. So
 
 ## Điều kiện đóng A1 còn lại
 
-- PR #53 đã cập nhật mô tả workflow/rollout và có review mới trên `a08152c` như trên. Cần xử lý/trả lời góp ý, xác nhận review bản sau sửa rồi chốt merge/phát hành. Approval Khai-Dang tại `ff9bb73` thuộc bản trước workflow, không thay approval mới.
-- [Review/Retro/backlog](B_REVIEW_RETRO_SPRINT3.md) ghi sự việc A thực hiện và việc cần làm; chưa xác nhận buổi nhóm, feedback giảng viên hoặc người khác approve.
-- Hồ sơ QA gốc đã commit/push tại `a08152c`; gói candidate từ đúng SHA này đã tạo trên máy A, gồm 422 file tracked, kiểm ZIP đạt/mã 0. Sau khi chốt bản mới, cập nhật gói và ghi SHA thực tế; candidate không thay bản phát hành. Đối chiếu [board](B_BOARD_SPRINT3.md), thực hiện Review/Retro/demo và kiểm giờ nộp LMS theo thông tin thật.
-- CI được theo dõi ở phạm vi A2 Task 4.4; đợt sửa này không thêm CI vào A1. B cho phép tách CI sang PR sau nếu cần merge sớm. Trả lời rõ lựa chọn này trên PR, không ghi pipeline đã chạy hoặc góp ý đã được B chấp thuận khi chưa có xác nhận.
+- PR #53 đã được Khai-Dang approve tại `f3f0ef7` và merge `6f38fcb`; approval cũ `ff9bb73` không thay bản mới. Còn chốt các thay đổi tài liệu sau đó, gồm #54, #55 và bản ghi demo này; approval PR không tự thay reviewer từng ticket hoặc bản phát hành cuối.
+- [Review/Retro/backlog](B_REVIEW_RETRO_SPRINT3.md) giữ sự việc thực tế. Demo thủ công 13/11 là lượt riêng của A; chưa xác nhận buổi nhóm hoặc feedback giảng viên. Ghi thêm người tham gia, hình thức, góp ý và xử lý khi thực sự diễn ra.
+- QA gốc tại `a08152c` và candidate 422 file ở mốc đó được giữ theo lịch sử. Candidate mới tại `f3f0ef7` có 423 file tracked, đã tạo/kiểm ZIP trên máy A; vẫn chưa thay gói phát hành từ SHA cuối. Sau khi chốt tài liệu, cập nhật source/manifest và ghi SHA thực tế; đối chiếu [board](B_BOARD_SPRINT3.md), hướng dẫn nộp và giờ LMS chính thức.
+- B đã đồng ý tách CI sang PR sau trong approval `f3f0ef7`; A2 Task 4.4 theo dõi CI riêng. Đợt cập nhật hồ sơ này không thêm CI vào A1 hoặc ghi pipeline đã chạy.
 - Không mở thêm tính năng ngoài phạm vi để đóng các mục hồ sơ này. Phần đã code/test và phần cần review/nghiệm thu được theo dõi riêng, không xóa lịch sử FAIL hoặc lập burndown giả.
