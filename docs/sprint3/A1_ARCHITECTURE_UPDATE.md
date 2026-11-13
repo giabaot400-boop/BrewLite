@@ -42,7 +42,8 @@ thị mỗi ô là một container. Compose chỉ có frontend, backend và db.
   đã commit, không gọi mock hoặc tác động kho/điểm lại.
 - Giữ canonical V1/V2, ledger lịch sử và policy1 read-only. Policy2 có hold
   15 phút, kho chỉ Product; không thêm tồn Topping, bảng hoặc UC mới.
-- Bảy nguồn/mười một SVG gồm bộ D01–D07 ngày 06/11 và hai góc D08/D09 mới.
+- Bộ D01–D07 ngày 06/11 có năm nguồn/chín SVG; D08/D09 bổ sung hai nguồn/hai
+  SVG, tổng cộng bảy nguồn/mười một SVG.
   Nguồn/hình cũ giữ nguyên; hai hình S1 tiếp tục là mốc lịch sử. Sơ đồ sequence
   và use case S3 đã mô tả mock nội bộ trước đợt bổ sung này.
 
@@ -50,8 +51,8 @@ thị mỗi ô là một container. Compose chỉ có frontend, backend và db.
 
 Hai SVG mới được render bằng PlantUML 1.2025.2, Java 21, Graphviz dot 2.42.4
 và font DejaVu Sans từ đúng hai nguồn `.puml`, cùng màu/font của bộ hiện có.
-Thông tin renderer và lệnh tái tạo đi kèm gói patch. Nên giữ phiên
-bản renderer khi cần so hình; không dùng hình xuất từ nguồn khác để thay SVG.
+Nên giữ phiên bản renderer khi cần so hình; không dùng hình xuất từ nguồn
+khác để thay SVG.
 
 ```powershell
 java -Djava.awt.headless=true -jar "DUONG_DAN_DEN_PLANTUML_JAR" -charset UTF-8 -tsvg docs/diagrams/sprint3/system-context.puml docs/diagrams/sprint3/logical-architecture.puml
