@@ -1,5 +1,12 @@
 # BrewLite Sprint 3 gói triển khai rút gọn
 
+## Kiến trúc bản tích hợp — 13/11/2026
+
+Bổ sung [system context và logical architecture Sprint 3](A1_ARCHITECTURE_UPDATE.md)
+từ source `88b4e12` sau merge #53/#49/#51. Hai nguồn PlantUML và hai SVG thể
+hiện mock nội bộ NestJS, Next.js/BFF, giỏ/recovery, expiry và CLI có flag.
+Giữ hình Sprint 1–2 theo lịch sử; không thêm API, schema, UC hoặc kết quả test.
+
 ## Xử lý review bản a08152c — 12/11/2026
 
 B đã review ZIP cả nhánh tại `a08152c`, tự kiểm web typecheck/lint và 960/960

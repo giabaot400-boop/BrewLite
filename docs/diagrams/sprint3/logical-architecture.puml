@@ -1,0 +1,69 @@
+@startuml logical-architecture-sprint3
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #5B4636
+skinparam roundcorner 12
+skinparam componentBorderColor #80644F
+skinparam rectangleBorderColor #80644F
+skinparam databaseBorderColor #80644F
+skinparam noteBackgroundColor #FFF6DA
+skinparam noteBorderColor #B89551
+skinparam nodesep 30
+skinparam ranksep 36
+top to bottom direction
+title BrewLite — Logical architecture Sprint 3\nBản tích hợp A1 tại 88b4e12 — 13/11/2026
+
+rectangle "Trình duyệt khách hàng" as Browser #F9F2E9 {
+  component "Next.js UI\nMenu / tùy chọn / giỏ / checkout\nXác nhận / chi tiết / lịch sử đơn" as UI
+  component "Giỏ và phục hồi v2\nlocalStorage + Web Locks\nowner, key/body, binding, recovery" as Storage
+  UI -- Storage : Web Lock + phiên
+}
+
+rectangle "BrewLite — phần server" as Server {
+  rectangle "Next.js server — frontend service" as Next #EAF4EB {
+    component "Server Components\nSSR và lựa chọn provider theo cờ" as SSR
+    component "BFF /api/*\nAuth cookie HttpOnly\nGuard Origin/phiên/chủ yêu cầu" as BFF
+  }
+  rectangle "NestJS — backend service" as Nest #FFF3D6 {
+    component "REST controllers + guards\nAuth / Products / Orders / Payments" as REST
+    component "Services nghiệp vụ\nAuth, catalog, tạo/đọc đơn\nOrderWorkflowService" as Services
+    component "MockPaymentService\nWALLET / CARD\nKết quả từ cấu hình backend" as Mock
+    component "OrderExpiryService\nStartup + tick 60 giây\nTối đa 50 đơn mỗi lượt quét" as Expiry
+    component "demo:advance\nApplication context nội bộ\nDEMO_WORKFLOW_ENABLED=true" as CLI
+    component "Prisma + giao dịch PostgreSQL\nLedger / row lock / Product CAS\nĐơn, payment, kho và điểm" as ORM
+    REST --> Services : Validate và xác thực lại
+    Services --> Mock : Đánh giá lần thanh toán mới\ntrong workflow transaction
+    Services --> ORM : Truy vấn và ghi nguyên tử
+    Expiry --> Services : Hết hạn: khóa/kiểm lại, nhả hold
+    CLI --> Services : Ba cạnh pha chế hợp lệ
+  }
+  database "PostgreSQL — db service\nCatalog, User/AuthSession, Order/snapshot\nOrderRequest, PaymentAttempt\nPromotion, StockReservation, LoyaltyEntry" as DB #E8EEF9
+}
+
+UI --> BFF : /api/* cùng origin\nCookie HttpOnly
+SSR --> REST : GET catalog
+BFF --> REST : REST/JSON nội bộ\nBearer khi cần xác thực
+ORM --> DB : Prisma/pg\nDữ liệu bền trong named volume
+
+note left of Storage
+  CHECKOUT_V2_ENABLED=1 chọn luồng v2.
+  Migration v1 → v2 dưới cùng Web Lock.
+  JWT không lưu trong localStorage.
+  Chưa rõ kết quả: giữ nguyên key/body;
+  chỉ khách chủ động mới gửi lại POST.
+end note
+
+legend bottom
+  Mock là adapter nội bộ; replay dùng attempt đã commit, không đánh giá/tác động lần nữa.
+  Compose có ba service frontend/backend/db; chỉ frontend mở 127.0.0.1:3000.
+  UI và BFF thuộc cùng ứng dụng Next.js; Prisma thuộc backend.
+  Expiry chạy trong backend. CLI là tiến trình tạm dùng application context,
+  không là service thứ tư và không là endpoint public đổi trạng thái đơn.
+  PWA chỉ cache tài nguyên công khai; auth/order/payment đi mạng, không xếp hàng offline.
+  Sơ đồ nhóm thành phần logic; trình tự, DTO và transaction chi tiết xem CONTRACTS/D03–D07.
+endlegend
+@enduml
