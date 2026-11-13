@@ -1,0 +1,59 @@
+@startuml
+!pragma layout smetana
+title BrewLite Sprint 2\nActivity từ giỏ đến kết quả tạo đơn
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #5B4636
+skinparam noteBackgroundColor #FFF6DA
+skinparam noteBorderColor #B89551
+skinparam roundcorner 10
+
+skinparam activityBackgroundColor #F6EEE4
+skinparam activityBorderColor #80644F
+skinparam activityDiamondBackgroundColor #FFF6DA
+|Trình duyệt|
+start
+:Khách mở giỏ;\nUI đọc storage và kiểm tra phiên;
+:Khi xác thực đúng owner và có pending:\nphục hồi lần đặt từ snapshot\nkể cả cart đã bị xóa theo P01;
+if (Đủ điều kiện xác nhận?) then (Chưa)
+  :Giỏ trống / lỗi lưu: thông báo, chưa đặt.\nChưa đăng nhập: sang đăng nhập / đăng ký;
+  :Nếu cần đăng nhập: sau đó về giỏ;\nkhách chủ động xác nhận lại;
+  stop
+else (Có)
+endif
+:Khách kiểm tra món, giá và\nbấm Đặt hàng hoặc Thử lại;
+if (Có pending đúng owner?) then (Có)
+  :Dùng key và payload đã lưu;\nkhông sửa nội dung / tạo key mới;
+else (Không)
+  :Tạo key mới, chốt payload / owner;\nlưu pending bền trước khi gửi;
+endif
+if (Pending đã lưu hợp lệ?) then (Chưa)
+  :Báo lỗi lưu; chưa gửi POST;
+  stop
+else (Có)
+endif
+:Nhả Web Lock sau ghi pending;\nkhóa nút / giỏ, gửi POST /api/orders;
+|Backend|
+:Xác thực lại, validate; transaction theo P07:\nlock, tra sổ trước khi đọc giá / tạo mới;
+|Trình duyệt|
+:Nhận phản hồi hoặc lỗi mạng;
+if (Xác nhận 200 / 201?) then (Có)
+  :Ghi kết quả, xóa đúng cart / pending\ncùng owner và revision bằng một lần ghi;
+  :Mã đơn + tổng chính thức;\nChờ thanh toán PENDING;
+else (Không)
+  :Phân loại lỗi, giữ giỏ;\nphục hồi theo P01 / P02;
+endif
+stop
+legend bottom
+  Điều kiện: cart hoặc snapshot pending có món; storage dùng được; phiên xác nhận.
+  Pending được phục hồi chỉ bởi đúng owner, giữ nguyên key/payload. Backend luôn kiểm tra lại quyền tạo đơn.
+  PRICE_CHANGED: chưa tạo, cập nhật giá, chờ xác nhận mới với key mới.
+  401: giữ pending, đăng nhập lại. 403/413: giữ pending, dừng đối chiếu.
+  IN_PROGRESS / 5xx / timeout: giữ key/payload; không tự sinh key mới.
+  BFF 10 s, UI 15 s; timeout không chứng minh server đã rollback.
+  Lỗi món trước lỗi giá; lỗi xác nhận chưa tạo cho sửa. Conflict không đổi key.
+  Không tự gửi đơn sau đăng nhập; chưa thực hiện thanh toán trong Sprint 2.
+endlegend
+@enduml

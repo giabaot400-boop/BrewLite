@@ -13,7 +13,7 @@ cây tài liệu A1 hiện hành. Lịch sử commit trước khi tách vẫn đ
 | Sprint 2 | [Mục lục Sprint 2](sprint2/README.md) | Giỏ, auth/session, tạo đơn PENDING và hồ sơ closeout |
 | Sprint 3 | [Thiết kế và phân công](sprint3/README.md) | Task 8–10, contract, AC/test, board và phần việc đang tích hợp |
 | Hướng dẫn kỹ thuật | [API sản phẩm](guides/API_CONTRACT.md), [UI dùng chung](guides/UI_SHARED_COMPONENTS.md), [Git](guides/GIT_WORKFLOW.md) | Hướng dẫn phục vụ code A1; kết quả lịch sử có giới hạn riêng |
-| Sơ đồ | [Sprint 1](diagrams/README.md), [Sprint 3](diagrams/sprint3/README.md) | Nguồn PlantUML/SVG theo phạm vi từng mốc |
+| Sơ đồ | [Sprint 1](diagrams/README.md), [Sprint 2](diagrams/sprint2/README.md), [Sprint 3](diagrams/sprint3/README.md) | Nguồn PlantUML/SVG theo phạm vi từng mốc |
 | Chạy source | [README gốc](../README.md) | apps/web, apps/api, cấu hình và lệnh chạy |
 
 ## Cách hiểu hồ sơ

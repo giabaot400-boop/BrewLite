@@ -6,6 +6,7 @@ thực hiện, không phải các bản báo cáo trùng cần đổi tên thàn
 
 | Nhóm | Tài liệu |
 |---|---|
+| Thiết kế và sơ đồ | [Danh mục PlantUML/SVG](../diagrams/sprint2/README.md), [đối chiếu AC](../diagrams/sprint2/CONSISTENCY.md) — hồ sơ tại thời điểm bàn giao |
 | Giỏ và helper | [Bước 1](SPRINT2_A_CART_STEP1.md), [bước 2](SPRINT2_A_CART_STEP2.md), [bước 3](SPRINT2_A_CART_STEP3.md), [bước 4–6](SPRINT2_A_CART_STEP4.md) |
 | Nối auth và giỏ | [Bridge 1](SPRINT2_A_AUTH_CART_BRIDGE_STEP1.md), [bridge 2/logout](SPRINT2_A_AUTH_CART_BRIDGE_STEP2.md) |
 | BFF và UI đặt đơn | [BFF owner](SPRINT2_A_ORDERS_BFF_OWNER_CONTRACT.md), [UI đơn](SPRINT2_A_ORDER_UI_STEP1.md) |

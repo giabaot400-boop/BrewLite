@@ -1,0 +1,127 @@
+@startuml sequence-create-order
+title BrewLite Sprint 2\nSequence tạo đơn phần A giao diện và cổng API
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #5B4636
+skinparam noteBackgroundColor #FFF6DA
+skinparam noteBorderColor #B89551
+skinparam roundcorner 10
+hide footbox
+skinparam sequenceMessageAlign center
+skinparam maxMessageSize 210
+skinparam ParticipantBackgroundColor #F6EEE4
+skinparam ParticipantBorderColor #80644F
+skinparam LifeLineBorderColor #9B8B7D
+skinparam sequenceGroupBackgroundColor #FFFFFF
+skinparam sequenceGroupBorderColor #9B8B7D
+skinparam sequenceDividerBackgroundColor #EAF0F6
+participant "Trình duyệt\nNext.js UI" as UI
+participant "Next.js\nRoute Handler" as BFF
+participant "NestJS\nAPI" as API
+database "PostgreSQL" as DB
+
+note over UI : Khách chủ động Đặt hàng / Thử lại
+UI -> UI : Web Lock, đọc envelope mới nhất;\nlưu pending trước POST; nhả lock trước HTTP
+break Không ghi được pending hoặc owner không khớp
+  UI -> UI : Báo lỗi, chưa gửi đơn
+end
+UI -> BFF : POST /api/orders\nIdempotency-Key + items
+BFF -> BFF : Kiểm tra Origin / JSON / header\nvà body 32 KiB
+break Bị từ chối tại BFF
+  BFF --> UI : 403 / 413; giữ pending cũ, dừng xử lý
+end
+BFF -> API : POST /orders\nBearer JWT + key + payload
+API -> API : Xác minh chữ ký / claims JWT
+break JWT không hợp lệ
+  API --> BFF : 401
+  BFF --> UI : Giữ pending; yêu cầu đăng nhập lại
+end
+API -> DB : Kiểm tra AuthSession theo sid / sub
+DB --> API : Phiên / lỗi DB
+alt Phiên không hợp lệ hoặc DB lỗi
+  API --> BFF : 401 hoặc 500 tương ứng
+else Phiên hợp lệ
+  API -> API : Validate DTO / key; chuẩn hóa / hash
+  break DTO / key không hợp lệ
+    API --> BFF : 400 VALIDATION_ERROR
+    BFF --> UI : Báo lỗi theo index request
+  end
+  ref over API,DB : S2-SEQ-ORDER phần B transaction / replay
+  API --> BFF : Kết quả sau commit / rollback
+end
+BFF --> UI : Response hoặc 502/504 nếu lỗi upstream
+note over UI,BFF
+  200/201: ghi kết quả, xóa đúng cart / pending cùng owner/revision.
+  PRICE_CHANGED: cập nhật giá, chờ xác nhận mới với key mới.
+  401: giữ pending, đăng nhập lại đúng owner. 403/413: giữ và dừng đối chiếu.
+  IN_PROGRESS / 5xx / timeout: giữ key/payload; chỉ Thử lại chủ động.
+  BFF timeout 10 s; UI timeout 15 s; không giữ Web Lock trong HTTP.
+  Conflict: không đổi key. Xem bảng phản hồi P01 và định dạng lỗi P06.
+end note
+@enduml
+
+@startuml sequence-create-order-transaction
+title BrewLite Sprint 2\nSequence tạo đơn phần B transaction và replay
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 14
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam ArrowColor #5B4636
+skinparam noteBackgroundColor #FFF6DA
+skinparam noteBorderColor #B89551
+skinparam roundcorner 10
+hide footbox
+skinparam sequenceMessageAlign center
+skinparam maxMessageSize 210
+skinparam ParticipantBackgroundColor #F6EEE4
+skinparam ParticipantBorderColor #80644F
+skinparam LifeLineBorderColor #9B8B7D
+skinparam sequenceGroupBackgroundColor #FFFFFF
+skinparam sequenceGroupBorderColor #9B8B7D
+skinparam sequenceDividerBackgroundColor #EAF0F6
+
+participant "NestJS Orders\nđã xác thực / validate DTO" as API
+database PostgreSQL as DB
+API -> DB : BEGIN RepeatableRead;\ntry transaction advisory lock(userId,key)
+DB --> API : Lấy được lock / đang bận
+alt Đang bận
+  API -> DB : Kết thúc transaction, không ghi
+  API -> API : 409 ORDER_REQUEST_IN_PROGRESS
+else Lấy được lock
+  API -> DB : Tìm OrderRequest(userId,key)
+  DB --> API : Record đã xử lý / chưa có
+  alt Có record
+    API -> API : So requestHash / canonicalVersion
+    API -> DB : Kết thúc transaction đọc
+    note over API
+      Hash khác: 409 IDEMPOTENCY_CONFLICT.
+      SUCCEEDED cùng hash: 200 đơn và giá cũ.
+      REJECTED cùng hash: phát lại lỗi đã lưu.
+      Không đọc giá hiện tại để thay kết quả cũ.
+    end note
+  else Chưa có record
+    API -> DB : Đọc Product / topping được phép\nvà giá trong snapshot transaction
+    DB --> API : Dữ liệu danh mục
+    API -> API : Validate mọi món / tiền trước;\nchỉ khi hợp lệ mới so giá
+    alt Món sai hoặc PRICE_CHANGED
+      API -> DB : Lưu OrderRequest REJECTED;\nkhông tạo Order; COMMIT
+      DB --> API : Commit hoàn tất
+      API -> API : 400 lỗi món / 409 PRICE_CHANGED\nvới details các dòng
+    else Hợp lệ và giá khớp
+      API -> DB : Order PENDING + snapshot con\n+ OrderRequest SUCCEEDED; COMMIT
+      DB --> API : Commit hoàn tất
+      API -> API : 201 id, PENDING, total
+    end
+  end
+end
+note over API,DB
+  Chỉ trả kết quả sau commit. REJECTED cũng phải commit trước khi phát lỗi.
+  Lỗi hệ thống: rollback toàn bộ. Không tạo record IN_PROGRESS riêng.
+  Snapshot RR có từ SELECT try-lock; có thể cũ dù lấy được lock.
+  Unique race / serialization: rollback, mở tx mới; tối đa 3 lượt tổng cộng.
+  Giữ userId/key/hash; tra sổ lại. Hết lượt: 5xx, client giữ pending.
+  SUCCEEDED: Order / OrderRequest cùng owner, key, hash trong một tx.
+end note
+@enduml
