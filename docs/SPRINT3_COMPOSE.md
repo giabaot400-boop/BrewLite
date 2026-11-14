@@ -80,6 +80,13 @@ Migration và seed chạy bằng lệnh riêng, không tự chạy mỗi lần a
 - Seed không tạo tài khoản đăng nhập hoặc cộng điểm.
 
 ## Bằng chứng và giới hạn
+
+Mục này giữ bằng chứng và giới hạn của đợt đầu trên máy E, không là kết luận
+cho toàn bộ bản tích hợp hiện tại. Kết quả mới xem mục
+[Cấu hình workflow ngày 12/11/2026](#cấu-hình-workflow-ngày-12112026),
+[hồ sơ nghiệm thu A1](sprint3/A1_ACCEPTANCE_REVIEW.md) và
+[demo thủ công ngày 13/11](sprint3/A1_MANUAL_DEMO_2026-11-13.md).
+
 Đã kiểm tra trên máy E:
 - Build cả hai image, áp dụng ba migration và seed trong Docker.
 - Ba service Healthy; /api/products trả 200, đủ bốn sản phẩm.
