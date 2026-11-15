@@ -9,14 +9,22 @@ NestJS, Prisma, PostgreSQL.
 ## Bản tích hợp Sprint 3
 
 PR [#53](https://github.com/giabaot400-boop/BrewLite/pull/53) bổ sung checkout,
-payment/cancel/expiry, điểm thưởng và kiểm soát kho. Bản được B review là
-`a08152c`; source ứng dụng đã kiểm trên máy A là `3959f40`. Các phần mô tả
-Sprint 1 bên dưới giữ bối cảnh tại mốc đó, không thay trạng thái tích hợp mới.
+payment/cancel/expiry, điểm thưởng và kiểm soát kho. Bản chốt trước đợt sửa
+tài liệu này: main `3a70df6`, đã gồm các PR #53, #49, #51, #54, #55 và #56.
+B approve #53 tại `f3f0ef7`. Source ứng dụng kế thừa `3959f40`; bằng chứng QA
+giữ theo SHA/image của từng lượt, không gán lại cho commit tài liệu mới.
+Gói nộp cuối được đóng từ SHA sau khi PR tài liệu cuối đã review/merge;
+ghi SHA thực tế đó vào hồ sơ đóng gói. Các phần mô tả Sprint 1 bên dưới
+giữ bối cảnh tại mốc đó, không thay trạng thái tích hợp mới.
 
 - Chạy ba service: [hướng dẫn Compose](docs/SPRINT3_COMPOSE.md).
 - Phiên bản/bằng chứng và giới hạn: [đối chiếu A1](docs/sprint3/A1_ACCEPTANCE_REVIEW.md).
-- Checkout v2 mặc định tắt. Profile đã chuyển storage sang v2 cần tiếp tục dùng
-  writer v2; không tắt cờ để quay về writer v1 hoặc xóa giỏ để hạ cấp.
+- Để xem thanh toán/hủy đơn, bật `CHECKOUT_V2_ENABLED=1` rồi build lại frontend;
+  lệnh Compose ở mục [Cấu hình workflow ngày 12/11/2026](docs/SPRINT3_COMPOSE.md#cấu-hình-workflow-ngày-12112026).
+- Checkout v2 mặc định tắt. Với `npm run dev`, đặt `CHECKOUT_V2_ENABLED=1`
+  trong `apps/web/.env.local` rồi khởi động lại frontend. Profile đã chuyển
+  storage sang v2 cần giữ cờ bằng `1`; không tắt cờ để quay về writer v1
+  hoặc xóa giỏ để hạ cấp.
 
 Sprint 1 triển khai menu, chi tiết sản phẩm, chọn size/topping và tính giá
 xem trước theo hồ sơ phân tích và thiết kế v1.1.
